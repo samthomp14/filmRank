@@ -59,6 +59,12 @@ export default function Navbar() {
                 >
                   Rankings
                 </Link>
+                <Link
+                  to="/profile"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                >
+                  Profile
+                </Link>
                 <button
                   onClick={handleSignOut}
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
