@@ -30,27 +30,40 @@ export default function AddMovie() {
   }
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Add a Movie</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter movie title"
-          required
-          className="w-full border rounded p-2"
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Add Movie
-        </button>
-      </form>
-      {status === 'success' && (
-        <p className="mt-4 text-green-600">✅ Movie added!</p>
-      )}
-      {status === 'error' && (
-        <p className="mt-4 text-red-600">❌ Error adding movie. Are you logged in?</p>
-      )}
+    <div className="py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Add a Movie</h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter movie title"
+                required
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out"
+            >
+              Add Movie
+            </button>
+          </form>
+          {status === 'success' && (
+            <div className="mt-4 p-4 bg-green-50 rounded-lg">
+              <p className="text-green-700 text-center">✅ Movie added successfully!</p>
+            </div>
+          )}
+          {status === 'error' && (
+            <div className="mt-4 p-4 bg-red-50 rounded-lg">
+              <p className="text-red-700 text-center">❌ Error adding movie. Please make sure you're logged in.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

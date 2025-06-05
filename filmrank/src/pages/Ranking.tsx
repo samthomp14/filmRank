@@ -43,24 +43,49 @@ function Ranking() {
     fetchRankings()
   }, [])
 
-  if (loading) return <p className="p-6">Loading rankings...</p>
-  if (movies.length === 0) return <p className="p-6">No movies ranked yet.</p>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600 text-lg">Loading rankings...</div>
+      </div>
+    )
+  }
+
+  if (movies.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600 text-lg">No movies ranked yet.</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🎥 My Top 10 Movies</h1>
-      <ul className="space-y-4">
-        {movies.map((movie, idx) => (
-          <li key={movie.id} className="border rounded-lg p-4 shadow-md bg-white">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-lg">
-                #{idx + 1}: {movie.title}
-              </span>
-              <span className="text-gray-600">Elo: {movie.elo_score.toFixed(0)}</span>
+    <div className="py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="p-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">🎥 My Top 10 Movies</h1>
+            <div className="space-y-4">
+              {movies.map((movie, idx) => (
+                <div
+                  key={movie.id}
+                  className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition duration-150 ease-in-out"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-4">
+                      <span className="text-2xl font-bold text-blue-600">#{idx + 1}</span>
+                      <h2 className="text-xl font-semibold text-gray-900">{movie.title}</h2>
+                    </div>
+                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      Elo: {movie.elo_score.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
