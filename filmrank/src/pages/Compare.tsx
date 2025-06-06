@@ -2,30 +2,36 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-interface Movie {
-  id: string
-  title: string
-  elo_score: number
+interface CompareMovie {
+  movie_id: string;
+  title: string;
+  imdb_id: string | null;
+  elo_score: number;
+  match_count: number;
 }
 
 function Compare() {
-  const [movies, setMovies] = useState<Movie[] | null>(null)
+  const [movies, setMovies] = useState<CompareMovie[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [comparisonsToday, setComparisonsToday] = useState(0)
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null)
 
   const fetchMovies = async () => {
-    setLoading(true)
-    const { data, error } = await supabase.rpc('get_two_random_movies')
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
+    const { data, error } = await supabase.rpc('get_two_random_movies');
+  
     if (error) {
-      console.error('Error fetching movies:', error)
+      console.error('Error fetching movies:', error);
     } else {
-      setMovies(data)
-      setSelectedMovie(null)
+      setMovies(data as CompareMovie[]);
+      setSelectedMovie(null);
     }
-    setLoading(false)
-  }
+  
+    setLoading(false);
+  };
 
   const fetchComparisonsToday = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -43,41 +49,26 @@ function Compare() {
     setComparisonsToday(count || 0)
   }
 
-  const handleVote = async (winner: Movie, loser: Movie) => {
-    setSelectedMovie(winner.id)
-    
-    // Elo calculation
-    const k = 32
-    const expectedA = 1 / (1 + Math.pow(10, (loser.elo_score - winner.elo_score) / 400))
-    const expectedB = 1 - expectedA
-
-    const newWinnerScore = Math.round(winner.elo_score + k * (1 - expectedA))
-    const newLoserScore = Math.round(loser.elo_score + k * (0 - expectedB))
-
+  const handleVote = async (winner: CompareMovie, loser: CompareMovie) => {
+    setSelectedMovie(winner.movie_id)
+  
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-
-    const updates = await Promise.all([
-      supabase.from('movies').update({ elo_score: newWinnerScore }).eq('id', winner.id),
-      supabase.from('movies').update({ elo_score: newLoserScore }).eq('id', loser.id),
-      supabase.from('comparisons').insert({
-        user_id: user.id,
-        winner_id: winner.id,
-        loser_id: loser.id
-      })
-    ])
-
-    if (updates.some(r => r.error)) {
-      console.error('Error updating scores:', updates.map(r => r.error))
+  
+    const { error } = await supabase.rpc('compare_movies', {
+      winner_id: winner.movie_id,
+      loser_id: loser.movie_id,
+      p_user_id: user.id
+    })
+  
+    if (error) {
+      console.error('RPC error:', error)
+    } else {
+      setComparisonsToday(prev => prev + 1)
+      setTimeout(fetchMovies, 200)
     }
-
-    // Update comparisons count
-    setComparisonsToday(prev => prev + 1)
-
-    // Fetch new pair after a shorter delay
-    setTimeout(fetchMovies, 200)
   }
-
+  
   const handleSkip = () => {
     fetchMovies()
   }
@@ -121,7 +112,7 @@ function Compare() {
             <div
               onClick={() => handleVote(movies[0], movies[1])}
               className={`w-full md:w-1/2 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-150 ease-in-out cursor-pointer transform hover:-translate-y-1 ${
-                selectedMovie === movies[0].id ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
+                selectedMovie === movies[0].movie_id ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
               }`}
             >
               <div className="p-8">
@@ -140,7 +131,7 @@ function Compare() {
             <div
               onClick={() => handleVote(movies[1], movies[0])}
               className={`w-full md:w-1/2 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-150 ease-in-out cursor-pointer transform hover:-translate-y-1 ${
-                selectedMovie === movies[1].id ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
+                selectedMovie === movies[1].movie_id ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
               }`}
             >
               <div className="p-8">

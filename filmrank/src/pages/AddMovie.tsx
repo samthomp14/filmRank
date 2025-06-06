@@ -15,17 +15,36 @@ export default function AddMovie() {
       return
     }
 
-    const { error } = await supabase.from('movies').insert({
-      title,
-      user_id: user.id,
-    })
+    try {
+      // First insert into movies table
+      const { data: movie, error: moviesError } = await supabase
+        .from('movies')
+        .insert({
+          title,
+          imdb_id: null
+        })
+        .select()
+        .single()
 
-    if (error) {
-      console.error(error)
-      setStatus('error')
-    } else {
+      if (moviesError) throw moviesError
+
+      // Then create user_movies entry
+      const { error: userMoviesError } = await supabase
+        .from('user_movies')
+        .insert({
+          user_id: user.id,
+          movie_id: movie.id,
+          elo_score: 1000,
+          match_count: 0
+        })
+
+      if (userMoviesError) throw userMoviesError
+
       setStatus('success')
       setTitle('')
+    } catch (error) {
+      console.error(error)
+      setStatus('error')
     }
   }
 

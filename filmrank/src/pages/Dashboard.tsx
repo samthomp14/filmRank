@@ -23,14 +23,20 @@ export default function Dashboard() {
 
       // Get total movies count
       const { count } = await supabase
-        .from('movies')
+        .from('user_movies')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
 
       // Get top movie
       const { data: topMovie } = await supabase
-        .from('movies')
-        .select('*')
+        .from('user_movies')
+        .select(`
+          elo_score,
+          movies (
+            id,
+            title
+          )
+        `)
         .eq('user_id', user.id)
         .order('elo_score', { ascending: false })
         .limit(1)
@@ -38,16 +44,31 @@ export default function Dashboard() {
 
       // Get recent movies
       const { data: recentMovies } = await supabase
-        .from('movies')
-        .select('*')
+        .from('user_movies')
+        .select(`
+          elo_score,
+          created_at,
+          movies (
+            id,
+            title
+          )
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5)
 
       setStats({
         totalMovies: count || 0,
-        topMovie: topMovie,
-        recentMovies: recentMovies || []
+        topMovie: topMovie ? {
+          id: topMovie.movies.id,
+          title: topMovie.movies.title,
+          elo_score: topMovie.elo_score
+        } : null,
+        recentMovies: recentMovies?.map(m => ({
+          id: m.movies.id,
+          title: m.movies.title,
+          elo_score: m.elo_score
+        })) || []
       })
       setLoading(false)
     }

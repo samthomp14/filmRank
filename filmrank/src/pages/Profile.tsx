@@ -83,13 +83,13 @@ export default function Profile() {
       const rows = text.split('\n')
       
       // Skip header row and process each movie
-      const movies = rows.slice(1).map(row => {
+      const movieTitles = rows.slice(1).map(row => {
         const columns = row.split(',')
         // Name is in the second column (index 1)
         return columns[1]?.trim()
       }).filter(Boolean)
 
-      if (movies.length === 0) {
+      if (movieTitles.length === 0) {
         throw new Error('No valid movies found in the file')
       }
 
@@ -99,24 +99,40 @@ export default function Profile() {
 
       // Insert movies in batches of 50
       const batchSize = 50
-      for (let i = 0; i < movies.length; i += batchSize) {
-        const batch = movies.slice(i, i + batchSize)
-        const { error } = await supabase
+      for (let i = 0; i < movieTitles.length; i += batchSize) {
+        const batch = movieTitles.slice(i, i + batchSize)
+        
+        // First, insert into movies table
+        const { data: insertedMovies, error: moviesError } = await supabase
           .from('movies')
           .insert(
             batch.map(title => ({
               title,
+              imdb_id: null // We don't have IMDB IDs from Letterboxd export
+            }))
+          )
+          .select()
+
+        if (moviesError) throw moviesError
+
+        // Then create user_movies entries
+        const { error: userMoviesError } = await supabase
+          .from('user_movies')
+          .insert(
+            insertedMovies.map(movie => ({
               user_id: user.id,
-              elo_score: 1000 // Default Elo score
+              movie_id: movie.id,
+              elo_score: 1000, // Default Elo score
+              match_count: 0
             }))
           )
 
-        if (error) throw error
+        if (userMoviesError) throw userMoviesError
       }
 
       setImportStatus({
         status: 'success',
-        message: `Successfully imported ${movies.length} movies!`
+        message: `Successfully imported ${movieTitles.length} movies!`
       })
     } catch (err) {
       setImportStatus({

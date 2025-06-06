@@ -25,8 +25,14 @@ function Ranking() {
       }
 
       const { data, error } = await supabase
-        .from('movies')
-        .select('*')
+        .from('user_movies')
+        .select(`
+          elo_score,
+          movies (
+            id,
+            title
+          )
+        `)
         .eq('user_id', user.id)
         .order('elo_score', { ascending: false })
         .limit(10)
@@ -34,7 +40,11 @@ function Ranking() {
       if (error) {
         console.error('Failed to fetch rankings:', error)
       } else {
-        setMovies(data)
+        setMovies(data.map(m => ({
+          id: m.movies.id,
+          title: m.movies.title,
+          elo_score: m.elo_score
+        })))
       }
 
       setLoading(false)
