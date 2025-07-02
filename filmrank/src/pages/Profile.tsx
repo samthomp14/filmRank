@@ -81,7 +81,6 @@ export default function Profile() {
     try {
       const text = await file.text()
       const rows = text.split('\n')
-      
       // Skip header row and process each movie
       const movieTitles = rows.slice(1).map(row => {
         const columns = row.split(',')
@@ -97,42 +96,79 @@ export default function Profile() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No user found')
 
-      // Insert movies in batches of 50
-      const batchSize = 50
-      for (let i = 0; i < movieTitles.length; i += batchSize) {
-        const batch = movieTitles.slice(i, i + batchSize)
-        
-        // First, insert into movies table
-        const { data: insertedMovies, error: moviesError } = await supabase
-          .from('movies')
-          .insert(
-            batch.map(title => ({
-              title,
-              imdb_id: null // We don't have IMDB IDs from Letterboxd export
-            }))
-          )
-          .select()
+      let added = 0
+      let skipped = 0
+      let failed = 0
+      let failedTitles: string[] = []
 
-        if (moviesError) throw moviesError
+      for (const title of movieTitles) {
+        try {
+          // 1. Check if movie exists in DB (by title, case-insensitive)
+          let { data: movies, error: searchError } = await supabase
+            .from('movies')
+            .select('id, imdb_id, title')
+            .ilike('title', title)
+            .limit(1)
 
-        // Then create user_movies entries
-        const { error: userMoviesError } = await supabase
-          .from('user_movies')
-          .insert(
-            insertedMovies.map(movie => ({
-              user_id: user.id,
-              movie_id: movie.id,
-              elo_score: 1000, // Default Elo score
-              match_count: 0
-            }))
-          )
+          let movieId: string | null = null
+          let imdbId: string | null = null
 
-        if (userMoviesError) throw userMoviesError
+          if (searchError) throw searchError
+
+          if (movies && movies.length > 0) {
+            movieId = movies[0].id
+            imdbId = movies[0].imdb_id
+          } else {
+            // 2. Fetch from OMDb
+            const response = await fetch(`http://localhost:3001/api/omdb?title=${encodeURIComponent(title)}`)
+            const omdb = await response.json()
+            if (omdb.Response === 'True') {
+              imdbId = omdb.imdbID
+              // 3. Insert movie with imdb_id
+              const { data: inserted, error: insertError } = await supabase
+                .from('movies')
+                .insert({ title: omdb.Title, imdb_id: omdb.imdbID })
+                .select()
+                .single()
+              if (insertError) throw insertError
+              movieId = inserted.id
+            } else {
+              failed++
+              failedTitles.push(title)
+              continue
+            }
+          }
+
+          // 4. Check if user already has this movie
+          const { data: userMovies, error: userMovieError } = await supabase
+            .from('user_movies')
+            .select()
+            .eq('user_id', user.id)
+            .eq('movie_id', movieId)
+            .limit(1)
+          if (userMovieError) throw userMovieError
+          if (userMovies && userMovies.length > 0) {
+            skipped++
+            continue
+          }
+
+          // 5. Add to user_movies
+          const { error: addUserMovieError } = await supabase
+            .from('user_movies')
+            .insert({
+              movie_id: movieId,
+            })
+          if (addUserMovieError) throw addUserMovieError
+          added++
+        } catch (err) {
+          failed++
+          failedTitles.push(title)
+        }
       }
 
       setImportStatus({
         status: 'success',
-        message: `Successfully imported ${movieTitles.length} movies!`
+        message: `Added: ${added}, Skipped: ${skipped}, Failed: ${failed}${failedTitles.length ? ' (Failed: ' + failedTitles.join(', ') + ')' : ''}`
       })
     } catch (err) {
       setImportStatus({

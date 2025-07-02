@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-interface MyMovie {
-  movie_id: string;
+interface Movie {
+  id: string;
+  title: string;
   elo_score: number;
-  match_count: number;
-  created_at: string;
-  movies: {
-    title: string;
-  };
 }
 
 export default function MyMovies() {
-  const [movies, setMovies] = useState<MyMovie[]>([])
+  const [movies, setMovies] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [movieToDelete, setMovieToDelete] = useState<MyMovie | null>(null)
+  const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
 
   useEffect(() => {
     fetchMovies()
@@ -25,30 +21,27 @@ export default function MyMovies() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No user found')
-  
-        const { data, error } = await supabase
+
+      const { data, error } = await supabase
         .from('user_movies')
         .select(`
-          movie_id,
           elo_score,
-          match_count,
-          created_at,
           movies (
+            id,
             title
           )
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-      
-  
+
       if (error) throw error
       setMovies(
-        (data as any[]).map((row) => ({
-          ...row,
-          movies: row.movies[0], // FIX: force movies from array to object
-        })) as MyMovie[]
+        (data as any[]).map((m) => ({
+          id: m.movies.id,
+          title: m.movies.title,
+          elo_score: m.elo_score
+        }))
       )
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch movies')
     } finally {
@@ -56,7 +49,7 @@ export default function MyMovies() {
     }
   }
   
-  const handleDelete = async (movie: MyMovie) => {
+  const handleDelete = async (movie: Movie) => {
     try {
 
       const { data: { user } } = await supabase.auth.getUser()
@@ -66,11 +59,11 @@ export default function MyMovies() {
         .from('user_movies')
         .delete()
         .eq('user_id', user.id)
-        .eq('movie_id', movie.movie_id)
+        .eq('movie_id', movie.id)
 
       if (error) throw error
 
-      setMovies(movies.filter(m => m.movie_id !== movie.movie_id))
+      setMovies(movies.filter(m => m.id !== movie.id))
       setMovieToDelete(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete movie')
@@ -114,15 +107,12 @@ export default function MyMovies() {
               <div className="space-y-4">
                 {movies.map((movie) => (
                   <div
-                    key={movie.movie_id}
+                    key={movie.id}
                     className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition duration-150 ease-in-out"
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <h2 className="text-xl font-semibold text-gray-900">{movie.movies.title}</h2>
-                        <p className="text-sm text-gray-500">
-                          Added on {new Date(movie.created_at).toLocaleDateString()}
-                        </p>
+                        <h2 className="text-xl font-semibold text-gray-900">{movie.title}</h2>
                       </div>
                       <div className="flex items-center space-x-4">
                         <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
@@ -152,7 +142,7 @@ export default function MyMovies() {
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Movie</h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete "{movieToDelete.movies.title}"? This action cannot be undone.
+              Are you sure you want to delete "{movieToDelete.title}"? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-4">
               <button
