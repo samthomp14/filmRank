@@ -1,6 +1,7 @@
 // src/pages/Compare.tsx
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import MovieCard from '../components/MovieCard'
 
 interface CompareMovie {
   movie_id: string;
@@ -8,6 +9,7 @@ interface CompareMovie {
   imdb_id: string | null;
   elo_score: number;
   match_count: number;
+  url: string;
 }
 
 function Compare() {
@@ -22,7 +24,7 @@ function Compare() {
     if (!user) return
 
     const { data, error } = await supabase.rpc('get_two_random_movies');
-  
+    console.log(data) //debug
     if (error) {
       console.error('Error fetching movies:', error);
     } else {
@@ -109,16 +111,11 @@ function Compare() {
         <div className="mb-12">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             {/* First Movie */}
-            <div
+            <MovieCard
+              movie={movies[0]}
               onClick={() => handleVote(movies[0], movies[1])}
-              className={`w-full md:w-1/2 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-150 ease-in-out cursor-pointer transform hover:-translate-y-1 ${
-                selectedMovie === movies[0].movie_id ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
-              }`}
-            >
-              <div className="p-8">
-                <h2 className="text-2xl font-semibold text-gray-900 text-center">{movies[0].title}</h2>
-              </div>
-            </div>
+              selected={selectedMovie === movies[0].movie_id}
+            />
 
             {/* VS Text */}
             <div className="hidden md:block">
@@ -128,16 +125,11 @@ function Compare() {
             </div>
 
             {/* Second Movie */}
-            <div
+            <MovieCard
+              movie={movies[1]}
               onClick={() => handleVote(movies[1], movies[0])}
-              className={`w-full md:w-1/2 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-150 ease-in-out cursor-pointer transform hover:-translate-y-1 ${
-                selectedMovie === movies[1].movie_id ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
-              }`}
-            >
-              <div className="p-8">
-                <h2 className="text-2xl font-semibold text-gray-900 text-center">{movies[1].title}</h2>
-              </div>
-            </div>
+              selected={selectedMovie === movies[1].movie_id}
+            />
           </div>
         </div>
 
