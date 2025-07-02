@@ -41,9 +41,6 @@ router.get('/', async (req, res) => {
       }
     });
 
-    console.log('OMDb API response status:', response.status);
-    console.log('OMDb API response data:', response.data);
-
     if (response.data.Error) {
       console.log('OMDb API returned error:', response.data.Error);
       return res.status(404).json({ error: response.data.Error });

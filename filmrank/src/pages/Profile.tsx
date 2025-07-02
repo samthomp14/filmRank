@@ -127,7 +127,7 @@ export default function Profile() {
               // 3. Insert movie with imdb_id
               const { data: inserted, error: insertError } = await supabase
                 .from('movies')
-                .insert({ title: omdb.Title, imdb_id: omdb.imdbID })
+                .insert({ title: omdb.Title, imdb_id: omdb.imdbID, url: omdb.Poster })
                 .select()
                 .single()
               if (insertError) throw insertError

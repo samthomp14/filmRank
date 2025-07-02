@@ -148,7 +148,8 @@ export default function AddMovie() {
               .from('movies')
               .insert({
                 title: movieData.Title,
-                imdb_id: movieData.imdbID
+                imdb_id: movieData.imdbID,
+                url: movieData.Poster
               })
               .select()
               .single()
