@@ -120,7 +120,7 @@ export default function Profile() {
             imdbId = movies[0].imdb_id
           } else {
             // 2. Fetch from OMDb
-            const response = await fetch(`http://localhost:3001/api/omdb?title=${encodeURIComponent(title)}`)
+            const response = await fetch(`/api/omdb?title=${encodeURIComponent(title)}`)
             const omdb = await response.json()
             if (omdb.Response === 'True') {
               imdbId = omdb.imdbID

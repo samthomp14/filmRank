@@ -103,7 +103,7 @@ export default function AddMovie() {
         }
       } else {
         // Search OMDb for new movie
-        const response = await axios.get<OMDbResponse>(`http://localhost:3001/api/omdb`, {
+        const response = await axios.get<OMDbResponse>(`/api/omdb`, {
           params: { title }
         })
         const movieData = response.data
