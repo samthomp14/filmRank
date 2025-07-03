@@ -15,24 +15,31 @@ interface MovieCardProps {
   selected: boolean;
 }
 
+const FALLBACK_IMAGE =
+  'https://via.placeholder.com/300x445.png?text=No+Image';
+
 const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected }) => {
   return (
     <div
       onClick={onClick}
-      className={`w-full md:w-1/2 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-150 ease-in-out cursor-pointer transform hover:-translate-y-1 ${
-        selected ? 'ring-4 ring-blue-500 scale-105' : 'hover:shadow-lg'
+      className={`relative w-[300px] h-[445px] rounded-2xl overflow-hidden shadow-lg transition-all duration-200 ease-in-out cursor-pointer border border-white/30 hover:scale-105 hover:shadow-2xl ${
+        selected ? 'ring-4 ring-blue-500 scale-105' : ''
       }`}
     >
-      <div className="p-8 flex flex-col items-center">
-        {movie.url && (
-          <img
-            src={movie.url}
-            alt={movie.title}
-            className="mb-4 w-40 h-60 object-cover rounded-lg shadow"
-          />
-        )}
-        <h2 className="text-2xl font-semibold text-gray-900 text-center">{movie.title}</h2>
+      <img
+        src={movie.url || FALLBACK_IMAGE}
+        alt={movie.title}
+        className="w-full h-full object-cover bg-gray-200"
+        onError={e => (e.currentTarget.src = FALLBACK_IMAGE)}
+      />
+      <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent px-4 py-3 flex items-end">
+        <h2 className="text-lg font-bold text-white drop-shadow-md truncate w-full" title={movie.title}>
+          {movie.title}
+        </h2>
       </div>
+      {selected && (
+        <div className="absolute inset-0 bg-blue-500/10 pointer-events-none rounded-2xl border-4 border-blue-500 animate-pulse" />
+      )}
     </div>
   )
 }
