@@ -6,6 +6,25 @@ interface Movie {
   id: string
   title: string
   elo_score: number
+  created_at: string
+}
+
+interface UserMovieRow {
+  elo_score: number;
+  created_at: string;
+  movies: { id: string; title: string } | { id: string; title: string }[] | null;
+}
+
+function getMovieId(movies: { id: string; title: string } | { id: string; title: string }[] | null): string {
+  if (!movies) return '';
+  if (Array.isArray(movies)) return movies[0]?.id ?? '';
+  return movies.id ?? '';
+}
+
+function getMovieTitle(movies: { id: string; title: string } | { id: string; title: string }[] | null): string {
+  if (!movies) return '';
+  if (Array.isArray(movies)) return movies[0]?.title ?? '';
+  return movies.title ?? '';
 }
 
 export default function Dashboard() {
@@ -32,6 +51,7 @@ export default function Dashboard() {
         .from('user_movies')
         .select(`
           elo_score,
+          created_at,
           movies (
             id,
             title
@@ -60,14 +80,16 @@ export default function Dashboard() {
       setStats({
         totalMovies: count || 0,
         topMovie: topMovie ? {
-          id: topMovie.movies.id,
-          title: topMovie.movies.title,
-          elo_score: topMovie.elo_score
+          id: getMovieId((topMovie as UserMovieRow).movies),
+          title: getMovieTitle((topMovie as UserMovieRow).movies),
+          elo_score: (topMovie as UserMovieRow).elo_score,
+          created_at: (topMovie as UserMovieRow).created_at || ''
         } : null,
-        recentMovies: recentMovies?.map(m => ({
-          id: m.movies.id,
-          title: m.movies.title,
-          elo_score: m.elo_score
+        recentMovies: (recentMovies as UserMovieRow[] | undefined)?.map(m => ({
+          id: getMovieId(m.movies),
+          title: getMovieTitle(m.movies),
+          elo_score: m.elo_score,
+          created_at: m.created_at || ''
         })) || []
       })
       setLoading(false)

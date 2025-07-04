@@ -6,6 +6,14 @@ interface Movie {
   id: string
   title: string
   elo_score: number
+  created_at: string
+}
+
+// Add this type for the joined row
+interface UserMovieRow {
+  elo_score: number;
+  created_at: string;
+  movies: { id: string; title: string } | { id: string; title: string }[] | null;
 }
 
 function Ranking() {
@@ -31,7 +39,8 @@ function Ranking() {
           movies (
             id,
             title
-          )
+          ),
+          created_at
         `)
         .eq('user_id', user.id)
         .order('elo_score', { ascending: false })
@@ -40,10 +49,11 @@ function Ranking() {
       if (error) {
         console.error('Failed to fetch rankings:', error)
       } else {
-        setMovies(data.map(m => ({
-          id: m.movies.id,
-          title: m.movies.title,
-          elo_score: m.elo_score
+        setMovies((data as UserMovieRow[]).map(m => ({
+          id: Array.isArray(m.movies) ? m.movies[0]?.id ?? '' : m.movies?.id ?? '',
+          title: Array.isArray(m.movies) ? m.movies[0]?.title ?? '' : m.movies?.title ?? '',
+          elo_score: m.elo_score,
+          created_at: m.created_at || ''
         })))
       }
 

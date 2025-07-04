@@ -111,19 +111,16 @@ export default function Profile() {
             .limit(1)
 
           let movieId: string | null = null
-          let imdbId: string | null = null
 
           if (searchError) throw searchError
 
           if (movies && movies.length > 0) {
             movieId = movies[0].id
-            imdbId = movies[0].imdb_id
           } else {
             // 2. Fetch from OMDb
             const response = await fetch(`/api/omdb?title=${encodeURIComponent(title)}`)
             const omdb = await response.json()
             if (omdb.Response === 'True') {
-              imdbId = omdb.imdbID
               // 3. Insert movie with imdb_id
               const { data: inserted, error: insertError } = await supabase
                 .from('movies')
