@@ -15,6 +15,7 @@ interface Movie {
   language?: string
   country?: string
   imdb_rating?: number
+  imdb_id?: string
   metadata?: any
 }
 
@@ -29,7 +30,7 @@ function MovieInfo() {
 
       const { data, error } = await supabase
         .from('movies')
-        .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, metadata')
+        .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, imdb_id, metadata')
         .eq('id', movieId)
         .single()
 
@@ -45,122 +46,202 @@ function MovieInfo() {
     fetchMovie()
   }, [movieId])
 
+  const handleIMDBLink = () => {
+    const imdbId = movie?.imdb_id || movie?.metadata?.imdbID
+    if (imdbId) {
+      window.open(`https://www.imdb.com/title/${imdbId}`, '_blank')
+    }
+  }
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Loading movie information...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-600 text-lg font-medium">Loading movie information...</div>
+        </div>
       </div>
     )
   }
 
   if (!movie) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Movie not found.</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-400 text-6xl mb-4">🎬</div>
+          <div className="text-gray-600 text-xl font-medium">Movie not found</div>
+          <div className="text-gray-500 mt-2">The movie you're looking for doesn't exist.</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-8">
-            <div className="flex flex-col md:flex-row gap-8">
-              {/* Movie Poster */}
-              <div className="flex-shrink-0">
-                {movie.url ? (
-                  <img
-                    src={movie.url}
-                    alt={movie.title}
-                    className="w-64 h-96 object-cover rounded-lg shadow-lg"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                ) : (
-                  <div className="w-64 h-96 bg-gray-200 rounded-lg shadow-lg flex items-center justify-center">
-                    <span className="text-gray-500">No poster available</span>
-                  </div>
-                )}
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8">
+            <button
+              onClick={() => window.history.back()}
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 mb-4"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Rankings
+            </button>
+          </div>
 
-              {/* Movie Information */}
-              <div className="flex-1">
-                <h1 className="text-4xl font-bold text-gray-900 mb-6">{movie.title}</h1>
-                
-                <div className="space-y-4">
-                  {movie.year && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Year:</span>
-                      <span className="text-gray-900">{formatYear(movie.year)}</span>
-                    </div>
-                  )}
-                  
-                  {movie.runtime && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Runtime:</span>
-                      <span className="text-gray-900">{formatRuntime(movie.runtime)}</span>
-                    </div>
-                  )}
-                  
-                  {movie.rating && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Rating:</span>
-                      <span className="text-gray-900">{movie.rating}</span>
-                    </div>
-                  )}
-                  
-                  {movie.director && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Director:</span>
-                      <span className="text-gray-900">{movie.director}</span>
-                    </div>
-                  )}
-                  
-                  {movie.genre && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Genre:</span>
-                      <span className="text-gray-900">{movie.genre}</span>
-                    </div>
-                  )}
-                  
-                  {movie.language && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Language:</span>
-                      <span className="text-gray-900">{movie.language}</span>
-                    </div>
-                  )}
-                  
-                  {movie.country && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">Country:</span>
-                      <span className="text-gray-900">{movie.country}</span>
-                    </div>
-                  )}
-                  
-                  {movie.imdb_rating && (
-                    <div className="flex items-center">
-                      <span className="text-gray-600 font-medium w-24">IMDB Rating:</span>
-                      <span className="text-gray-900">{formatIMDBRating(movie.imdb_rating)}</span>
-                    </div>
-                  )}
-                  
-                  {movie.metadata?.Plot && (
-                    <div className="flex items-start">
-                      <span className="text-gray-600 font-medium w-24">Plot:</span>
-                      <span className="text-gray-900">{movie.metadata.Plot}</span>
-                    </div>
-                  )}
+          {/* Main Content */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+            <div className="p-8 lg:p-12">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+                {/* Movie Poster */}
+                <div className="lg:col-span-1">
+                  <div className="sticky top-8">
+                    {movie.url ? (
+                      <div className="relative group">
+                        <img
+                          src={movie.url}
+                          alt={movie.title}
+                          className="w-full h-auto rounded-xl shadow-2xl transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </div>
+                    ) : (
+                      <div className="w-full aspect-[2/3] bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl shadow-2xl flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-gray-400 text-4xl mb-2">🎬</div>
+                          <span className="text-gray-500 font-medium">No poster available</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="mt-8">
-                  <button
-                    onClick={() => window.history.back()}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-150 ease-in-out"
-                  >
-                    Back to Rankings
-                  </button>
+                {/* Movie Information */}
+                <div className="lg:col-span-2">
+                  <div className="space-y-8">
+                    {/* Title and Basic Info */}
+                    <div>
+                      <div className="flex items-start gap-3 mb-4">
+                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight flex-1">
+                          {movie.title}
+                        </h1>
+                        {(movie.imdb_id || movie.metadata?.imdbID) && (
+                          <button
+                            onClick={handleIMDBLink}
+                            className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                            title="View on IMDB"
+                          >
+                            <i className="fa fa-external-link" aria-hidden="true"></i>
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Quick Stats */}
+                      <div className="flex flex-wrap gap-4 mb-6">
+                        {movie.year && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {formatYear(movie.year)}
+                          </span>
+                        )}
+                        {movie.runtime && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            {formatRuntime(movie.runtime)}
+                          </span>
+                        )}
+                        {movie.rating && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            {movie.rating}
+                          </span>
+                        )}
+                        {movie.imdb_rating && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            ⭐ {formatIMDBRating(movie.imdb_rating)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Plot */}
+                    {movie.metadata?.Plot && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Synopsis</h3>
+                        <p className="text-gray-700 leading-relaxed">{movie.metadata.Plot}</p>
+                      </div>
+                    )}
+
+                    {/* Movie Details Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Left Column */}
+                      <div className="space-y-4">
+                        {movie.director && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Director</div>
+                            <div className="text-gray-900 font-medium">{movie.director}</div>
+                          </div>
+                        )}
+                        
+                        {movie.metadata?.Writer && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Writer</div>
+                            <div className="text-gray-900 font-medium">{movie.metadata.Writer}</div>
+                          </div>
+                        )}
+                        
+                        {movie.genre && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Genre</div>
+                            <div className="text-gray-900 font-medium">{movie.genre}</div>
+                          </div>
+                        )}
+                        
+                        {movie.metadata?.Released && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Release Date</div>
+                            <div className="text-gray-900 font-medium">{movie.metadata.Released}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Column */}
+                      <div className="space-y-4">
+                        {movie.language && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Language</div>
+                            <div className="text-gray-900 font-medium">{movie.language}</div>
+                          </div>
+                        )}
+                        
+                        {movie.country && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Country</div>
+                            <div className="text-gray-900 font-medium">{movie.country}</div>
+                          </div>
+                        )}
+                        
+                        {movie.metadata?.Awards && (
+                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                            <div className="text-sm font-medium text-gray-500 mb-1">Awards</div>
+                            <div className="text-gray-900 font-medium">{movie.metadata.Awards}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Cast */}
+                    {movie.metadata?.Actors && (
+                      <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Cast</h3>
+                        <p className="text-gray-700">{movie.metadata.Actors}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
