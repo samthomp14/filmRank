@@ -26,7 +26,7 @@ export default function MyMovies() {
         .from('user_movies')
         .select(`
           elo_score,
-          movies (
+          movies:movies!user_movies_movie_id_fkey (
             id,
             title
           )

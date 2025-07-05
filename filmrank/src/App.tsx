@@ -10,6 +10,7 @@ import Ranking from "./pages/Ranking";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import MyMovies from "./pages/MyMovies";
+import MovieInfo from "./pages/MovieInfo";
 import Layout from "./components/Layout";
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/add" element={user ? <AddMovie /> : <Navigate to="/login" replace />} />
           <Route path="/compare" element={user ? <Compare /> : <Navigate to="/login" replace />} />
           <Route path="/ranking" element={user ? <Ranking /> : <Navigate to="/login" replace />} />
+          <Route path="/movie/:movieId" element={user ? <MovieInfo /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
           <Route path="/my-movies" element={user ? <MyMovies /> : <Navigate to="/login" replace />} />
         </Route>

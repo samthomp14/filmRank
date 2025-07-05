@@ -1,7 +1,7 @@
 // src/pages/Compare.tsx
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import MovieCard from '../components/MovieCard'
+import MovieCard from '../components/MovieCard.tsx'
 
 interface CompareMovie {
   movie_id: string;
