@@ -2,20 +2,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import axios from 'axios'
+import { parseOMDBResponse } from '../lib/movieUtils'
+import type { OMDBResponse } from '../lib/movieUtils'
 
 interface MovieMatch {
   id: string
   title: string
   imdb_id: string | null
   poster_url?: string
-}
-
-interface OMDbResponse {
-  Response: string
-  Title: string
-  imdbID: string
-  Poster: string
-  Error?: string
 }
 
 export default function AddMovie() {
@@ -103,7 +97,7 @@ export default function AddMovie() {
         }
       } else {
         // Search OMDb for new movie
-        const response = await axios.get<OMDbResponse>(`/api/omdb`, {
+        const response = await axios.get<OMDBResponse>(`/api/omdb`, {
           params: { title }
         })
         const movieData = response.data
@@ -143,14 +137,13 @@ export default function AddMovie() {
 
             movieId = existingMovies[0].id
           } else {
+            // Parse OMDB response and prepare data for insertion
+            const movieInsertData = parseOMDBResponse(movieData);
+
             // Insert new movie
             const { data: movie, error: moviesError } = await supabase
               .from('movies')
-              .insert({
-                title: movieData.Title,
-                imdb_id: movieData.imdbID,
-                url: movieData.Poster
-              })
+              .insert(movieInsertData)
               .select()
               .single()
 

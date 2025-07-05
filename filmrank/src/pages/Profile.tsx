@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { parseOMDBResponse } from '../lib/movieUtils'
+import type { OMDBResponse } from '../lib/movieUtils'
 
 interface UserProfile {
   email: string
@@ -119,12 +121,15 @@ export default function Profile() {
           } else {
             // 2. Fetch from OMDb
             const response = await fetch(`/api/omdb?title=${encodeURIComponent(title)}`)
-            const omdb = await response.json()
+            const omdb: OMDBResponse = await response.json()
             if (omdb.Response === 'True') {
-              // 3. Insert movie with imdb_id
+              // Parse OMDB response and prepare data for insertion
+              const movieInsertData = parseOMDBResponse(omdb);
+
+              // 3. Insert movie with all the new columns
               const { data: inserted, error: insertError } = await supabase
                 .from('movies')
-                .insert({ title: omdb.Title, imdb_id: omdb.imdbID, url: omdb.Poster })
+                .insert(movieInsertData)
                 .select()
                 .single()
               if (insertError) throw insertError

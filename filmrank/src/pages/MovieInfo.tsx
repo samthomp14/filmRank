@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { formatRuntime, formatYear, formatIMDBRating } from '../lib/movieUtils'
 
 interface Movie {
   id: string
   title: string
   url?: string
+  year?: number
+  runtime?: number
+  rating?: string
+  genre?: string
+  director?: string
+  language?: string
+  country?: string
+  imdb_rating?: number
+  metadata?: any
 }
 
 function MovieInfo() {
@@ -19,7 +29,7 @@ function MovieInfo() {
 
       const { data, error } = await supabase
         .from('movies')
-        .select('id, title, url')
+        .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, metadata')
         .eq('id', movieId)
         .single()
 
@@ -80,34 +90,68 @@ function MovieInfo() {
                 <h1 className="text-4xl font-bold text-gray-900 mb-6">{movie.title}</h1>
                 
                 <div className="space-y-4">
-                  <div className="flex items-center">
-                    <span className="text-gray-600 font-medium w-24">Year:</span>
-                    <span className="text-gray-900">2023</span>
-                  </div>
+                  {movie.year && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Year:</span>
+                      <span className="text-gray-900">{formatYear(movie.year)}</span>
+                    </div>
+                  )}
                   
-                  <div className="flex items-center">
-                    <span className="text-gray-600 font-medium w-24">Director:</span>
-                    <span className="text-gray-900">Christopher Nolan</span>
-                  </div>
+                  {movie.runtime && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Runtime:</span>
+                      <span className="text-gray-900">{formatRuntime(movie.runtime)}</span>
+                    </div>
+                  )}
                   
-                  <div className="flex items-center">
-                    <span className="text-gray-600 font-medium w-24">Genre:</span>
-                    <span className="text-gray-900">Action, Drama</span>
-                  </div>
+                  {movie.rating && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Rating:</span>
+                      <span className="text-gray-900">{movie.rating}</span>
+                    </div>
+                  )}
                   
-                  <div className="flex items-center">
-                    <span className="text-gray-600 font-medium w-24">Rating:</span>
-                    <span className="text-gray-900">8.5/10</span>
-                  </div>
+                  {movie.director && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Director:</span>
+                      <span className="text-gray-900">{movie.director}</span>
+                    </div>
+                  )}
                   
-                  <div className="flex items-start">
-                    <span className="text-gray-600 font-medium w-24">Plot:</span>
-                    <span className="text-gray-900">
-                      A compelling story about human nature and the choices we make. 
-                      This film explores themes of redemption, love, and the human condition 
-                      through masterful storytelling and stunning visuals.
-                    </span>
-                  </div>
+                  {movie.genre && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Genre:</span>
+                      <span className="text-gray-900">{movie.genre}</span>
+                    </div>
+                  )}
+                  
+                  {movie.language && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Language:</span>
+                      <span className="text-gray-900">{movie.language}</span>
+                    </div>
+                  )}
+                  
+                  {movie.country && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">Country:</span>
+                      <span className="text-gray-900">{movie.country}</span>
+                    </div>
+                  )}
+                  
+                  {movie.imdb_rating && (
+                    <div className="flex items-center">
+                      <span className="text-gray-600 font-medium w-24">IMDB Rating:</span>
+                      <span className="text-gray-900">{formatIMDBRating(movie.imdb_rating)}</span>
+                    </div>
+                  )}
+                  
+                  {movie.metadata?.Plot && (
+                    <div className="flex items-start">
+                      <span className="text-gray-600 font-medium w-24">Plot:</span>
+                      <span className="text-gray-900">{movie.metadata.Plot}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-8">
