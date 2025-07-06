@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import CheckboxFilter from '../components/CheckboxFilter'
 import RangeFilter from '../components/RangeFilter'
 import MultiSelectFilter from '../components/MultiSelectFilter'
 

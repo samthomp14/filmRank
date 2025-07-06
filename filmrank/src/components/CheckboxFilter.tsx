@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface CheckboxFilterProps {
   label: string
   options: string[]
