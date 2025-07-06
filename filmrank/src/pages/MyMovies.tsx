@@ -9,6 +9,8 @@ interface Movie {
 
 export default function MyMovies() {
   const [movies, setMovies] = useState<Movie[]>([])
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
@@ -16,6 +18,14 @@ export default function MyMovies() {
   useEffect(() => {
     fetchMovies()
   }, [])
+
+  useEffect(() => {
+    // Filter movies based on search term
+    const filtered = movies.filter(movie =>
+      movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    setFilteredMovies(filtered)
+  }, [searchTerm, movies])
 
   const fetchMovies = async () => {
     try {
@@ -93,6 +103,31 @@ export default function MyMovies() {
           <div className="p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Movies</h1>
             
+            {/* Search Bar */}
+            {movies.length > 0 && (
+              <div className="mb-6">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search movies by title..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                {searchTerm && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Showing {filteredMovies.length} of {movies.length} movies
+                  </p>
+                )}
+              </div>
+            )}
+            
             {movies.length === 0 ? (
               <div className="text-center text-gray-600">
                 <p className="mb-4">You haven't added any movies yet.</p>
@@ -103,9 +138,19 @@ export default function MyMovies() {
                   Add Your First Movie
                 </a>
               </div>
+            ) : filteredMovies.length === 0 && searchTerm ? (
+              <div className="text-center text-gray-600">
+                <p className="mb-4">No movies found matching "{searchTerm}".</p>
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Clear Search
+                </button>
+              </div>
             ) : (
               <div className="space-y-4">
-                {movies.map((movie) => (
+                {filteredMovies.map((movie) => (
                   <div
                     key={movie.id}
                     className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition duration-150 ease-in-out"
