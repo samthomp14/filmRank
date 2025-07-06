@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import RangeFilter from '../components/RangeFilter'
 import MultiSelectFilter from '../components/MultiSelectFilter'
+import { formatRuntime } from '../lib/movieUtils'
+import { formatIMDBRating } from '../lib/movieUtils'
+import { Link } from 'react-router-dom'
 
 interface Movie {
   id: string;
@@ -115,6 +118,9 @@ export default function MyMovies() {
     countries: [] as string[]
   })
 
+  // Change sortOption to only track field and direction
+  const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ field: 'title', direction: 'asc' })
+
   useEffect(() => {
     fetchMovies()
   }, [])
@@ -180,6 +186,33 @@ export default function MyMovies() {
     })
     setFilteredMovies(filtered)
   }, [filters, movies])
+
+  // Helper: sort movies
+  const sortMovies = (movies: Movie[]) => {
+    const { field, direction } = sortOption
+    const sorted = [...movies].sort((a, b) => {
+      let aValue: any = a[field as keyof Movie]
+      let bValue: any = b[field as keyof Movie]
+      // For title, compare as string
+      if (field === 'title') {
+        aValue = aValue ? aValue.toLowerCase() : ''
+        bValue = bValue ? bValue.toLowerCase() : ''
+        if (aValue < bValue) return direction === 'asc' ? -1 : 1
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1
+        return 0
+      }
+      // For numbers (year, imdb_rating, runtime, elo_score)
+      aValue = aValue ?? -Infinity
+      bValue = bValue ?? -Infinity
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1
+      return 0
+    })
+    return sorted
+  }
+
+  // Apply sort to filteredMovies
+  const sortedMovies = sortMovies(filteredMovies)
 
   const fetchMovies = async () => {
     try {
@@ -373,7 +406,7 @@ export default function MyMovies() {
     const FALLBACK_IMAGE = 'https://via.placeholder.com/300x445.png?text=No+Image'
     
     return (
-      <div className="relative group">
+      <Link to={`/movie/${movie.id}`} className="relative group block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg" state={{ from: 'my-movies' }}>
         <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out">
           <img
             src={movie.url || FALLBACK_IMAGE}
@@ -410,7 +443,7 @@ export default function MyMovies() {
             <p className="text-gray-500 text-xs mt-1">{movie.year}</p>
           )}
         </div>
-      </div>
+      </Link>
     )
   }
 
@@ -649,6 +682,35 @@ export default function MyMovies() {
                     </button>
                   </div>
                   
+                  {/* Sort Dropdown and Toggle */}
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="sort" className="text-sm text-gray-700">Sort by:</label>
+                    <select
+                      id="sort"
+                      value={sortOption.field}
+                      onChange={e => setSortOption(opt => ({ ...opt, field: e.target.value }))}
+                      className="px-2 py-1 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="title">Title</option>
+                      <option value="year">Year</option>
+                      <option value="imdb_rating">IMDB Rating</option>
+                      <option value="runtime">Runtime</option>
+                      <option value="elo_score">ELO Score</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setSortOption(opt => ({ ...opt, direction: opt.direction === 'asc' ? 'desc' : 'asc' }))}
+                      className="p-2 rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      title={`Sort ${sortOption.direction === 'asc' ? 'Descending' : 'Ascending'}`}
+                    >
+                      {sortOption.direction === 'asc' ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" /></svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                      )}
+                    </button>
+                  </div>
+                  
                   <button
                     onClick={() => setShowFilters(!showFilters)}
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
@@ -736,52 +798,54 @@ export default function MyMovies() {
               </div>
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {filteredMovies.map((movie) => (
+                {sortedMovies.map((movie) => (
                   <GridMovieCard key={movie.id} movie={movie} />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredMovies.map((movie) => (
-                  <div
-                    key={movie.id}
-                    className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition duration-150 ease-in-out"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-2">{movie.title}</h2>
-                        <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-                          {movie.year && (
-                            <span className="bg-gray-200 px-2 py-1 rounded">{movie.year}</span>
+                {sortedMovies.map((movie) => (
+                  <div key={movie.id} className="hover:bg-gray-100 transition duration-150 ease-in-out rounded-lg">
+                    <Link to={`/movie/${movie.id}`} className="block bg-gray-50 rounded-lg p-6 focus:outline-none focus:ring-2 focus:ring-blue-500" state={{ from: 'my-movies' }}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h2 className="text-xl font-semibold text-gray-900 mb-2">{movie.title}</h2>
+                          <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                            {movie.year && (
+                              <span className="bg-gray-200 px-2 py-1 rounded">{movie.year}</span>
+                            )}
+                            {movie.runtime && (
+                              <span className="bg-gray-200 px-2 py-1 rounded">{formatRuntime(movie.runtime)}</span>
+                            )}
+                            {movie.rating && (
+                              <span className="bg-gray-200 px-2 py-1 rounded">{movie.rating}</span>
+                            )}
+                            {movie.imdb_rating && (
+                              <span className="bg-gray-200 px-2 py-1 rounded">{formatIMDBRating(movie.imdb_rating)}</span>
+                            )}
+                          </div>
+                          {movie.genre && (
+                            <p className="text-sm text-gray-500 mt-1">{movie.genre}</p>
                           )}
-                          {movie.runtime && (
-                            <span className="bg-gray-200 px-2 py-1 rounded">{movie.runtime} min</span>
-                          )}
-                          {movie.rating && (
-                            <span className="bg-gray-200 px-2 py-1 rounded">{movie.rating}</span>
-                          )}
-                          {movie.imdb_rating && (
-                            <span className="bg-gray-200 px-2 py-1 rounded">⭐ {movie.imdb_rating}</span>
+                          {movie.director && (
+                            <p className="text-sm text-gray-500">Director: {movie.director}</p>
                           )}
                         </div>
-                        {movie.genre && (
-                          <p className="text-sm text-gray-500 mt-1">{movie.genre}</p>
-                        )}
-                        {movie.director && (
-                          <p className="text-sm text-gray-500">Director: {movie.director}</p>
-                        )}
+                        <div className="flex items-center ml-4">
+                          <button
+                            onClick={e => {
+                              e.preventDefault();
+                              setMovieToDelete(movie);
+                            }}
+                            className="text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg p-2"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center ml-4">
-                        <button
-                          onClick={() => setMovieToDelete(movie)}
-                          className="text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg p-2"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                    </Link>
                   </div>
                 ))}
               </div>
