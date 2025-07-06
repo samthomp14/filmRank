@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { title } = req.query;
+  const { title, year } = req.query;
 
   if (!title || typeof title !== 'string') {
     return res.status(400).json({ error: 'Title parameter is required' });
@@ -12,7 +12,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('OMDb Route - Environment check:', {
     OMDB_API_KEY_EXISTS: !!process.env.OMDB_API_KEY,
     OMDB_API_KEY_LENGTH: process.env.OMDB_API_KEY?.length,
-    TITLE: title
+    TITLE: title,
+    YEAR: year
   });
 
   if (!process.env.OMDB_API_KEY) {
@@ -24,15 +25,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const apiKey = process.env.OMDB_API_KEY;
     console.log('Making OMDb API request:', {
       title,
+      year,
       apiKeyPrefix: apiKey.substring(0, 4) + '...',
       apiKeyLength: apiKey.length
     });
 
+    const params: any = {
+      t: title,
+      apikey: apiKey
+    };
+
+    // Add year parameter if provided
+    if (year && typeof year === 'string') {
+      params.y = year;
+    }
     const response = await axios.get('http://www.omdbapi.com/', {
-      params: {
-        t: title,
-        apikey: apiKey
-      }
+      params
     });
 
     if (response.data.Error) {

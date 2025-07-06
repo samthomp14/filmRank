@@ -84,13 +84,15 @@ export default function Profile() {
       const text = await file.text()
       const rows = text.split('\n')
       // Skip header row and process each movie
-      const movieTitles = rows.slice(1).map(row => {
+      const movieData = rows.slice(1).map(row => {
         const columns = row.split(',')
-        // Name is in the second column (index 1)
-        return columns[1]?.trim()
-      }).filter(Boolean)
+        // Name is in the second column (index 1), Year is in the third column (index 2)
+        const title = columns[1]?.trim()
+        const year = columns[2]?.trim()
+        return { title, year }
+      }).filter(movie => movie.title && movie.title.length > 0)
 
-      if (movieTitles.length === 0) {
+      if (movieData.length === 0) {
         throw new Error('No valid movies found in the file')
       }
 
@@ -103,7 +105,7 @@ export default function Profile() {
       let failed = 0
       let failedTitles: string[] = []
 
-      for (const title of movieTitles) {
+      for (const { title, year } of movieData) {
         try {
           // 1. Check if movie exists in DB (by title, case-insensitive)
           let { data: movies, error: searchError } = await supabase
@@ -119,8 +121,12 @@ export default function Profile() {
           if (movies && movies.length > 0) {
             movieId = movies[0].id
           } else {
-            // 2. Fetch from OMDb
-            const response = await fetch(`/api/omdb?title=${encodeURIComponent(title)}`)
+            // 2. Fetch from OMDb with year if available
+            const params = new URLSearchParams({ title })
+            if (year && year.length > 0) {
+              params.append('year', year)
+            }
+            const response = await fetch(`/api/omdb?${params.toString()}`)
             const omdb: OMDBResponse = await response.json()
             if (omdb.Response === 'True') {
               // Parse OMDB response and prepare data for insertion

@@ -14,11 +14,22 @@ interface MovieMatch {
 
 export default function AddMovie() {
   const [title, setTitle] = useState('')
+  const [year, setYear] = useState('')
   const [status, setStatus] = useState<null | 'success' | 'error'>(null)
   const [matches, setMatches] = useState<MovieMatch[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedMovie, setSelectedMovie] = useState<MovieMatch | null>(null)
   const [errorMessage, setErrorMessage] = useState<string>('')
+
+  // Generate year options (from 1888 to current year + 2)
+  const currentYear = new Date().getFullYear()
+  const yearOptions = [
+    { value: '', label: 'Year (Optional)' },
+    ...Array.from({ length: currentYear - 1887 + 3 }, (_, i) => {
+      const yearValue = currentYear + 2 - i
+      return { value: yearValue.toString(), label: yearValue.toString() }
+    })
+  ]
 
   useEffect(() => {
     const searchMovies = async () => {
@@ -97,11 +108,17 @@ export default function AddMovie() {
         }
       } else {
         // Search OMDb for new movie
+        console.log('Searching OMDb for movie:', { title, year })
+        const params: any = { title }
+        if (year.trim()) {
+          params.year = year.trim()
+        }
+        console.log('OMDb params:', params)
         const response = await axios.get<OMDBResponse>(`/api/omdb`, {
-          params: { title }
+          params
         })
         const movieData = response.data
-
+        console.log('OMDb response:', movieData)
         if (movieData.Response === 'True') {
           // Check if movie already exists in database
           const { data: existingMovies, error: movieCheckError } = await supabase
@@ -175,6 +192,7 @@ export default function AddMovie() {
 
       setStatus('success')
       setTitle('')
+      setYear('')
       setSelectedMovie(null)
       setMatches([])
     } catch (error) {
@@ -201,6 +219,20 @@ export default function AddMovie() {
                 required
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
               />
+            </div>
+            
+            <div>
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-white"
+              >
+                {yearOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
             
             {matches.length > 0 && (
