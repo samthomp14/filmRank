@@ -75,10 +75,40 @@ function Compare() {
     fetchMovies()
   }
 
+  // Handle keyboard events
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!movies || movies.length < 2) return
+    
+    switch (event.key) {
+      case 'ArrowLeft':
+        event.preventDefault()
+        handleVote(movies[0], movies[1])
+        break
+      case 'ArrowRight':
+        event.preventDefault()
+        handleVote(movies[1], movies[0])
+        break
+      case ' ':
+        event.preventDefault()
+        handleSkip()
+        break
+    }
+  }
+
   useEffect(() => {
     fetchMovies()
     fetchComparisonsToday()
   }, [])
+
+  useEffect(() => {
+    // Add keyboard event listener
+    window.addEventListener('keydown', handleKeyDown)
+    
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [movies]) // Re-add listener when movies change
 
   if (loading) {
     return (
@@ -143,8 +173,11 @@ function Compare() {
           </button>
 
           <div className="bg-blue-50 rounded-lg p-4 max-w-md">
-            <p className="text-sm text-blue-800 text-center">
+            <p className="text-sm text-blue-800 text-center mb-2">
               Tip: Click on the movie you prefer. The more you compare, the more accurate your rankings will become!
+            </p>
+            <p className="text-xs text-blue-600 text-center">
+              Keyboard shortcuts: ← Left movie | → Right movie | Space Skip
             </p>
           </div>
         </div>
