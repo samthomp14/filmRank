@@ -16,6 +16,7 @@ interface Movie {
   language?: string;
   country?: string;
   imdb_rating?: number;
+  url?: string;
 }
 
 interface FilterState {
@@ -78,6 +79,7 @@ export default function MyMovies() {
   const [error, setError] = useState<string | null>(null)
   const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   
   // Filter state
   const [filters, setFilters] = useState<FilterState>({
@@ -199,7 +201,8 @@ export default function MyMovies() {
             director,
             language,
             country,
-            imdb_rating
+            imdb_rating,
+            url
           )
         `)
         .eq('user_id', user.id)
@@ -218,7 +221,8 @@ export default function MyMovies() {
         director: m.movies.director,
         language: m.movies.language,
         country: m.movies.country,
-        imdb_rating: m.movies.imdb_rating
+        imdb_rating: m.movies.imdb_rating,
+        url: m.movies.url
       }))
       
       setMovies(movieData)
@@ -363,6 +367,52 @@ export default function MyMovies() {
     else if (tag.key === 'directors') setFilters(prev => ({ ...prev, selectedDirectors: [] }))
     else if (tag.key === 'languages') setFilters(prev => ({ ...prev, selectedLanguages: [] }))
     else if (tag.key === 'countries') setFilters(prev => ({ ...prev, selectedCountries: [] }))
+  }
+
+  // Grid view movie card component
+  const GridMovieCard = ({ movie }: { movie: Movie }) => {
+    const FALLBACK_IMAGE = 'https://via.placeholder.com/300x445.png?text=No+Image'
+    
+    return (
+      <div className="relative group">
+        <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out">
+          <img
+            src={movie.url || FALLBACK_IMAGE}
+            alt={movie.title}
+            className="w-full h-full object-cover bg-gray-200"
+            onError={(e) => {
+              e.currentTarget.src = FALLBACK_IMAGE
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          
+          {/* Delete button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setMovieToDelete(movie)
+            }}
+            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+
+        </div>
+        
+        {/* Title and year */}
+        <div className="mt-2">
+          <h3 className="font-semibold text-gray-900 text-sm leading-tight truncate" title={movie.title}>
+            {movie.title}
+          </h3>
+          {movie.year && (
+            <p className="text-gray-500 text-xs mt-1">{movie.year}</p>
+          )}
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -571,6 +621,35 @@ export default function MyMovies() {
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
+                  
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                        viewMode === 'list'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                        viewMode === 'grid'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    </button>
+                  </div>
+                  
                   <button
                     onClick={() => setShowFilters(!showFilters)}
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
@@ -656,6 +735,12 @@ export default function MyMovies() {
                   Clear All Filters
                 </button>
               </div>
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {filteredMovies.map((movie) => (
+                  <GridMovieCard key={movie.id} movie={movie} />
+                ))}
+              </div>
             ) : (
               <div className="space-y-4">
                 {filteredMovies.map((movie) => (
@@ -687,10 +772,7 @@ export default function MyMovies() {
                           <p className="text-sm text-gray-500">Director: {movie.director}</p>
                         )}
                       </div>
-                      <div className="flex items-center space-x-4 ml-4">
-                        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                          Elo: {movie.elo_score.toFixed(0)}
-                        </span>
+                      <div className="flex items-center ml-4">
                         <button
                           onClick={() => setMovieToDelete(movie)}
                           className="text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg p-2"
