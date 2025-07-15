@@ -53,7 +53,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Why FilmRank? & Who It's For (2-col grid) */}
+      {/* Why FilmRank? & AnimatedLeaderboard */}
       <section className="w-full border-t border-gray-200 shadow-sm bg-white py-20 px-4">
         <div className="container max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
@@ -83,25 +83,8 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="w-full border-t border-gray-200 shadow-sm bg-gray-50 py-20 px-4">
-        <div className="container max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">Who It's For</h3>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              FilmRank is for anyone who watches a lot of movies, doesn't love rating systems, and wants a low-pressure way to organize their favorites. If you care more about your personal taste than what's "best," you'll feel right at home.
-            </p>
-          </div>
-          <div className="hidden md:block h-full w-full flex items-center justify-center">
-            {/* Placeholder for future illustration or accent */}
-            <div className="w-full h-64 bg-gray-200 rounded-2xl flex items-center justify-center text-gray-400 text-2xl font-bold opacity-40">
-              [Your Art Here]
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* How It Works */}
-      <section className="w-full border-t border-gray-200 shadow-sm bg-white py-20 px-4">
+      <section className="w-full border-t border-gray-200 shadow-sm bg-gray-50 py-20 px-4">
         <div className="container max-w-5xl mx-auto">
           <h3 className="text-2xl font-semibold text-gray-900 mb-10 text-center">How It Works</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
@@ -133,22 +116,26 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="w-full border-t border-gray-200 shadow-sm bg-gray-50 py-20 px-4">
-        <div className="container max-w-4xl mx-auto text-center">
-          <p className="italic text-lg text-gray-800 mb-2">"FilmRank made me love organizing my movies again. No pressure, just fun."</p>
-          <p className="text-gray-600 mb-4">— Alex, early user</p>
-          <p className="font-semibold text-blue-600">Over 1,000 movies ranked</p>
+      {/* Who It's For */}
+      <section className="w-full border-t border-gray-200 shadow-sm bg-white py-5 px-4">
+        <div className="container max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">Who It's For</h3>
+            <p className="text-lg text-gray-700 leading-relaxed">
+              FilmRank is for anyone who watches a lot of movies, doesn't love rating systems, and wants a low-pressure way to organize their favorites. If you care more about your personal taste than what's "best," you'll feel right at home.
+            </p>
+          </div>
+          <div className="hidden md:block h-full w-full flex items-center justify-center">
+            <img
+              src="/wordcloud.png"
+              alt="A wordcloud of movie genres and vibes"
+              className="mx-auto w-full max-w-xl"
+            />
+          </div>
         </div>
       </section>
 
-      {/* Closing Section */}
-      <section className="w-full border-t border-gray-200 shadow-sm bg-white py-20 px-4">
-        <div className="container max-w-4xl mx-auto text-center">
-          <h3 className="text-2xl font-semibold text-gray-900 mb-4">No pressure. No stars. Just your vibe.</h3>
-          <p className="text-lg text-gray-700 leading-relaxed">FilmRank is about celebrating your unique taste, not chasing perfection. Start ranking and rediscover what you love about movies.</p>
-        </div>
-      </section>
+     
     </div>
   )
 }

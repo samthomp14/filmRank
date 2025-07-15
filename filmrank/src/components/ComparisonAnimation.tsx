@@ -111,16 +111,6 @@ export default function ComparisonAnimation({ className = '' }: { className?: st
     phase === 'winner' && isWinner
       ? { opacity: 1, scale: 1.15 }
       : { opacity: 0, scale: 1 };
-  const loserAnim = (left: boolean) =>
-    phase === 'winner'
-      ? {
-          x: left ? -120 : 120,
-          y: 120,
-          rotate: left ? -18 : 18,
-          opacity: 0,
-          zIndex: 30,
-        }
-      : { x: 0, y: 0, rotate: 0, opacity: 1, zIndex: 10 };
   const fadeInAnim = { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 };
 
   return (
