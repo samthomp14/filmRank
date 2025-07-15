@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import MyMovies from "./pages/MyMovies";
 import MovieInfo from "./pages/MovieInfo";
 import Layout from "./components/Layout";
+import Landing from "./pages/Landing";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -40,7 +41,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/" element={user ? <Dashboard /> : <Navigate to="/login" replace />} />
+          <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" replace />} />
+          <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
           <Route path="/add" element={user ? <AddMovie /> : <Navigate to="/login" replace />} />
           <Route path="/compare" element={user ? <Compare /> : <Navigate to="/login" replace />} />
           <Route path="/ranking" element={user ? <Ranking /> : <Navigate to="/login" replace />} />
