@@ -8,19 +8,11 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline'
 import AnimatedLeaderboard from '../components/AnimatedLeaderboard'
+import ComparisonAnimation from '../components/ComparisonAnimation'
 
 export default function Landing() {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
-  // Poster comparison animation state
-  const [posters, setPosters] = useState<string[]>([])
-  const [currentPair, setCurrentPair] = useState<[string, string]>(['', ''])
-  const [winner, setWinner] = useState<number | null>(null)
-  const [animationPhase, setAnimationPhase] = useState<'idle' | 'comparing' | 'winner' | 'transition'>('idle')
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [nextPoster, setNextPoster] = useState<string>('')
-  const [eliminatedPoster, setEliminatedPoster] = useState<number | null>(null)
-  const [previousWinner, setPreviousWinner] = useState<string>('')
 
   useEffect(() => {
     const checkSession = async () => {
@@ -29,87 +21,6 @@ export default function Landing() {
     }
     checkSession()
   }, [])
-
-  // Fetch all posters on mount
-  useEffect(() => {
-    const fetchPosters = async () => {
-      const { data, error } = await supabase
-        .from('movies')
-        .select('id, url')
-      if (!error && data) {
-        // Filter out movies without URLs and shuffle to get 10 random ones
-        const moviesWithUrls = data.filter(m => m.url)
-        const shuffled = moviesWithUrls.sort(() => 0.5 - Math.random())
-        const posterUrls = shuffled.slice(0, 10).map(m => m.url)
-        setPosters(posterUrls)
-        if (posterUrls.length >= 2) {
-          setCurrentPair([posterUrls[0], posterUrls[1]])
-          setAnimationPhase('comparing')
-        }
-      }
-    }
-    fetchPosters()
-  }, [])
-
-  // Animation cycle
-  useEffect(() => {
-    if (posters.length < 2 || animationPhase !== 'comparing') return
-
-    const cycle = async () => {
-      // Show comparison for 2 seconds
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Pick a random winner
-      const winnerIndex = Math.random() > 0.5 ? 0 : 1
-      const loserIndex = winnerIndex === 0 ? 1 : 0
-      const winnerPoster = currentPair[winnerIndex]
-      setWinner(winnerIndex)
-      setEliminatedPoster(loserIndex)
-      setAnimationPhase('winner')
-      
-      // Show winner for 1 second
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Prepare next poster - exclude the previous winner
-      let nextIndex = (currentIndex + 2) % posters.length
-      let newPoster = posters[nextIndex]
-      
-      // If the next poster would be the previous winner, find a different one
-      if (newPoster === previousWinner && posters.length > 2) {
-        // Find the next available poster that's not the previous winner
-        for (let i = 1; i < posters.length; i++) {
-          const candidateIndex = (currentIndex + 2 + i) % posters.length
-          const candidatePoster = posters[candidateIndex]
-          if (candidatePoster !== previousWinner && candidatePoster !== winnerPoster) {
-            nextIndex = candidateIndex
-            newPoster = candidatePoster
-            break
-          }
-        }
-      }
-      
-      setNextPoster(newPoster)
-      
-      // Transition phase - loser fades out and new poster fades in
-      setAnimationPhase('transition')
-      await new Promise(resolve => setTimeout(resolve, 800))
-      
-      // Keep the winner, replace the loser with next poster
-      const newPair: [string, string] = winnerIndex === 0 
-        ? [winnerPoster, newPoster] 
-        : [newPoster, winnerPoster]
-      
-      setCurrentPair(newPair)
-      setCurrentIndex(nextIndex)
-      setWinner(null)
-      setNextPoster('')
-      setEliminatedPoster(null)
-      setPreviousWinner(winnerPoster)
-      setAnimationPhase('comparing')
-    }
-
-    cycle()
-  }, [posters, currentPair, animationPhase, currentIndex])
 
   const handleStartRanking = () => {
     navigate(isLoggedIn ? '/compare' : '/login')
@@ -137,64 +48,7 @@ export default function Landing() {
           </div>
           {/* Right: Comparison Animation */}
           <div className="hidden md:flex justify-center items-center">
-            <div className="relative w-[500px] h-96 flex items-center justify-center">
-              {currentPair[0] && currentPair[1] && (
-                <>
-                  {/* Left Poster */}
-                  <div className="relative">
-                    <div 
-                      className={`w-48 h-72 rounded-lg overflow-hidden shadow-lg transition-all duration-700 ${
-                        animationPhase === 'winner' && winner === 0 
-                          ? 'scale-110 ring-4 ring-blue-500 z-20' 
-                          : animationPhase === 'winner' && winner === 1
-                          ? 'scale-75 -translate-x-48 translate-y-32 opacity-0 rotate-12 z-10'
-                          : animationPhase === 'transition' && eliminatedPoster === 0
-                          ? 'opacity-0'
-                          : 'scale-100 z-10'
-                      }`}
-                    >
-                      <img
-                        src={animationPhase === 'transition' && winner === 1 && nextPoster ? nextPoster : currentPair[0]}
-                        alt="Movie Poster"
-                        className="w-full h-full object-cover"
-                        draggable={false}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* VS Text */}
-                  <div className={`mx-8 z-30 transition-all duration-500 ${
-                    animationPhase === 'winner' ? 'opacity-0 scale-75' : 'opacity-100 scale-100'
-                  }`}>
-                    <div className="bg-white px-4 py-2 rounded-full shadow-md">
-                      <span className="text-xl font-bold text-gray-400">VS</span>
-                    </div>
-                  </div>
-                  
-                  {/* Right Poster */}
-                  <div className="relative">
-                    <div 
-                      className={`w-48 h-72 rounded-lg overflow-hidden shadow-lg transition-all duration-700 ${
-                        animationPhase === 'winner' && winner === 1 
-                          ? 'scale-110 ring-4 ring-blue-500 z-20' 
-                          : animationPhase === 'winner' && winner === 0
-                          ? 'scale-75 translate-x-48 translate-y-32 opacity-0 -rotate-12 z-10'
-                          : animationPhase === 'transition' && eliminatedPoster === 1
-                          ? 'opacity-0'
-                          : 'scale-100 z-10'
-                      }`}
-                    >
-                      <img
-                        src={animationPhase === 'transition' && winner === 0 && nextPoster ? nextPoster : currentPair[1]}
-                        alt="Movie Poster"
-                        className="w-full h-full object-cover"
-                        draggable={false}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+            <ComparisonAnimation />
           </div>
         </div>
       </section>
