@@ -7,6 +7,7 @@ import {
   ArrowsRightLeftIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
+import AnimatedLeaderboard from '../components/AnimatedLeaderboard'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -222,12 +223,8 @@ export default function Landing() {
               </li>
             </ul>
           </div>
-          <div className="hidden md:block h-full w-full flex items-center justify-center">
-            {/* Placeholder for future illustration or accent */}
-            <div className="w-full h-64 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-400 text-2xl font-bold opacity-40">
-              {/* Illustration or SVG could go here */}
-              [Your Art Here]
-            </div>
+          <div className="h-full w-full flex items-center justify-center">
+            <AnimatedLeaderboard />
           </div>
         </div>
       </section>
