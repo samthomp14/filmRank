@@ -13,6 +13,7 @@ import MyMovies from "./pages/MyMovies";
 import MovieInfo from "./pages/MovieInfo";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
+import Onboarding from "./pages/Onboarding";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -49,6 +50,7 @@ function App() {
           <Route path="/movie/:movieId" element={user ? <MovieInfo /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" replace />} />
           <Route path="/my-movies" element={user ? <MyMovies /> : <Navigate to="/login" replace />} />
+          <Route path="/onboarding" element={<Onboarding />} />
         </Route>
       </Routes>
     </Router>
