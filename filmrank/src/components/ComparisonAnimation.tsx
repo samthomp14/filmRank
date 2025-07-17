@@ -24,7 +24,7 @@ export default function ComparisonAnimation({ className = '' }: { className?: st
       if (!error && data) {
         const urls = data.filter(m => m.url).map(m => m.url);
         const shuffled = urls.sort(() => 0.5 - Math.random());
-        setPosters(shuffled.slice(0, 10));
+        setPosters(shuffled.slice(0, 10).filter((p): p is string => p !== null));
       }
     };
     fetchPosters();

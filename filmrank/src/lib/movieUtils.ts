@@ -1,5 +1,7 @@
 // Utility functions for handling movie data from OMDB API
 
+import type { TablesInsert } from '../types/supabase';
+
 export interface OMDBResponse {
   Response: string;
   Title: string;
@@ -29,25 +31,10 @@ export interface OMDBResponse {
   Error?: string;
 }
 
-export interface MovieInsertData {
-  title: string;
-  imdb_id: string;
-  url: string;
-  year: number | null;
-  runtime: number | null;
-  rating: string;
-  genre: string;
-  director: string;
-  language: string;
-  country: string;
-  imdb_rating: number | null;
-  metadata: OMDBResponse;
-}
-
 /**
  * Parse OMDB response and return structured data for database insertion
  */
-export function parseOMDBResponse(movieData: OMDBResponse): MovieInsertData {
+export function parseOMDBResponse(movieData: OMDBResponse): TablesInsert<'movies'> {
   // Parse runtime to get minutes
   const runtimeMatch = movieData.Runtime?.match(/(\d+)/);
   const runtime = runtimeMatch ? parseInt(runtimeMatch[1]) : null;
@@ -61,16 +48,16 @@ export function parseOMDBResponse(movieData: OMDBResponse): MovieInsertData {
   return {
     title: movieData.Title,
     imdb_id: movieData.imdbID,
-    url: movieData.Poster,
+    url: movieData.Poster || null,
     year: year,
     runtime: runtime,
-    rating: movieData.Rated,
-    genre: movieData.Genre,
-    director: movieData.Director,
-    language: movieData.Language,
-    country: movieData.Country,
+    rating: movieData.Rated || null,
+    genre: movieData.Genre || null,
+    director: movieData.Director || null,
+    language: movieData.Language || null,
+    country: movieData.Country || null,
     imdb_rating: imdbRating,
-    metadata: movieData
+    metadata: movieData as any, // Json type
   };
 }
 

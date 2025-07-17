@@ -1,37 +1,19 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { Link } from 'react-router-dom'
+import type { Tables } from '../types/supabase';
 
-interface Movie {
-  id: string
-  title: string
-  elo_score: number
-  created_at: string
-}
-
-interface UserMovieRow {
+type MovieRow = Tables<'movies'>;
+interface MovieWithJoin extends MovieRow {
   elo_score: number;
   created_at: string;
-  movies: { id: string; title: string } | { id: string; title: string }[] | null;
-}
-
-function getMovieId(movies: { id: string; title: string } | { id: string; title: string }[] | null): string {
-  if (!movies) return '';
-  if (Array.isArray(movies)) return movies[0]?.id ?? '';
-  return movies.id ?? '';
-}
-
-function getMovieTitle(movies: { id: string; title: string } | { id: string; title: string }[] | null): string {
-  if (!movies) return '';
-  if (Array.isArray(movies)) return movies[0]?.title ?? '';
-  return movies.title ?? '';
 }
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalMovies: 0,
-    topMovie: null as Movie | null,
-    recentMovies: [] as Movie[]
+    topMovie: null as MovieWithJoin | null,
+    recentMovies: [] as MovieWithJoin[]
   })
   const [loading, setLoading] = useState(true)
 
@@ -80,17 +62,18 @@ export default function Dashboard() {
       setStats({
         totalMovies: count || 0,
         topMovie: topMovie ? {
-          id: getMovieId((topMovie as UserMovieRow).movies),
-          title: getMovieTitle((topMovie as UserMovieRow).movies),
-          elo_score: (topMovie as UserMovieRow).elo_score,
-          created_at: (topMovie as UserMovieRow).created_at || ''
-        } : null,
-        recentMovies: (recentMovies as UserMovieRow[] | undefined)?.map(m => ({
-          id: getMovieId(m.movies),
-          title: getMovieTitle(m.movies),
-          elo_score: m.elo_score,
-          created_at: m.created_at || ''
-        })) || []
+          ...(Array.isArray((topMovie as any).movies) ? (topMovie as any).movies[0] : (topMovie as any).movies),
+          elo_score: (topMovie as any).elo_score,
+          created_at: (topMovie as any).created_at || ''
+        } as MovieWithJoin : null,
+        recentMovies: (recentMovies as { movies: MovieRow | MovieRow[] | null; elo_score: number; created_at: string }[] | undefined)?.map(m => {
+          const movie = Array.isArray(m.movies) ? m.movies[0] : m.movies;
+          return {
+            ...(movie || {}),
+            elo_score: m.elo_score,
+            created_at: m.created_at || ''
+          } as MovieWithJoin;
+        }) || []
       })
       setLoading(false)
     }

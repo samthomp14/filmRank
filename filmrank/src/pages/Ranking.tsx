@@ -2,25 +2,18 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import type { Tables } from '../types/supabase';
 
-interface Movie {
-  id: string
-  title: string
-  elo_score: number
-  created_at: string
-  poster_url?: string
-}
-
-// Add this type for the joined row
-interface UserMovieRow {
+type MovieRow = Tables<'movies'>;
+interface MovieWithJoin extends MovieRow {
   elo_score: number;
   created_at: string;
-  movies: { id: string; title: string; url?: string } | { id: string; title: string; url?: string }[] | null;
+  poster_url?: string;
 }
 
 function Ranking() {
   const navigate = useNavigate()
-  const [movies, setMovies] = useState<Movie[]>([])
+  const [movies, setMovies] = useState<MovieWithJoin[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -52,13 +45,15 @@ function Ranking() {
       if (error) {
         console.error('Failed to fetch rankings:', error)
       } else {
-        setMovies((data as UserMovieRow[]).map(m => ({
-          id: Array.isArray(m.movies) ? m.movies[0]?.id ?? '' : m.movies?.id ?? '',
-          title: Array.isArray(m.movies) ? m.movies[0]?.title ?? '' : m.movies?.title ?? '',
-          elo_score: m.elo_score,
-          created_at: m.created_at || '',
-          poster_url: Array.isArray(m.movies) ? m.movies[0]?.url ?? '' : m.movies?.url ?? ''
-        })))
+        setMovies((data as { elo_score: number; created_at: string; movies: MovieRow | MovieRow[] | null }[]).map(m => {
+          const movie = Array.isArray(m.movies) ? m.movies[0] : m.movies;
+          return {
+            ...(movie || {}),
+            elo_score: m.elo_score,
+            created_at: m.created_at || '',
+            poster_url: movie?.url ?? '',
+          } as MovieWithJoin;
+        }))
       }
 
       setLoading(false)

@@ -6,7 +6,7 @@ interface CompareMovie {
   imdb_id: string | null;
   elo_score: number;
   match_count: number;
-  url: string;
+  url: string | null;
 }
 
 interface MovieCardProps {

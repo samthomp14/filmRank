@@ -2,14 +2,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import MovieCard from '../components/MovieCard.tsx'
+import type { Tables } from '../types/supabase';
 
-interface CompareMovie {
+interface CompareMovie extends Tables<'movies'> {
   movie_id: string;
-  title: string;
-  imdb_id: string | null;
   elo_score: number;
   match_count: number;
-  url: string;
 }
 
 function Compare() {

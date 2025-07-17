@@ -2,21 +2,20 @@ import { useEffect, useState } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { formatRuntime, formatYear, formatIMDBRating } from '../lib/movieUtils'
+import type { Tables } from '../types/supabase';
 
-interface Movie {
-  id: string
-  title: string
-  url?: string
-  year?: number
-  runtime?: number
-  rating?: string
-  genre?: string
-  director?: string
-  language?: string
-  country?: string
-  imdb_rating?: number
-  imdb_id?: string
-  metadata?: any
+type Movie = Tables<'movies'>;
+
+function getOMDBField(meta: unknown, field: string): string | undefined {
+  if (
+    typeof meta === 'object' &&
+    meta !== null &&
+    !Array.isArray(meta) &&
+    typeof (meta as Record<string, unknown>)[field] === 'string'
+  ) {
+    return (meta as Record<string, string>)[field];
+  }
+  return undefined;
 }
 
 function MovieInfo() {
@@ -40,7 +39,7 @@ function MovieInfo() {
       if (error) {
         console.error('Failed to fetch movie:', error)
       } else {
-        setMovie(data)
+        setMovie(data);
       }
 
       setLoading(false)
@@ -50,9 +49,12 @@ function MovieInfo() {
   }, [movieId])
 
   const handleIMDBLink = () => {
-    const imdbId = movie?.imdb_id || movie?.metadata?.imdbID
+    let imdbId = movie?.imdb_id;
+    if (!imdbId) {
+      imdbId = getOMDBField(movie?.metadata, 'imdbID');
+    }
     if (imdbId) {
-      window.open(`https://www.imdb.com/title/${imdbId}`, '_blank')
+      window.open(`https://www.imdb.com/title/${imdbId}`, '_blank');
     }
   }
 
@@ -138,7 +140,7 @@ function MovieInfo() {
                         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight flex-1">
                           {movie.title}
                         </h1>
-                        {(movie.imdb_id || movie.metadata?.imdbID) && (
+                        {(movie.imdb_id || getOMDBField(movie.metadata, 'imdbID')) && (
                           <button
                             onClick={handleIMDBLink}
                             className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
@@ -175,10 +177,10 @@ function MovieInfo() {
                     </div>
 
                     {/* Plot */}
-                    {movie.metadata?.Plot && (
+                    {getOMDBField(movie.metadata, 'Plot') && (
                       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Synopsis</h3>
-                        <p className="text-gray-700 leading-relaxed">{movie.metadata.Plot}</p>
+                        <p className="text-gray-700 leading-relaxed">{getOMDBField(movie.metadata, 'Plot')}</p>
                       </div>
                     )}
 
@@ -193,10 +195,10 @@ function MovieInfo() {
                           </div>
                         )}
                         
-                        {movie.metadata?.Writer && (
+                        {getOMDBField(movie.metadata, 'Writer') && (
                           <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
                             <div className="text-sm font-medium text-gray-500 mb-1">Writer</div>
-                            <div className="text-gray-900 font-medium">{movie.metadata.Writer}</div>
+                            <div className="text-gray-900 font-medium">{getOMDBField(movie.metadata, 'Writer')}</div>
                           </div>
                         )}
                         
@@ -207,10 +209,10 @@ function MovieInfo() {
                           </div>
                         )}
                         
-                        {movie.metadata?.Released && (
+                        {getOMDBField(movie.metadata, 'Released') && (
                           <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
                             <div className="text-sm font-medium text-gray-500 mb-1">Release Date</div>
-                            <div className="text-gray-900 font-medium">{movie.metadata.Released}</div>
+                            <div className="text-gray-900 font-medium">{getOMDBField(movie.metadata, 'Released')}</div>
                           </div>
                         )}
                       </div>
@@ -231,20 +233,20 @@ function MovieInfo() {
                           </div>
                         )}
                         
-                        {movie.metadata?.Awards && (
+                        {getOMDBField(movie.metadata, 'Awards') && (
                           <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
                             <div className="text-sm font-medium text-gray-500 mb-1">Awards</div>
-                            <div className="text-gray-900 font-medium">{movie.metadata.Awards}</div>
+                            <div className="text-gray-900 font-medium">{getOMDBField(movie.metadata, 'Awards')}</div>
                           </div>
                         )}
                       </div>
                     </div>
 
                     {/* Cast */}
-                    {movie.metadata?.Actors && (
+                    {getOMDBField(movie.metadata, 'Actors') && (
                       <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Cast</h3>
-                        <p className="text-gray-700">{movie.metadata.Actors}</p>
+                        <p className="text-gray-700">{getOMDBField(movie.metadata, 'Actors')}</p>
                       </div>
                     )}
                   </div>

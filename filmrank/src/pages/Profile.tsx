@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { parseOMDBResponse } from '../lib/movieUtils'
 import type { OMDBResponse } from '../lib/movieUtils'
+import type { TablesInsert } from '../types/supabase';
 
 interface UserProfile {
   email: string
@@ -130,12 +131,11 @@ export default function Profile() {
             const omdb: OMDBResponse = await response.json()
             if (omdb.Response === 'True') {
               // Parse OMDB response and prepare data for insertion
-              const movieInsertData = parseOMDBResponse(omdb);
-
+              const movieInsertData: TablesInsert<'movies'> = parseOMDBResponse(omdb);
               // 3. Insert movie with all the new columns
               const { data: inserted, error: insertError } = await supabase
                 .from('movies')
-                .insert(movieInsertData)
+                .insert([movieInsertData])
                 .select()
                 .single()
               if (insertError) throw insertError

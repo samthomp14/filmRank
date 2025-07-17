@@ -5,20 +5,11 @@ import MultiSelectFilter from '../components/MultiSelectFilter'
 import { formatRuntime } from '../lib/movieUtils'
 import { formatIMDBRating } from '../lib/movieUtils'
 import { Link } from 'react-router-dom'
+import type { Tables } from '../types/supabase';
 
-interface Movie {
-  id: string;
-  title: string;
+type MovieRow = Tables<'movies'>;
+interface MovieWithElo extends MovieRow {
   elo_score: number;
-  year?: number;
-  runtime?: number;
-  rating?: string;
-  genre?: string;
-  director?: string;
-  language?: string;
-  country?: string;
-  imdb_rating?: number;
-  url?: string;
 }
 
 interface FilterState {
@@ -75,11 +66,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({ title, isExpanded, onTogg
 }
 
 export default function MyMovies() {
-  const [movies, setMovies] = useState<Movie[]>([])
-  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
+  const [movies, setMovies] = useState<MovieWithElo[]>([])
+  const [filteredMovies, setFilteredMovies] = useState<MovieWithElo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
+  const [movieToDelete, setMovieToDelete] = useState<MovieWithElo | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   
@@ -188,11 +179,11 @@ export default function MyMovies() {
   }, [filters, movies])
 
   // Helper: sort movies
-  const sortMovies = (movies: Movie[]) => {
+  const sortMovies = (movies: MovieWithElo[]) => {
     const { field, direction } = sortOption
     const sorted = [...movies].sort((a, b) => {
-      let aValue: any = a[field as keyof Movie]
-      let bValue: any = b[field as keyof Movie]
+      let aValue: any = a[field as keyof MovieWithElo]
+      let bValue: any = b[field as keyof MovieWithElo]
       // For title, compare as string
       if (field === 'title') {
         aValue = aValue ? aValue.toLowerCase() : ''
@@ -242,29 +233,18 @@ export default function MyMovies() {
 
       if (error) throw error
       
-      const movieData = (data as any[]).map((m) => ({
-        id: m.movies.id,
-        title: m.movies.title,
+      const movieData: MovieWithElo[] = (data as { movies: MovieRow; elo_score: number }[]).map((m) => ({
+        ...m.movies,
         elo_score: m.elo_score,
-        year: m.movies.year,
-        runtime: m.movies.runtime,
-        rating: m.movies.rating,
-        genre: m.movies.genre,
-        director: m.movies.director,
-        language: m.movies.language,
-        country: m.movies.country,
-        imdb_rating: m.movies.imdb_rating,
-        url: m.movies.url
-      }))
-      
+      }));
       setMovies(movieData)
       
       // Extract filter options from movies data
-      const ratings = [...new Set(movieData.map(m => m.rating).filter(Boolean))].sort()
-      const genres = [...new Set(movieData.flatMap(m => m.genre?.split(', ') || []).filter(Boolean))].sort()
-      const directors = [...new Set(movieData.map(m => m.director).filter(Boolean))].sort()
-      const languages = [...new Set(movieData.flatMap(m => m.language?.split(', ') || []).filter(Boolean))].sort()
-      const countries = [...new Set(movieData.flatMap(m => m.country?.split(', ') || []).filter(Boolean))].sort()
+      const ratings = [...new Set(movieData.map(m => m.rating).filter((r): r is string => !!r))].sort();
+      const genres = [...new Set(movieData.flatMap(m => m.genre?.split(', ') || []).filter((g): g is string => !!g))].sort();
+      const directors = [...new Set(movieData.map(m => m.director).filter((d): d is string => !!d))].sort();
+      const languages = [...new Set(movieData.flatMap(m => m.language?.split(', ') || []).filter((l): l is string => !!l))].sort();
+      const countries = [...new Set(movieData.flatMap(m => m.country?.split(', ') || []).filter((c): c is string => !!c))].sort();
       
       setFilterOptions({
         ratings,
@@ -280,7 +260,7 @@ export default function MyMovies() {
     }
   }
   
-  const handleDelete = async (movie: Movie) => {
+  const handleDelete = async (movie: MovieWithElo) => {
     try {
 
       const { data: { user } } = await supabase.auth.getUser()
@@ -402,7 +382,7 @@ export default function MyMovies() {
   }
 
   // Grid view movie card component
-  const GridMovieCard = ({ movie }: { movie: Movie }) => {
+  const GridMovieCard = ({ movie }: { movie: MovieWithElo }) => {
     const FALLBACK_IMAGE = 'https://via.placeholder.com/300x445.png?text=No+Image'
     
     return (

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import axios from 'axios'
 import { parseOMDBResponse } from '../lib/movieUtils'
 import type { OMDBResponse } from '../lib/movieUtils'
+import type { TablesInsert } from '../types/supabase';
 
 interface MovieMatch {
   id: string
@@ -155,12 +156,11 @@ export default function AddMovie() {
             movieId = existingMovies[0].id
           } else {
             // Parse OMDB response and prepare data for insertion
-            const movieInsertData = parseOMDBResponse(movieData);
-
+            const movieInsertData: TablesInsert<'movies'> = parseOMDBResponse(movieData);
             // Insert new movie
             const { data: movie, error: moviesError } = await supabase
               .from('movies')
-              .insert(movieInsertData)
+              .insert([movieInsertData])
               .select()
               .single()
 
