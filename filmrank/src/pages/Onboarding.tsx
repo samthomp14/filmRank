@@ -293,12 +293,22 @@ function FinalizeStep({ onBack, onFinish, selectedMovieIds, isSaving }: any) {
       <p className="text-base text-gray-600 mb-4 text-center">
         Review your selections below. When you're ready, click <b>Finish</b> to start using FilmRank!
       </p>
-      <div className="bg-gray-100 rounded-lg p-8 text-center text-gray-500 mb-8">
-        {selectedMovieIds && selectedMovieIds.length > 0 ? (
-          <span>{selectedMovieIds.length} movies selected.</span>
-        ) : (
-          <span>No movies selected.</span>
-        )}
+      <div className="bg-gray-100 rounded-lg p-8 text-center mb-8">
+        <div className="space-y-2">
+          <p className="text-gray-700 font-medium">Your Profile</p>
+          <p className="text-gray-600 text-sm">Name and genre preferences will be saved</p>
+          {selectedMovieIds && selectedMovieIds.length > 0 ? (
+            <div className="mt-4">
+              <p className="text-gray-700 font-medium">{selectedMovieIds.length} movies will be added to your library</p>
+              <p className="text-gray-600 text-sm">These movies will be available for ranking and comparison</p>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <p className="text-gray-500 text-sm">No movies selected</p>
+              <p className="text-gray-600 text-sm">You can add movies later from the catalog</p>
+            </div>
+          )}
+        </div>
       </div>
       <div className="flex gap-4 justify-between w-full max-w-md">
         {onBack && (
@@ -366,7 +376,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
       }
 
       // Update user profile with onboarding data
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from('users')
         .update({
           name: name.trim(),
@@ -375,10 +385,32 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
         })
         .eq('id', user.id);
 
-      if (error) {
-        console.error('Error saving onboarding data:', error);
-        // You might want to show an error message to the user here
+      if (profileError) {
+        console.error('Error saving onboarding data:', profileError);
+        alert('Error saving profile data. Please try again.');
         return;
+      }
+
+      // Add selected movies to user_movies table
+      if (selectedMovieIds.length > 0) {
+        const userMoviesData = selectedMovieIds.map(movieId => ({
+          user_id: user.id,
+          movie_id: movieId,
+          elo_score: 1000, // Default ELO score
+          match_count: 0   // Default match count
+        }));
+
+        const { error: moviesError } = await supabase
+          .from('user_movies')
+          .insert(userMoviesData);
+
+        if (moviesError) {
+          console.error('Error adding movies to user library:', moviesError);
+          // Don't fail the entire onboarding process if movie insertion fails
+          // Just log the error and continue
+        } else {
+          console.log(`Successfully added ${selectedMovieIds.length} movies to user library`);
+        }
       }
 
       // Update the parent component's onboarding status
@@ -390,7 +422,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
       navigate('/dashboard');
     } catch (error) {
       console.error('Error during onboarding completion:', error);
-      // You might want to show an error message to the user here
+      alert('An error occurred during onboarding. Please try again.');
     } finally {
       setIsSaving(false);
     }
