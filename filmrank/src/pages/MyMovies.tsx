@@ -385,35 +385,37 @@ export default function MyMovies() {
   const GridMovieCard = ({ movie }: { movie: MovieWithElo }) => {
     const FALLBACK_IMAGE = 'https://via.placeholder.com/300x445.png?text=No+Image'
     
+    const handleCardClick = (e: React.MouseEvent) => {
+      // Only navigate if the click is not on the delete button
+      if ((e.target as HTMLElement).closest('button')) return;
+      window.location.href = `/movie/${movie.id}`;
+    };
+
     return (
-      <Link to={`/movie/${movie.id}`} className="relative group block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg" state={{ from: 'my-movies' }}>
+      <div onClick={handleCardClick} className="relative group block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg cursor-pointer">
         <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out">
           <img
             src={movie.url || FALLBACK_IMAGE}
             alt={movie.title}
-            className="w-full h-full object-cover bg-gray-200"
+            className="w-full h-full object-cover bg-gray-200 pointer-events-none"
             onError={(e) => {
               e.currentTarget.src = FALLBACK_IMAGE
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
           {/* Delete button */}
           <button
             onClick={(e) => {
-              e.stopPropagation()
-              setMovieToDelete(movie)
+              e.stopPropagation();
+              setMovieToDelete(movie);
             }}
-            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10 pointer-events-auto"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          
-
         </div>
-        
         {/* Title and year */}
         <div className="mt-2">
           <h3 className="font-semibold text-gray-900 text-sm leading-tight truncate" title={movie.title}>
@@ -423,7 +425,7 @@ export default function MyMovies() {
             <p className="text-gray-500 text-xs mt-1">{movie.year}</p>
           )}
         </div>
-      </Link>
+      </div>
     )
   }
 
@@ -613,7 +615,7 @@ export default function MyMovies() {
           {/* Main Content */}
           <div className="flex-1 bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Movies</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Library</h1>
             
             {/* Search and Filter Bar */}
             {movies.length > 0 && (

@@ -295,13 +295,13 @@ export default function Profile() {
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">My Movies</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">My Library</h2>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <Link
                     to="/my-movies"
                     className="w-full bg-white text-blue-600 px-4 py-2 rounded-lg font-medium border border-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center"
                   >
-                    View All My Movies
+                    View Library
                   </Link>
                 </div>
               </div>
