@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import CatalogModal from '../components/CatalogModal';
 import { useInfiniteQuery } from '../hooks/use-infinite-query';
 import type { Tables } from '../types/supabase';
 
@@ -15,6 +14,15 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
     );
   };
+
+  const handleNext = () => {
+    if (!name.trim()) {
+      alert('Please enter your name to continue.');
+      return;
+    }
+    onNext();
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Welcome to FilmRank!</h1>
@@ -27,7 +35,7 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
       <div className="space-y-8">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Display Name
+            Display Name *
           </label>
           <input
             type="text"
@@ -64,7 +72,12 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
           </div>
         </div>
         <div className="flex justify-end">
-          <button type="button" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700" onClick={onNext}>
+          <button 
+            type="button" 
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+            onClick={handleNext}
+            disabled={!name.trim()}
+          >
             Continue
           </button>
         </div>
@@ -273,7 +286,7 @@ function ManualSelectStep({ onBack, onNext, selectedMovieIds, setSelectedMovieId
   );
 }
 
-function FinalizeStep({ onBack, onFinish, selectedMovieIds }: any) {
+function FinalizeStep({ onBack, onFinish, selectedMovieIds, isSaving }: any) {
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-2xl font-bold mb-6 text-center">You're All Set!</h2>
@@ -289,19 +302,44 @@ function FinalizeStep({ onBack, onFinish, selectedMovieIds }: any) {
       </div>
       <div className="flex gap-4 justify-between w-full max-w-md">
         {onBack && (
-          <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack}>Back</button>
+          <button 
+            type="button" 
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+            onClick={onBack}
+            disabled={isSaving}
+          >
+            Back
+          </button>
         )}
-        <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto" onClick={onFinish}>Finish</button>
+        <button 
+          type="button" 
+          className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+          onClick={onFinish}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            </>
+          ) : (
+            'Finish'
+          )}
+        </button>
       </div>
     </div>
   );
 }
 
-export default function Onboarding() {
+export default function Onboarding({ onOnboardingComplete }: { onOnboardingComplete?: (status: boolean) => void }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedMovieIds, setSelectedMovieIds] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   // Add more onboarding state as needed
   const navigate = useNavigate();
 
@@ -309,9 +347,53 @@ export default function Onboarding() {
   const next = () => setStep(s => s + 1);
   const back = () => setStep(s => s - 1);
   const skip = () => setStep(s => s + 1);
-  const finish = () => {
-    // TODO: Save onboarding data
-    navigate('/dashboard');
+  const finish = async () => {
+    // Validate required fields
+    if (!name.trim()) {
+      alert('Please enter your name to continue.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error('No user found');
+        navigate('/login');
+        return;
+      }
+
+      // Update user profile with onboarding data
+      const { error } = await supabase
+        .from('users')
+        .update({
+          name: name.trim(),
+          preferences: { genres: selectedGenres },
+          onboarding_complete: true
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving onboarding data:', error);
+        // You might want to show an error message to the user here
+        return;
+      }
+
+      // Update the parent component's onboarding status
+      if (onOnboardingComplete) {
+        onOnboardingComplete(true);
+      }
+
+      // Navigate to dashboard on success
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error during onboarding completion:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -346,6 +428,7 @@ export default function Onboarding() {
             onBack={back}
             onFinish={finish}
             selectedMovieIds={selectedMovieIds}
+            isSaving={isSaving}
           />
         )}
       </div>

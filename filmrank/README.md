@@ -1,6 +1,29 @@
-# React + TypeScript + Vite
+# FilmRank
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A movie ranking application built with React, TypeScript, Vite, and Supabase.
+
+## Features
+
+- User authentication and profiles
+- Movie catalog browsing
+- Movie comparison and ranking system
+- Onboarding flow for new users
+- User preferences and movie library management
+
+## Recent Updates
+
+### Automatic User Creation
+- When a user signs up, a record is automatically created in the `public.users` table
+- Database trigger `on_auth_user_created` handles this automatically
+- Only the user ID is inserted, all other fields use their default values
+
+## Database Schema
+
+The application uses the following main tables:
+- `users` - User profiles and preferences
+- `movies` - Movie catalog
+- `user_movies` - User's movie library with ELO scores
+- `comparisons` - Movie comparison history
 
 Currently, two official plugins are available:
 
