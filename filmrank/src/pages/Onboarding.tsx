@@ -8,13 +8,24 @@ import { parseOMDBResponse } from '../lib/movieUtils';
 import type { OMDBResponse } from '../lib/movieUtils';
 
 const GENRE_OPTIONS = [
-  'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror'
+  'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror',
+  'Romance', 'Thriller', 'Fantasy', 'Animation', 'Documentary',
+  'Adventure', 'Mystery', 'Crime', 'Family', 'Musical',
+  'Western', 'War', 'Biography', 'History', 'Sport',
+  'Superhero', 'Noir', 'Short', 'Experimental', 'Reality',
+  'News', 'Film-Noir', 'Children',
+  'Adult', 'Disaster', 'Epic', 'Political', 'Psychological',
+  'Road', 'Satire', 'Slasher', 'Spy', 'Suspense'
 ];
 
 function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext }: any) {
   const handleGenreToggle = (genre: string) => {
     setSelectedGenres((prev: string[]) =>
-      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
+      prev.includes(genre)
+        ? prev.filter((g) => g !== genre)
+        : prev.length < 3
+          ? [...prev, genre]
+          : prev
     );
   };
 
@@ -56,22 +67,31 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Favorite Genres
           </label>
-          <div className="flex flex-wrap gap-2">
-            {GENRE_OPTIONS.map((genre) => (
-              <button
-                key={genre}
-                type="button"
-                className={`px-3 py-1 rounded-full border focus:outline-none transition-colors
-                  ${selectedGenres.includes(genre)
-                    ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
-                    : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-50'}
-                `}
-                onClick={() => handleGenreToggle(genre)}
-                aria-pressed={selectedGenres.includes(genre)}
-              >
-                {genre}
-              </button>
-            ))}
+          <p className="text-xs text-gray-500 mb-2">Select up to 3 genres</p>
+          <div className="w-full">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {GENRE_OPTIONS.map((genre) => {
+                const selected = selectedGenres.includes(genre);
+                const disabled = !selected && selectedGenres.length >= 3;
+                return (
+                  <button
+                    key={genre}
+                    type="button"
+                    className={`px-3 py-1 rounded-full border focus:outline-none transition-colors
+                      ${selected
+                        ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+                        : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-50'}
+                      ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                    `}
+                    onClick={() => handleGenreToggle(genre)}
+                    aria-pressed={selected}
+                    disabled={disabled}
+                  >
+                    {genre}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
         <div className="flex justify-end">
@@ -389,7 +409,7 @@ function ManualSelectStep({ onBack, onFinish, selectedMovieIds, setSelectedMovie
       }
       // Add selected movies
       if (selectedMovieIds.length > 0) {
-        const userMoviesData = selectedMovieIds.map(movieId => ({
+        const userMoviesData = selectedMovieIds.map((movieId: string) => ({
           user_id: user.id,
           movie_id: movieId,
           elo_score: 1000,
@@ -507,7 +527,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
   };
   return (
     <div className="flex justify-center bg-gray-50 px-4">
-      <div className="w-full flex flex-col items-center pt-12 md:pt-20">
+      <div className="w-full max-w-2xl mx-auto flex flex-col items-center pt-12 md:pt-20">
         {step === 1 && (
           <ProfileStep
             name={name}
