@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import MovieCard from '../components/MovieCard.tsx'
 import type { Tables } from '../types/supabase';
+import { useSwipeable } from 'react-swipeable'
 
 interface CompareMovie extends Tables<'movies'> {
   movie_id: string;
@@ -109,6 +110,16 @@ function Compare() {
     }
   }, [movies]) // Re-add listener when movies change
 
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (movies && movies.length >= 2) handleVote(movies[0], movies[1])
+    },
+    onSwipedRight: () => {
+      if (movies && movies.length >= 2) handleVote(movies[1], movies[0])
+    },
+    trackMouse: true // allows swipe with mouse for testing
+  })
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -126,8 +137,8 @@ function Compare() {
   }
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div {...handlers} className="flex flex-col justify-center items-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl w-full">
         {/* Header Section */}
         <div className="text-center mb-16 relative">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Which movie do you prefer?</h1>
