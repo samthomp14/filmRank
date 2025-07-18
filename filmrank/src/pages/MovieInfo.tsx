@@ -39,7 +39,7 @@ function MovieInfo() {
       if (error) {
         console.error('Failed to fetch movie:', error)
       } else {
-        setMovie(data);
+        setMovie({ alt_title: null, ...data });
       }
 
       setLoading(false)

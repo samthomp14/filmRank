@@ -1,23 +1,20 @@
 import { supabase } from '../lib/supabaseClient'
-import { PostgrestQueryBuilder } from '@supabase/postgrest-js'
-import { SupabaseClient } from '@supabase/supabase-js'
 import { useEffect, useRef, useSyncExternalStore } from 'react'
 
 // Minimal types for table name and row data
-type SupabaseTableName = string;
-type SupabaseTableData<T extends SupabaseTableName> = any;
-type SupabaseSelectBuilder<T extends SupabaseTableName> = any;
-type SupabaseQueryHandler<T extends SupabaseTableName> = (query: SupabaseSelectBuilder<T>) => SupabaseSelectBuilder<T>;
+type SupabaseTableName = 'movies' | 'user_movies' | 'comparisons' | 'users';
+type SupabaseTableData = any;
+type SupabaseQueryHandler = (query: any) => any;
 
-interface UseInfiniteQueryProps<T extends SupabaseTableName, Query extends string = '*'> {
+interface UseInfiniteQueryProps {
   // The table name to query
-  tableName: T
+  tableName: SupabaseTableName
   // The columns to select, defaults to `*`
   columns?: string
   // The number of items to fetch per page, defaults to `20`
   pageSize?: number
   // A function that modifies the query. Can be used to sort, filter, etc. If .range is used, it will be overwritten.
-  trailingQuery?: SupabaseQueryHandler<T>
+  trailingQuery?: SupabaseQueryHandler
 }
 
 interface StoreState<TData> {
@@ -32,8 +29,8 @@ interface StoreState<TData> {
 
 type Listener = () => void
 
-function createStore<TData extends SupabaseTableData<T>, T extends SupabaseTableName>(
-  props: UseInfiniteQueryProps<T>
+function createStore<TData = SupabaseTableData>(
+  props: UseInfiniteQueryProps
 ) {
   const { tableName, columns = '*', pageSize = 20, trailingQuery } = props
 
@@ -65,7 +62,7 @@ function createStore<TData extends SupabaseTableData<T>, T extends SupabaseTable
 
     let query = supabase
       .from(tableName)
-      .select(columns, { count: 'exact' }) as unknown as SupabaseSelectBuilder<T>
+      .select(columns, { count: 'exact' }) as any;
 
     if (trailingQuery) {
       query = trailingQuery(query)
@@ -78,8 +75,8 @@ function createStore<TData extends SupabaseTableData<T>, T extends SupabaseTable
     } else {
       const deduplicatedData = ((newData || []) as TData[]).filter(
         (item) => {
-          if ('id' in item) {
-            return !state.data.find((old) => 'id' in old && old.id === item.id)
+          if (item && typeof item === 'object' && 'id' in item) {
+            return !state.data.find((old) => old && typeof old === 'object' && 'id' in old && old.id === (item as any).id)
           }
           return true;
         }
@@ -128,11 +125,8 @@ const initialState: any = {
   hasInitialFetch: false,
 }
 
-function useInfiniteQuery<
-  TData extends SupabaseTableData<T>,
-  T extends SupabaseTableName = SupabaseTableName,
->(props: UseInfiniteQueryProps<T>) {
-  const storeRef = useRef(createStore<TData, T>(props))
+function useInfiniteQuery<TData = SupabaseTableData>(props: UseInfiniteQueryProps) {
+  const storeRef = useRef(createStore<TData>(props))
 
   const state = useSyncExternalStore(
     storeRef.current.subscribe,
@@ -148,7 +142,7 @@ function useInfiniteQuery<
         props.columns !== props.columns ||
         props.pageSize !== props.pageSize)
     ) {
-      storeRef.current = createStore<TData, T>(props)
+      storeRef.current = createStore<TData>(props)
     }
 
     if (!state.hasInitialFetch && typeof window !== 'undefined') {
