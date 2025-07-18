@@ -79,41 +79,31 @@ function Ranking() {
   }
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Top 10 Films</h1>
-            <div className="space-y-4">
-              {movies.map((movie, idx) => (
-                <div
-                  key={movie.id}
-                  className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition duration-150 ease-in-out cursor-pointer"
-                  onClick={() => navigate(`/movie/${movie.id}`)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-6">
-                      <span className="text-3xl font-bold text-blue-600 min-w-[60px]">#{idx + 1}</span>
-                      <div>
-                        <h2 className="text-2xl font-semibold text-gray-900">{movie.title}</h2>
-                      </div>
-                    </div>
-                    {movie.poster_url && (
-                      <img
-                        src={movie.poster_url}
-                        alt={movie.title}
-                        className="w-20 h-30 object-cover rounded-lg shadow-md"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
+    <div className="py-12 px-2 max-w-6xl w-full mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Top 10 Films</h1>
+      <div className="space-y-4">
+        {movies.map((movie, idx) => (
+          <div
+            key={movie.id}
+            className="w-full bg-white rounded-lg shadow p-3 sm:p-6 hover:bg-gray-50 transition duration-150 ease-in-out cursor-pointer"
+            onClick={() => navigate(`/movie/${movie.id}`)}
+          >
+            <div className="flex flex-row items-center justify-between gap-3 sm:gap-6">
+              <span className="text-xl sm:text-3xl font-bold text-blue-600 min-w-[36px] sm:min-w-[60px]">#{idx + 1}</span>
+              <h2 className="flex-1 text-base sm:text-2xl font-semibold text-gray-900 whitespace-normal break-words px-2">{movie.title}</h2>
+              {movie.poster_url && (
+                <img
+                  src={movie.poster_url}
+                  alt={movie.title}
+                  className="w-16 h-24 sm:w-24 sm:h-36 object-cover rounded-lg shadow-md flex-shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              )}
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   )
