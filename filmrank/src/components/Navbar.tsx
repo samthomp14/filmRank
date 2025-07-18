@@ -77,6 +77,12 @@ export default function Navbar() {
                   Rankings
                 </Link>
                 <Link
+                  to="/my-movies"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                >
+                  Library
+                </Link>
+                <Link
                   to="/profile"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
                 >
@@ -118,6 +124,7 @@ export default function Navbar() {
                 <Link to="/compare" className="w-full py-2 text-gray-700 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Compare</Link>
                 <Link to="/add" className="w-full py-2 text-gray-700 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Add Movie</Link>
                 <Link to="/ranking" className="w-full py-2 text-gray-700 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Rankings</Link>
+                <Link to="/my-movies" className="w-full py-2 text-gray-700 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Library</Link>
                 <Link to="/profile" className="w-full py-2 text-gray-700 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Profile</Link>
                 <button onClick={() => { handleSignOut(); setMenuOpen(false); }} className="w-full py-2 text-gray-700 hover:text-blue-600 text-left">Sign Out</button>
               </>
