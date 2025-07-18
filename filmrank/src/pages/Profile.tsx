@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import { parseOMDBResponse } from '../lib/movieUtils'
 import type { OMDBResponse } from '../lib/movieUtils'
 import type { TablesInsert } from '../types/supabase';
+import JSZip from 'jszip';
 
 interface UserProfile {
   email: string
@@ -82,8 +83,21 @@ export default function Profile() {
     setImportStatus({ status: 'loading', message: 'Processing your movies...' })
 
     try {
-      const text = await file.text()
-      const rows = text.split('\n')
+      let csvText = '';
+      if (file.name.endsWith('.zip')) {
+        // Handle ZIP file: extract watched.csv
+        const zip = await JSZip.loadAsync(file);
+        const watchedFile = zip.file(/watched\.csv$/i)[0];
+        if (!watchedFile) throw new Error('watched.csv not found in ZIP. Please upload the Letterboxd export ZIP or the watched.csv file.');
+        csvText = await watchedFile.async('text');
+      } else if (file.name.endsWith('.csv')) {
+        // Handle CSV file directly
+        csvText = await file.text();
+      } else {
+        throw new Error('Unsupported file type. Please upload a Letterboxd ZIP export or a watched.csv file.');
+      }
+
+      const rows = csvText.split('\n')
       // Skip header row and process each movie
       const movieData = rows.slice(1).map(row => {
         const columns = row.split(',')
@@ -108,42 +122,50 @@ export default function Profile() {
 
       for (const { title, year } of movieData) {
         try {
-          // 1. Check if movie exists in DB (by title, case-insensitive)
-          let { data: movies, error: searchError } = await supabase
+          // 1. Check if movie exists in DB (by title, alt_title, and year, case-insensitive, exact match)
+          let query = supabase
             .from('movies')
-            .select('id, imdb_id, title')
-            .ilike('title', title)
-            .limit(1)
+            .select('id, imdb_id, title, year, alt_title')
+            .or(`title.ilike."${title}",alt_title.ilike."${title}"`)
+            .limit(10);
+          if (year && !isNaN(Number(year))) {
+            query = query.eq('year', Number(year));
+          }
+          let { data: movies, error: searchError } = await query;
 
-          let movieId: string | null = null
+          let movieId: string | null = null;
 
-          if (searchError) throw searchError
+          if (searchError) throw searchError;
 
           if (movies && movies.length > 0) {
-            movieId = movies[0].id
+            // Prefer exact year match if available
+            const match = movies.find(m => (!year || m.year === Number(year)));
+            movieId = (match || movies[0]).id;
           } else {
             // 2. Fetch from OMDb with year if available
-            const params = new URLSearchParams({ title })
+            const params = new URLSearchParams({ title });
             if (year && year.length > 0) {
-              params.append('year', year)
+              params.append('year', year);
             }
-            const response = await fetch(`/api/omdb?${params.toString()}`)
-            const omdb: OMDBResponse = await response.json()
+            const response = await fetch(`/api/omdb?${params.toString()}`);
+            const omdb: OMDBResponse = await response.json();
             if (omdb.Response === 'True') {
               // Parse OMDB response and prepare data for insertion
               const movieInsertData: TablesInsert<'movies'> = parseOMDBResponse(omdb);
+              // Set alt_title to the Letterboxd title
+              movieInsertData.alt_title = title;
               // 3. Insert movie with all the new columns
               const { data: inserted, error: insertError } = await supabase
                 .from('movies')
                 .insert([movieInsertData])
                 .select()
-                .single()
-              if (insertError) throw insertError
-              movieId = inserted.id
+                .single();
+              if (insertError) throw insertError;
+              movieId = inserted.id;
             } else {
-              failed++
-              failedTitles.push(title)
-              continue
+              failed++;
+              failedTitles.push(title);
+              continue;
             }
           }
 
@@ -233,8 +255,8 @@ export default function Profile() {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600">
-                      Import your movies from Letterboxd by uploading your exported CSV file.
-                      <br />
+                      Import your movies from Letterboxd by uploading your exported <b>ZIP file</b> or the <b>watched.csv</b> file.<br />
+                      <span className="text-gray-500">We recommend uploading the ZIP file directly – we'll find the right file for you!</span><br />
                       <a 
                         href="https://letterboxd.com/settings/data/" 
                         target="_blank" 
@@ -249,10 +271,10 @@ export default function Profile() {
                         <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <span className="text-sm font-medium">Click to upload CSV</span>
+                        <span className="text-sm font-medium">Click to upload ZIP or CSV</span>
                         <input
                           type="file"
-                          accept=".csv"
+                          accept=".csv,.zip"
                           className="hidden"
                           onChange={handleFileUpload}
                           disabled={importStatus.status === 'loading'}
