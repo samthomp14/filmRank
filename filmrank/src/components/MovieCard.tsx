@@ -13,18 +13,19 @@ interface MovieCardProps {
   movie: CompareMovie;
   onClick: () => void;
   selected: boolean;
+  className?: string;
 }
 
 const FALLBACK_IMAGE =
   'https://via.placeholder.com/300x445.png?text=No+Image';
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected }) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected, className }) => {
   return (
     <div
       onClick={onClick}
-      className={`relative w-[300px] h-[445px] rounded-2xl overflow-hidden shadow-lg transition-all duration-200 ease-in-out cursor-pointer border border-white/30 hover:scale-105 hover:shadow-2xl ${
+      className={`relative aspect-[2/3] rounded-2xl overflow-hidden shadow-lg transition-all duration-200 ease-in-out cursor-pointer border border-white/30 hover:scale-105 hover:shadow-2xl ${
         selected ? 'ring-4 ring-blue-500 scale-105' : ''
-      }`}
+      } ${className || ''}`}
     >
       <img
         src={movie.url || FALLBACK_IMAGE}

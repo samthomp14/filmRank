@@ -148,19 +148,18 @@ function Compare() {
 
         {/* Comparison Section */}
         <div className="mb-16">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+          <div className="flex flex-row items-center justify-center gap-4 sm:gap-8 w-full">
             {/* First Movie */}
             <MovieCard
               movie={movies[0]}
               onClick={() => handleVote(movies[0], movies[1])}
               selected={selectedMovie === movies[0].movie_id}
+              className="flex-1 max-w-xs"
             />
 
             {/* VS Text */}
-            <div className="hidden md:block">
-              <div className="bg-white px-6 py-2 rounded-full shadow-sm">
-                <span className="text-2xl font-bold text-gray-400">VS</span>
-              </div>
+            <div className="px-2 sm:px-6 py-2 rounded-full shadow-sm bg-white">
+              <span className="text-2xl font-bold text-gray-400">VS</span>
             </div>
 
             {/* Second Movie */}
@@ -168,6 +167,7 @@ function Compare() {
               movie={movies[1]}
               onClick={() => handleVote(movies[1], movies[0])}
               selected={selectedMovie === movies[1].movie_id}
+              className="flex-1 max-w-xs"
             />
           </div>
         </div>
