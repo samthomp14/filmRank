@@ -89,14 +89,24 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
   );
 }
 
-function ImportStep({ onNext, onSkip, onBack }: any) {
+function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }: any) {
   // Import status state
   const [importStatus, setImportStatus] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
+  const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // File upload handler (same logic as Profile page)
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // File upload handler (store file only)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    setImportStatus({ status: 'idle', message: '' });
+  };
+
+  // Finalize import handler
+  const handleFinalizeImport = async () => {
     if (!file) return;
+    setIsProcessing(true);
     setImportStatus({ status: 'loading', message: 'Processing your movies...' });
     try {
       let csvText = '';
@@ -123,13 +133,22 @@ function ImportStep({ onNext, onSkip, onBack }: any) {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
+      // Update user profile with onboarding data
+      const { error: profileError } = await supabase
+        .from('users')
+        .update({
+          name: name.trim(),
+          preferences: { genres: selectedGenres },
+          onboarding_complete: true
+        })
+        .eq('id', user.id);
+      if (profileError) throw profileError;
       let added = 0;
       let skipped = 0;
       let failed = 0;
       let failedTitles: string[] = [];
       for (const { title, year } of movieData) {
         try {
-          // Check if movie exists by title, alt_title, and year (case-insensitive, exact match)
           let query = supabase
             .from('movies')
             .select('id, imdb_id, title, year, alt_title')
@@ -194,19 +213,24 @@ function ImportStep({ onNext, onSkip, onBack }: any) {
         status: 'success',
         message: `Added: ${added}, Skipped: ${skipped}, Failed: ${failed}${failedTitles.length ? ' (Failed: ' + failedTitles.join(', ') + ')' : ''}`
       });
+      // Complete onboarding
+      if (onImportComplete) onImportComplete();
     } catch (err) {
       setImportStatus({
         status: 'error',
         message: err instanceof Error ? err.message : 'Failed to import movies'
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-center">Import Your Movie Library</h2>
       <p className="text-base text-gray-600 mb-4 text-center">
         If you already track your movies on Letterboxd, you can quickly import your watched list here.<br />
-        <span className="text-gray-500">Don't use Letterboxd? <b>Skip this step</b> to add movies from our catalog instead.</span>
+        <span className="text-gray-500">Don't use Letterboxd? <b>Add movies manually</b> instead.</span>
       </p>
       <div className="flex flex-col items-center gap-6">
         <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center gap-4 w-full max-w-md">
@@ -215,7 +239,7 @@ function ImportStep({ onNext, onSkip, onBack }: any) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <span className="text-sm font-medium">Click to upload ZIP or CSV</span>
-            <input type="file" accept=".csv,.zip" className="hidden" onChange={handleFileUpload} />
+            <input type="file" accept=".csv,.zip" className="hidden" onChange={handleFileUpload} disabled={isProcessing} />
           </label>
           <p className="text-xs text-gray-500 text-center">
             Import your movies from Letterboxd by uploading your exported <b>ZIP file</b> or the <b>watched.csv</b> file.<br />
@@ -229,6 +253,9 @@ function ImportStep({ onNext, onSkip, onBack }: any) {
               Get your Letterboxd export
             </a>
           </p>
+          {file && (
+            <div className="text-sm text-gray-700">Selected file: {file.name}</div>
+          )}
           {importStatus.status !== 'idle' && (
             <div className={`text-center text-sm ${
               importStatus.status === 'success' ? 'text-green-600' :
@@ -241,11 +268,11 @@ function ImportStep({ onNext, onSkip, onBack }: any) {
         </div>
         <div className="flex gap-4 justify-between w-full max-w-md">
           {onBack && (
-            <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack}>Back</button>
+            <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack} disabled={isProcessing}>Back</button>
           )}
           <div className="flex gap-4 ml-auto">
-            <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onSkip}>Skip</button>
-            <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium" onClick={onNext}>Continue</button>
+            <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onManual} disabled={isProcessing}>Add movies manually</button>
+            <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium" onClick={handleFinalizeImport} disabled={!file || isProcessing}>Finalize Import</button>
           </div>
         </div>
       </div>
@@ -253,7 +280,7 @@ function ImportStep({ onNext, onSkip, onBack }: any) {
   );
 }
 
-function ManualSelectStep({ onBack, onNext, selectedMovieIds, setSelectedMovieIds }: any) {
+function ManualSelectStep({ onBack, onFinish, selectedMovieIds, setSelectedMovieIds, name, selectedGenres }: any) {
   const {
     data: movies,
     isLoading,
@@ -294,7 +321,7 @@ function ManualSelectStep({ onBack, onNext, selectedMovieIds, setSelectedMovieId
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const handleMouseEnter = (movieId: string) => (e: React.MouseEvent) => {
+  const handleMouseEnter = (movieId: string) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setHoveredMovie(movieId);
     setTooltipPosition({ x: e.clientX, y: e.clientY });
     tooltipTimer.current = setTimeout(() => {
@@ -329,6 +356,60 @@ function ManualSelectStep({ onBack, onNext, selectedMovieIds, setSelectedMovieId
   const filteredMovies = search.trim() === ''
     ? movies
     : movies.filter(movie => movie.title.toLowerCase().includes(search.trim().toLowerCase()));
+
+  // Saving state
+  const [isSaving, setIsSaving] = useState(false);
+  // Finish handler
+  const handleFinish = async () => {
+    if (!name.trim()) {
+      alert('Please enter your name to continue.');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user found');
+        window.location.href = '/login';
+        return;
+      }
+      // Update user profile
+      const { error: profileError } = await supabase
+        .from('users')
+        .update({
+          name: name.trim(),
+          preferences: { genres: selectedGenres },
+          onboarding_complete: true
+        })
+        .eq('id', user.id);
+      if (profileError) {
+        console.error('Error saving onboarding data:', profileError);
+        alert('Error saving profile data. Please try again.');
+        return;
+      }
+      // Add selected movies
+      if (selectedMovieIds.length > 0) {
+        const userMoviesData = selectedMovieIds.map(movieId => ({
+          user_id: user.id,
+          movie_id: movieId,
+          elo_score: 1000,
+          match_count: 0
+        }));
+        const { error: moviesError } = await supabase
+          .from('user_movies')
+          .insert(userMoviesData);
+        if (moviesError) {
+          console.error('Error adding movies to user library:', moviesError);
+        }
+      }
+      if (onFinish) onFinish();
+    } catch (error) {
+      console.error('Error during onboarding completion:', error);
+      alert('An error occurred during onboarding. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center w-full pb-16">
@@ -402,67 +483,9 @@ function ManualSelectStep({ onBack, onNext, selectedMovieIds, setSelectedMovieId
       )}
       <div className="flex gap-4 justify-between mt-8 w-full max-w-5xl mb-8">
         {onBack && (
-          <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack}>Back</button>
+          <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack} disabled={isSaving}>Back</button>
         )}
-        <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto" onClick={onNext}>Continue</button>
-      </div>
-    </div>
-  );
-}
-
-function FinalizeStep({ onBack, onFinish, selectedMovieIds, isSaving }: any) {
-  return (
-    <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-bold mb-6 text-center">You're All Set!</h2>
-      <p className="text-base text-gray-600 mb-4 text-center">
-        Review your selections below. When you're ready, click <b>Finish</b> to start using FilmRank!
-      </p>
-      <div className="bg-gray-100 rounded-lg p-8 text-center mb-8">
-        <div className="space-y-2">
-          <p className="text-gray-700 font-medium">Your Profile</p>
-          <p className="text-gray-600 text-sm">Name and genre preferences will be saved</p>
-          {selectedMovieIds && selectedMovieIds.length > 0 ? (
-            <div className="mt-4">
-              <p className="text-gray-700 font-medium">{selectedMovieIds.length} movies will be added to your library</p>
-              <p className="text-gray-600 text-sm">These movies will be available for ranking and comparison</p>
-            </div>
-          ) : (
-            <div className="mt-4">
-              <p className="text-gray-500 text-sm">No movies selected</p>
-              <p className="text-gray-600 text-sm">You can add movies later from the catalog</p>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex gap-4 justify-between w-full max-w-md">
-        {onBack && (
-          <button 
-            type="button" 
-            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" 
-            onClick={onBack}
-            disabled={isSaving}
-          >
-            Back
-          </button>
-        )}
-        <button 
-          type="button" 
-          className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
-          onClick={onFinish}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <>
-              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Saving...
-            </>
-          ) : (
-            'Finish'
-          )}
-        </button>
+        <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto" onClick={handleFinish} disabled={isSaving}>Finish</button>
       </div>
     </div>
   );
@@ -473,85 +496,15 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
   const [name, setName] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedMovieIds, setSelectedMovieIds] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  // Add more onboarding state as needed
   const navigate = useNavigate();
-
   // Handlers for step navigation
   const next = () => setStep(s => s + 1);
   const back = () => setStep(s => s - 1);
-  const skip = () => setStep(s => s + 1);
-  const finish = async () => {
-    // Validate required fields
-    if (!name.trim()) {
-      alert('Please enter your name to continue.');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error('No user found');
-        navigate('/login');
-        return;
-      }
-
-      // Update user profile with onboarding data
-      const { error: profileError } = await supabase
-        .from('users')
-        .update({
-          name: name.trim(),
-          preferences: { genres: selectedGenres },
-          onboarding_complete: true
-        })
-        .eq('id', user.id);
-
-      if (profileError) {
-        console.error('Error saving onboarding data:', profileError);
-        alert('Error saving profile data. Please try again.');
-        return;
-      }
-
-      // Add selected movies to user_movies table
-      if (selectedMovieIds.length > 0) {
-        const userMoviesData = selectedMovieIds.map(movieId => ({
-          user_id: user.id,
-          movie_id: movieId,
-          elo_score: 1000, // Default ELO score
-          match_count: 0   // Default match count
-        }));
-
-        const { error: moviesError } = await supabase
-          .from('user_movies')
-          .insert(userMoviesData);
-
-        if (moviesError) {
-          console.error('Error adding movies to user library:', moviesError);
-          // Don't fail the entire onboarding process if movie insertion fails
-          // Just log the error and continue
-        } else {
-          console.log(`Successfully added ${selectedMovieIds.length} movies to user library`);
-        }
-      }
-
-      // Update the parent component's onboarding status
-      if (onOnboardingComplete) {
-        onOnboardingComplete(true);
-      }
-
-      // Navigate to dashboard on success
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error during onboarding completion:', error);
-      alert('An error occurred during onboarding. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
+  // Handler for onboarding completion
+  const handleOnboardingComplete = () => {
+    if (onOnboardingComplete) onOnboardingComplete(true);
+    navigate('/dashboard');
   };
-
   return (
     <div className="flex justify-center bg-gray-50 px-4">
       <div className="w-full flex flex-col items-center pt-12 md:pt-20">
@@ -566,25 +519,21 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
         )}
         {step === 2 && (
           <ImportStep
-            onNext={next}
-            onSkip={skip}
+            onImportComplete={handleOnboardingComplete}
+            onManual={() => setStep(3)}
             onBack={back}
+            name={name}
+            selectedGenres={selectedGenres}
           />
         )}
         {step === 3 && (
           <ManualSelectStep
             onBack={back}
-            onNext={next}
+            onFinish={handleOnboardingComplete}
             selectedMovieIds={selectedMovieIds}
             setSelectedMovieIds={setSelectedMovieIds}
-          />
-        )}
-        {step === 4 && (
-          <FinalizeStep
-            onBack={back}
-            onFinish={finish}
-            selectedMovieIds={selectedMovieIds}
-            isSaving={isSaving}
+            name={name}
+            selectedGenres={selectedGenres}
           />
         )}
       </div>
