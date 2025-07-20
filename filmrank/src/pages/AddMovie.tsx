@@ -1,292 +1,315 @@
 // src/pages/AddMovie.tsx
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import axios from 'axios'
-import { parseOMDBResponse } from '../lib/movieUtils'
-import type { OMDBResponse } from '../lib/movieUtils'
-import type { TablesInsert } from '../types/supabase';
-
-interface MovieMatch {
-  id: string
-  title: string
-  imdb_id: string | null
-  poster_url?: string
-}
+import MovieGallery from '../components/MovieGallery'
+import type { Tables } from '../types/supabase';
+import axios from 'axios';
+import { parseOMDBResponse } from '../lib/movieUtils';
+import type { OMDBResponse } from '../lib/movieUtils';
 
 export default function AddMovie() {
-  const [title, setTitle] = useState('')
-  const [year, setYear] = useState('')
-  const [status, setStatus] = useState<null | 'success' | 'error'>(null)
-  const [matches, setMatches] = useState<MovieMatch[]>([])
-  const [loading, setLoading] = useState(false)
-  const [selectedMovie, setSelectedMovie] = useState<MovieMatch | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [userLibraryIds, setUserLibraryIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showOmdbPrompt, setShowOmdbPrompt] = useState(false);
+  const [omdbTitle, setOmdbTitle] = useState('');
+  const [omdbYear, setOmdbYear] = useState('');
+  const [omdbModal, setOmdbModal] = useState<{
+    title: string;
+    year: string;
+    director: string;
+    poster: string;
+    id?: string;
+    imdb_id?: string;
+    alreadyInLibrary?: boolean;
+    isOmdb?: boolean;
+    omdbData?: OMDBResponse;
+  } | null>(null);
+  const [omdbError, setOmdbError] = useState<string | null>(null);
 
-  // Generate year options (from 1888 to current year + 2)
-  const currentYear = new Date().getFullYear()
-  const yearOptions = [
-    { value: '', label: 'Year (Optional)' },
-    ...Array.from({ length: currentYear - 1887 + 3 }, (_, i) => {
-      const yearValue = currentYear + 2 - i
-      return { value: yearValue.toString(), label: yearValue.toString() }
-    })
-  ]
-
+  // Fetch user's library movie IDs
   useEffect(() => {
-    const searchMovies = async () => {
-      if (title.length < 2) {
-        setMatches([])
-        return
+    const fetchUserLibrary = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setUserLibraryIds([]);
+        setLoading(false);
+        return;
       }
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: movies, error } = await supabase
-        .from('movies')
-        .select('id, title, imdb_id')
-        .ilike('title', `%${title}%`)
-        .limit(5)
-
+      const { data, error } = await supabase
+        .from('user_movies')
+        .select('movie_id');
       if (error) {
-        console.error('Error searching movies:', error)
-        return
-      }
-
-      setMatches(movies || [])
-    }
-
-    const debounceTimer = setTimeout(searchMovies, 300)
-    return () => clearTimeout(debounceTimer)
-  }, [title])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setStatus(null)
-    setErrorMessage('')
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setStatus('error')
-      setErrorMessage('Please make sure you are logged in')
-      setLoading(false)
-      return
-    }
-
-    try {
-      if (selectedMovie) {
-        // Check if user already has this movie
-        const { data: existingMovie, error: checkError } = await supabase
-          .from('user_movies')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('movie_id', selectedMovie.id)
-          .single()
-
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-          console.error('Error checking existing movie:', checkError)
-          throw checkError
-        }
-
-        if (existingMovie) {
-          throw new Error('You have already added this movie to your list')
-        }
-
-        // Movie exists but user doesn't have it, create user_movies entry
-        const { error: userMoviesError } = await supabase
-          .from('user_movies')
-          .insert({
-            user_id: user.id,
-            movie_id: selectedMovie.id,
-            elo_score: 1000,
-            match_count: 0
-          })
-
-        if (userMoviesError) {
-          console.error('Error adding movie to user list:', userMoviesError)
-          throw userMoviesError
-        }
+        setUserLibraryIds([]);
       } else {
-        // Search OMDb for new movie
-        console.log('Searching OMDb for movie:', { title, year })
-        const params: any = { title }
-        if (year.trim()) {
-          params.year = year.trim()
-        }
-        console.log('OMDb params:', params)
-        // Get access token
-        const { data: sessionData } = await supabase.auth.getSession();
-        const accessToken = sessionData.session?.access_token;
-        const response = await axios.get<OMDBResponse>(`/api/omdb`, {
-          params,
-          headers: {
-            Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
-          },
-        })
-        const movieData = response.data
-        console.log('OMDb response:', movieData)
-        if (movieData.Response === 'True') {
-          // Check if movie already exists in database
-          const { data: existingMovies, error: movieCheckError } = await supabase
-            .from('movies')
-            .select('id')
-            .eq('imdb_id', movieData.imdbID)
-            .limit(1)
+        setUserLibraryIds((data || []).map((row: { movie_id: string }) => row.movie_id));
+      }
+      setLoading(false);
+    };
+    fetchUserLibrary();
+  }, []);
 
-          if (movieCheckError) {
-            console.error('Error checking existing movie:', movieCheckError)
-            throw movieCheckError
-          }
+  // Add movie to user library handler
+  const handleAdd = async (movie: Tables<'movies'>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not logged in');
+    // Check if already in library (should be disabled in UI, but double check)
+    if (userLibraryIds.includes(movie.id)) return;
+    const { error } = await supabase
+      .from('user_movies')
+      .insert({
+        user_id: user.id,
+        movie_id: movie.id,
+        elo_score: 1000,
+        match_count: 0
+      });
+    if (error) throw error;
+    setUserLibraryIds(ids => [...ids, movie.id]);
+  };
 
-          let movieId: string
-
-          if (existingMovies && existingMovies.length > 0) {
-            // Movie exists in database, check if user already has it
-            const { data: userMovies, error: userCheckError } = await supabase
-              .from('user_movies')
-              .select('*')
-              .eq('user_id', user.id)
-              .eq('movie_id', existingMovies[0].id)
-              .limit(1)
-
-            if (userCheckError) {
-              console.error('Error checking user movie:', userCheckError)
-              throw userCheckError
-            }
-
-            if (userMovies && userMovies.length > 0) {
-              throw new Error('You have already added this movie to your list')
-            }
-
-            movieId = existingMovies[0].id
-          } else {
-            // Parse OMDB response and prepare data for insertion
-            const movieInsertData: TablesInsert<'movies'> = parseOMDBResponse(movieData);
-            // Insert new movie
-            const { data: movie, error: moviesError } = await supabase
-              .from('movies')
-              .insert([movieInsertData])
-              .select()
-              .single()
-
-            if (moviesError) {
-              console.error('Error creating new movie:', moviesError)
-              throw moviesError
-            }
-            movieId = movie.id
-          }
-
-          // Create user_movies entry
-          const { error: userMoviesError } = await supabase
-            .from('user_movies')
-            .insert({
-              user_id: user.id,
-              movie_id: movieId,
-              elo_score: 1000,
-              match_count: 0
-            })
-
-          if (userMoviesError) {
-            console.error('Error adding movie to user list:', userMoviesError)
-            throw userMoviesError
-          }
-        } else {
-          throw new Error(movieData.Error || 'Movie not found in OMDb')
+  // OMDb prompt submit handler
+  const handleOmdbPrompt = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOmdbError(null);
+    const title = omdbTitle.trim();
+    const year = omdbYear ? omdbYear.trim() : '';
+    if (!title) return;
+    // 1. Check user's library (by title/year/alt_title)
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: userMovies } = await supabase
+        .from('user_movies')
+        .select('movie_id');
+      const userMovieIds = (userMovies || []).map((row: { movie_id: string }) => row.movie_id);
+      if (userMovieIds.length > 0) {
+        // Check in movies table for user's movies
+        const { data: movies } = await supabase
+          .from('movies')
+          .select('*')
+          .in('id', userMovieIds);
+        const found = (movies || []).find(m =>
+          (m.title && m.title.toLowerCase() === title.toLowerCase()) ||
+          (m.alt_title && m.alt_title.toLowerCase() === title.toLowerCase())
+        );
+        if (found && (!year || (found.year && String(found.year) === year))) {
+          setOmdbModal({
+            title: found.title,
+            year: found.year ? String(found.year) : '',
+            director: found.director || '',
+            poster: found.url || 'https://via.placeholder.com/120x175.png?text=No+Image',
+            id: found.id,
+            imdb_id: found.imdb_id || undefined,
+            alreadyInLibrary: true,
+          });
+          return;
         }
       }
-
-      setStatus('success')
-      setTitle('')
-      setYear('')
-      setSelectedMovie(null)
-      setMatches([])
-    } catch (error) {
-      console.error('Full error:', error)
-      setStatus('error')
-      setErrorMessage(error instanceof Error ? error.message : 'Error adding movie')
-    } finally {
-      setLoading(false)
     }
-  }
+    // 2. Check movie database (title, alt_title)
+    let { data: foundMovies } = await supabase
+      .from('movies')
+      .select('*')
+      .or(`title.ilike.%${title}%,alt_title.ilike.%${title}%`);
+    if (year) {
+      foundMovies = (foundMovies || []).filter((m: any) => m.year && String(m.year) === year);
+    }
+    const found = (foundMovies || [])[0];
+    if (found) {
+      setOmdbModal({
+        title: found.title,
+        year: found.year ? String(found.year) : '',
+        director: found.director || '',
+        poster: found.url || 'https://via.placeholder.com/120x175.png?text=No+Image',
+        id: found.id,
+        imdb_id: found.imdb_id || undefined,
+        alreadyInLibrary: userLibraryIds.includes(found.id),
+      });
+      return;
+    }
+    // 3. Query OMDb
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      const params: any = { title };
+      if (year) params.year = year;
+      const response = await axios.get('/api/omdb', {
+        params,
+        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : undefined },
+      });
+
+      const movieData = response.data;
+      if (movieData.Response === 'True') {
+        setOmdbModal({
+          title: movieData.Title,
+          year: movieData.Year || '',
+          director: movieData.Director || '',
+          poster: movieData.Poster && movieData.Poster !== 'N/A' ? movieData.Poster : 'https://via.placeholder.com/120x175.png?text=No+Image',
+          imdb_id: movieData.imdbID,
+          isOmdb: true,
+          omdbData: movieData,
+        });
+      } else {
+        setOmdbError('Movie not found in OMDb.');
+      }
+    } catch (err) {
+      setOmdbError('Error searching OMDb.');
+    }
+  };
+
+  // OMDb confirm handler
+  const handleOmdbConfirm = async () => {
+    if (!omdbModal) return;
+    // If already in library, just close
+    if (omdbModal.alreadyInLibrary) {
+      setOmdbModal(null);
+      return;
+    }
+    // If movie is in DB but not in user's library, add to user_movies
+    if (omdbModal.id && !omdbModal.isOmdb) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from('user_movies').insert({
+        user_id: user.id,
+        movie_id: omdbModal.id,
+        elo_score: 1000,
+        match_count: 0,
+      });
+      setUserLibraryIds(ids => [...ids, omdbModal.id!]);
+      setOmdbModal(null);
+      return;
+    }
+    // If OMDb, add to DB and user_movies
+    if (omdbModal.isOmdb && omdbModal.imdb_id && omdbModal.omdbData) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      // Check if already in DB by imdb_id
+      const { data: existing } = await supabase
+        .from('movies')
+        .select('*')
+        .eq('imdb_id', omdbModal.imdb_id)
+        .limit(1);
+      let movieId = null;
+      if (existing && existing.length > 0) {
+        movieId = existing[0].id;
+      } else {
+        // Use the OMDb data already fetched
+        const movieInsertData = parseOMDBResponse(omdbModal.omdbData);
+        const { data: movie, error } = await supabase
+          .from('movies')
+          .insert([movieInsertData])
+          .select()
+          .single();
+        if (error) return;
+        movieId = movie.id;
+      }
+      // Add to user_movies
+      await supabase.from('user_movies').insert({
+        user_id: user.id,
+        movie_id: movieId,
+        elo_score: 1000,
+        match_count: 0,
+      });
+      setUserLibraryIds(ids => [...ids, movieId]);
+      setOmdbModal(null);
+      setShowOmdbPrompt(false);
+    }
+  };
+
+  // OMDb deny handler
+  const handleOmdbDeny = () => {
+    setOmdbModal(null);
+  };
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="max-w-5xl mx-auto">
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Add a Movie</h1>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter movie title"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+          {loading ? (
+            <div className="text-center text-gray-600 py-12">Loading your library...</div>
+          ) : (
+            <>
+              <MovieGallery
+                userLibraryIds={userLibraryIds}
+                onAdd={handleAdd}
+                hideAdded={false}
               />
-            </div>
-            
-            <div>
-              <select
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out bg-white"
-              >
-                {yearOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            {matches.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">Existing matches:</p>
-                {matches.map((match) => (
-                  <div
-                    key={match.id}
-                    className={`p-3 rounded-lg border cursor-pointer hover:bg-gray-50 ${
-                      selectedMovie?.id === match.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
-                    }`}
-                    onClick={() => setSelectedMovie(match)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      {match.poster_url && (
-                        <img
-                          src={match.poster_url}
-                          alt={match.title}
-                          className="w-12 h-18 object-cover rounded"
-                        />
-                      )}
-                      <span className="font-medium">{match.title}</span>
-                    </div>
-                  </div>
-                ))}
+              {/* OMDb fallback prompt at bottom */}
+              <div className="mt-8 flex flex-col items-center">
+                <div className="text-gray-600 mb-2">Don't see it here?</div>
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={() => setShowOmdbPrompt(true)}
+                >
+                  Search OMDb by Title & Year
+                </button>
               </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out disabled:opacity-50"
-            >
-              {loading ? 'Adding...' : 'Add Movie'}
-            </button>
-          </form>
-          {status === 'success' && (
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
-              <p className="text-green-700 text-center">Movie added successfully!</p>
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="mt-4 p-4 bg-red-50 rounded-lg">
-              <p className="text-red-700 text-center">{errorMessage}</p>
-            </div>
+            </>
           )}
         </div>
       </div>
+      {/* OMDb Prompt Modal */}
+      {showOmdbPrompt && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Search OMDb</h3>
+            <form onSubmit={handleOmdbPrompt} className="space-y-4">
+              <input
+                type="text"
+                value={omdbTitle}
+                onChange={e => setOmdbTitle(e.target.value)}
+                placeholder="Movie Title"
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <input
+                type="text"
+                value={omdbYear}
+                onChange={e => setOmdbYear(e.target.value)}
+                placeholder="Year (optional)"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              {omdbError && <div className="text-red-600 text-sm">{omdbError}</div>}
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setShowOmdbPrompt(false)} className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* OMDb Result Modal (stub) */}
+      {omdbModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+          <div className="bg-white/95 border border-gray-200 rounded-2xl shadow-2xl max-w-3xl w-full flex flex-col px-0 py-0 overflow-hidden">
+            <div className="px-8 pt-8 pb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">
+                {omdbModal.alreadyInLibrary
+                  ? 'You already have this movie in your library!'
+                  : omdbModal.id && !omdbModal.isOmdb
+                  ? 'This movie is already in our database. Add to your library?'
+                  : 'Review and confirm'}
+              </h3>
+            </div>
+            <div className="flex flex-row gap-0 items-stretch bg-white">
+              <div className="flex items-center justify-center px-8 py-8">
+                <img src={omdbModal.poster} alt={omdbModal.title} className="w-56 h-80 object-cover rounded-xl shadow-lg border border-gray-200" />
+              </div>
+              <div className="flex flex-col justify-center px-8 py-8 min-w-[220px] flex-1">
+                <div className="font-extrabold text-3xl text-gray-900 mb-2 leading-tight">{omdbModal.title}</div>
+                {omdbModal.year && <div className="text-blue-700 text-lg font-semibold mb-2">{omdbModal.year}</div>}
+                <div className="text-gray-700 text-base mb-4">Director:<br /><span className="font-medium text-lg text-gray-900">{omdbModal.director}</span></div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 px-8 py-6 bg-white border-t border-gray-100 rounded-b-2xl">
+              <button onClick={handleOmdbDeny} className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium transition">{omdbModal.alreadyInLibrary ? 'Close' : 'No'}</button>
+              {!omdbModal.alreadyInLibrary && (
+                <button onClick={handleOmdbConfirm} className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow transition">Add to Library</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
