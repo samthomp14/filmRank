@@ -20,6 +20,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^0.525.0",
     "motion": "^12.23.5",
+    "papaparse": "^5.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/node": "^24.0.14",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",

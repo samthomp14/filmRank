@@ -3,6 +3,7 @@ import { parseOMDBResponse } from './movieUtils'
 import type { OMDBResponse } from './movieUtils'
 import type { TablesInsert } from '../types/supabase'
 import JSZip from 'jszip'
+import Papa from 'papaparse'
 
 export interface ImportStatus {
   status: 'idle' | 'loading' | 'success' | 'error'
@@ -21,6 +22,13 @@ export interface ImportOptions {
   onProgress?: (status: ImportStatus) => void
   batchSize?: number
   apiDelay?: number
+}
+
+interface MovieRow {
+  Date: string
+  Name: string
+  Year: string
+  'Letterboxd URI': string
 }
 
 /**
@@ -60,14 +68,29 @@ export async function importMoviesFromFile(
       throw new Error('Unsupported file type. Please upload a Letterboxd ZIP export or a watched.csv file.')
     }
 
-    // Parse CSV data
-    const rows = csvText.split('\n')
-    const movieData = rows.slice(1).map(row => {
-      const columns = row.split(',')
-      const title = columns[1]?.trim()
-      const year = columns[2]?.trim()
+    // Parse CSV data with PapaParse
+    const result = Papa.parse<MovieRow>(csvText, {
+      header: true,
+      skipEmptyLines: true
+    })
+
+    if (result.errors.length > 0) {
+      console.warn('CSV parsing warnings:', result.errors)
+    }
+
+    // Validate headers
+    const expectedHeaders = ['Date', 'Name', 'Year', 'Letterboxd URI']
+    const actualHeaders = result.meta.fields || []
+    
+    if (!expectedHeaders.every(header => actualHeaders.includes(header))) {
+      throw new Error(`Invalid CSV format. Expected headers: ${expectedHeaders.join(', ')}. Found: ${actualHeaders.join(', ')}. Please upload a valid Letterboxd export file.`)
+    }
+
+    const movieData = result.data.map((row: MovieRow) => {
+      const title = row.Name
+      const year = row.Year
       return { title, year }
-    }).filter(movie => movie.title && movie.title.length > 0)
+    }).filter((movie: { title?: string; year?: string }) => movie.title && movie.title.length > 0)
 
     if (movieData.length === 0) {
       throw new Error('No valid movies found in the file')
@@ -82,9 +105,10 @@ export async function importMoviesFromFile(
     updateProgress({ status: 'loading', message: 'Checking existing movies in database...' })
     
     // Get all unique titles and years for batch lookup
-    const uniqueMovies = Array.from(new Set(movieData.map(m => `${m.title}|${m.year || ''}`)))
-      .map(key => {
-        const [title, year] = key.split('|')
+    const uniqueMovies = Array.from(new Set(movieData.map((m: { title?: string; year?: string }) => `${m.title}|${m.year || ''}`)))
+      .map((key: unknown) => {
+        const keyStr = key as string
+        const [title, year] = keyStr.split('|')
         return { title, year }
       })
 
@@ -145,13 +169,19 @@ export async function importMoviesFromFile(
       })
 
       // Process batch with rate limiting for OMDb API calls
-      const batchPromises = batch.map(async ({ title, year }, index) => {
+      const batchPromises = batch.map(async (movie: { title?: string; year?: string }, index: number) => {
         // Add small delay between OMDb API calls to respect rate limits
         if (index > 0) {
           await new Promise(resolve => setTimeout(resolve, apiDelay))
         }
 
         try {
+          const { title, year } = movie
+          if (!title) {
+            failed++
+            return { title: '', year, failed: true }
+          }
+          
           const key = `${title}|${year || ''}`
           let movieId: string | null = null
 
@@ -202,8 +232,9 @@ export async function importMoviesFromFile(
 
         } catch (err) {
           failed++
-          failedTitles.push(title)
-          return { title, year, failed: true }
+          const movieTitle = movie.title || 'Unknown'
+          failedTitles.push(movieTitle)
+          return { title: movieTitle, year: movie.year, failed: true }
         }
       })
 
