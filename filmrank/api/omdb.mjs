@@ -1,7 +1,6 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import axios from 'axios';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   const { title, year } = req.query;
 
   if (!title || typeof title !== 'string') {
@@ -30,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       apiKeyLength: apiKey.length
     });
 
-    const params: any = {
+    const params = {
       t: title,
       apikey: apiKey
     };
