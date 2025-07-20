@@ -195,7 +195,17 @@ export async function importMoviesFromFile(
             if (year && year.length > 0) {
               params.append('year', year)
             }
-            const response = await fetch(`/api/omdb?${params.toString()}`)
+            // Get access token
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData.session?.access_token;
+            let response;
+            if (accessToken) {
+              response = await fetch(`/api/omdb?${params.toString()}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+              });
+            } else {
+              response = await fetch(`/api/omdb?${params.toString()}`);
+            }
             const omdb: OMDBResponse = await response.json()
             
             if (omdb.Response === 'True') {
@@ -294,10 +304,9 @@ export async function importMoviesFromFile(
  * Helper function to format import results into a user-friendly message
  */
 export function formatImportResult(result: ImportResult): string {
-  const { added, skipped, failed, failedTitles } = result
-  const failedMessage = failedTitles.length > 0 
-    ? ` (Failed: ${failedTitles.slice(0, 5).join(', ')}${failedTitles.length > 5 ? '...' : ''})` 
-    : ''
-  
-  return `Added: ${added}, Skipped: ${skipped}, Failed: ${failed}${failedMessage}`
+  const { failed, failedTitles } = result
+  if (failed > 0 && failedTitles.length > 0) {
+    return `Failed to import: ${failedTitles.slice(0, 5).join(', ')}${failedTitles.length > 5 ? '...' : ''}`
+  }
+  return ''
 } 

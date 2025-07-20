@@ -115,8 +115,14 @@ export default function AddMovie() {
           params.year = year.trim()
         }
         console.log('OMDb params:', params)
+        // Get access token
+        const { data: sessionData } = await supabase.auth.getSession();
+        const accessToken = sessionData.session?.access_token;
         const response = await axios.get<OMDBResponse>(`/api/omdb`, {
-          params
+          params,
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+          },
         })
         const movieData = response.data
         console.log('OMDb response:', movieData)

@@ -2,10 +2,19 @@ import { createServerClient } from '@supabase/ssr'
 import axios from 'axios'
 
 export default async function handler(req, res) {
+  // Get access token from Authorization header
+  const authHeader = req.headers.authorization || '';
+  const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
   const supabase = createServerClient(
     process.env.VITE_SUPABASE_URL,
     process.env.VITE_SUPABASE_ANON_KEY,
     {
+      global: {
+        headers: {
+          Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+        },
+      },
       cookies: {
         getAll: () => {
           const cookies = req.cookies ?? {}
