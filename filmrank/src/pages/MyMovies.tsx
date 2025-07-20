@@ -383,7 +383,7 @@ export default function MyMovies() {
 
   // Grid view movie card component
   const GridMovieCard = ({ movie }: { movie: MovieWithElo }) => {
-    const FALLBACK_IMAGE = 'https://via.placeholder.com/300x445.png?text=No+Image'
+    const FALLBACK_IMAGE = '/no_poster_placeholder.png'
     const navigate = useNavigate();
     if (!movie) return null; // null check for missing movie data
     const handleCardClick = (e: React.MouseEvent) => {

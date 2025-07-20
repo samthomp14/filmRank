@@ -9,7 +9,7 @@ interface MovieGalleryProps {
   pageSize?: number;
 }
 
-const FALLBACK_IMAGE = '/no-poster-available.png';
+const FALLBACK_IMAGE = '/no_poster_placeholder.png';
 
 // Simple spinner component
 const Spinner = () => (
@@ -153,7 +153,7 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
           <div ref={gridRef} className="relative grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-x-3 gap-y-4 mb-6 min-h-[340px]">
             {filteredMovies.map(movie => {
               const alreadyAdded = userLibraryIds.includes(movie.id);
-              const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+              const handleMouseEnter = () => {
                 setHoveredMovieId(movie.id);
                 tooltipTimer.current = setTimeout(() => setShowTooltip(true), 1000);
               };

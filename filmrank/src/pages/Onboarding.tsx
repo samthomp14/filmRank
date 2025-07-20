@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { useInfiniteQuery } from '../hooks/use-infinite-query';
 import type { Tables } from '../types/supabase';
 import { importMoviesFromFile, formatImportResult, type ImportStatus } from '../lib/movieImportUtils';
+import MovieGallery from '../components/MovieGallery';
 
 const GENRE_OPTIONS = [
   'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror',
@@ -229,96 +229,55 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
   );
 }
 
-function ManualSelectStep({ onBack, onFinish, selectedMovieIds, setSelectedMovieIds, name, selectedGenres }: any) {
-  const {
-    data: movies,
-    isLoading,
-    hasMore,
-    fetchNextPage,
-  } = useInfiniteQuery<Tables<'movies'>>({
-    tableName: 'movies',
-    columns: 'id, title, url',
-    pageSize: 24,
-  });
+function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
+  const [userLibraryIds, setUserLibraryIds] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Search state
-  const [search, setSearch] = useState('');
-
-  // Infinite scroll: fetch more when bottom sentinel is visible
-  const bottomRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (!hasMore || isLoading) return;
-    const observer = new window.IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        fetchNextPage();
+    const fetchUserLibrary = async () => {
+      setIsSaving(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setUserLibraryIds([]);
+        setIsSaving(false);
+        return;
       }
-    });
-    if (bottomRef.current) observer.observe(bottomRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, isLoading, fetchNextPage]);
-
-  const toggleMovie = (id: string) => {
-    setSelectedMovieIds(selectedMovieIds.includes(id)
-      ? selectedMovieIds.filter((mid: string) => mid !== id)
-      : [...selectedMovieIds, id]
-    );
-  };
-
-  // Tooltip logic
-  const [hoveredMovie, setHoveredMovie] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [showTooltip, setShowTooltip] = useState(false);
-  const tooltipTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const handleMouseEnter = (movieId: string) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setHoveredMovie(movieId);
-    setTooltipPosition({ x: e.clientX, y: e.clientY });
-    tooltipTimer.current = setTimeout(() => {
-      setShowTooltip(true);
-    }, 2000); // 2 seconds
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setTooltipPosition({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredMovie(null);
-    setShowTooltip(false);
-    if (tooltipTimer.current) {
-      clearTimeout(tooltipTimer.current);
-      tooltipTimer.current = null;
-    }
-  };
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+      const { data, error } = await supabase
+        .from('user_movies')
+        .select('movie_id');
+      if (error) {
+        setUserLibraryIds([]);
+      } else {
+        setUserLibraryIds((data || []).map((row: { movie_id: string }) => row.movie_id));
+      }
+      setIsSaving(false);
     };
+    fetchUserLibrary();
   }, []);
 
-  // Find hovered movie title
-  const hoveredMovieObj = movies.find(m => m.id === hoveredMovie);
+  // Add movie to user library handler
+  const handleAdd = async (movie: Tables<'movies'>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not logged in');
+    if (userLibraryIds.includes(movie.id)) return;
+    const { error } = await supabase
+      .from('user_movies')
+      .insert({
+        user_id: user.id,
+        movie_id: movie.id,
+        elo_score: 1000,
+        match_count: 0
+      });
+    if (error) throw error;
+    setUserLibraryIds(ids => [...ids, movie.id]);
+  };
 
-  // Filter movies by search query (case-insensitive)
-  const filteredMovies = search.trim() === ''
-    ? movies
-    : movies.filter(movie => movie.title.toLowerCase().includes(search.trim().toLowerCase()));
-
-  // Saving state
-  const [isSaving, setIsSaving] = useState(false);
   // Finish handler
   const handleFinish = async () => {
-    if (!name.trim()) {
-      alert('Please enter your name to continue.');
-      return;
-    }
     setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error('No user found');
         window.location.href = '/login';
         return;
       }
@@ -332,28 +291,11 @@ function ManualSelectStep({ onBack, onFinish, selectedMovieIds, setSelectedMovie
         })
         .eq('id', user.id);
       if (profileError) {
-        console.error('Error saving onboarding data:', profileError);
         alert('Error saving profile data. Please try again.');
         return;
       }
-      // Add selected movies
-      if (selectedMovieIds.length > 0) {
-        const userMoviesData = selectedMovieIds.map((movieId: string) => ({
-          user_id: user.id,
-          movie_id: movieId,
-          elo_score: 1000,
-          match_count: 0
-        }));
-        const { error: moviesError } = await supabase
-          .from('user_movies')
-          .insert(userMoviesData);
-        if (moviesError) {
-          console.error('Error adding movies to user library:', moviesError);
-        }
-      }
       if (onFinish) onFinish();
     } catch (error) {
-      console.error('Error during onboarding completion:', error);
       alert('An error occurred during onboarding. Please try again.');
     } finally {
       setIsSaving(false);
@@ -366,70 +308,13 @@ function ManualSelectStep({ onBack, onFinish, selectedMovieIds, setSelectedMovie
       <p className="text-base text-gray-600 mb-4 text-center">
         Browse our movie catalog and select the films you've already watched. This helps us get your recommendations and rankings started!
       </p>
-      {/* Search input */}
-      <div className="w-full max-w-5xl mb-4 flex justify-center">
-        <input
-          type="text"
-          className="w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Search movies by title..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+      <div className="w-full mb-6">
+        <MovieGallery
+          userLibraryIds={userLibraryIds}
+          onAdd={handleAdd}
+          hideAdded={false}
         />
       </div>
-      <div className="w-full max-w-5xl">
-        {isLoading && movies.length === 0 ? (
-          <div className="text-gray-500 text-center py-12">Loading movies...</div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
-            {filteredMovies.map(movie => {
-              const selected = selectedMovieIds.includes(movie.id);
-              return (
-                <div key={movie.id} className="flex justify-center items-center">
-                  <div
-                    onClick={() => toggleMovie(movie.id)}
-                    onMouseEnter={handleMouseEnter(movie.id)}
-                    onMouseMove={hoveredMovie === movie.id ? handleMouseMove : undefined}
-                    onMouseLeave={handleMouseLeave}
-                    className={`relative w-[120px] h-[175px] rounded-lg overflow-hidden shadow transition-all duration-200 ease-in-out cursor-pointer hover:scale-105 hover:shadow-lg ${selected ? 'ring-4 ring-blue-500 scale-105' : ''}`}
-                  >
-                    <img
-                      src={movie.url || 'https://via.placeholder.com/120x175.png?text=No+Image'}
-                      alt={movie.title}
-                      className="w-full h-full object-cover bg-gray-200"
-                      onError={e => (e.currentTarget.src = 'https://via.placeholder.com/120x175.png?text=No+Image')}
-                    />
-                    {/* Show title on hover or if selected */}
-                    <div className={`absolute bottom-0 left-0 w-full px-2 py-1 bg-black/80 text-xs text-white text-center truncate transition-opacity duration-200 ${selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-                      style={{ pointerEvents: 'none' }}
-                    >
-                      {movie.title}
-                    </div>
-                    {selected && (
-                      <div className="absolute inset-0 bg-blue-500/10 pointer-events-none rounded-lg border-4 border-blue-500 animate-pulse" />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {/* Infinite scroll sentinel */}
-            <div ref={bottomRef} className="h-8 col-span-full" />
-          </div>
-        )}
-      </div>
-      {/* Tooltip */}
-      {showTooltip && hoveredMovieObj && (
-        <div
-          className="fixed z-50 px-3 py-2 bg-black text-white text-sm rounded shadow-lg pointer-events-none"
-          style={{
-            left: tooltipPosition.x + 16,
-            top: tooltipPosition.y + 8,
-            maxWidth: 240,
-            whiteSpace: 'pre-line',
-          }}
-        >
-          {hoveredMovieObj.title}
-        </div>
-      )}
       <div className="flex gap-4 justify-between mt-8 w-full max-w-5xl mb-8">
         {onBack && (
           <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack} disabled={isSaving}>Back</button>
@@ -444,7 +329,6 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [selectedMovieIds, setSelectedMovieIds] = useState<string[]>([]);
   const navigate = useNavigate();
   // Handlers for step navigation
   const next = () => setStep(s => s + 1);
@@ -456,7 +340,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
   };
   return (
     <div className="flex justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-2xl mx-auto flex flex-col items-center pt-12 md:pt-20">
+      <div className="w-full max-w-5xl mx-auto flex flex-col items-center pt-12 md:pt-20">
         {step === 1 && (
           <ProfileStep
             name={name}
@@ -479,8 +363,6 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
           <ManualSelectStep
             onBack={back}
             onFinish={handleOnboardingComplete}
-            selectedMovieIds={selectedMovieIds}
-            setSelectedMovieIds={setSelectedMovieIds}
             name={name}
             selectedGenres={selectedGenres}
           />
