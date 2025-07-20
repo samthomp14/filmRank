@@ -4,7 +4,7 @@ import RangeFilter from '../components/RangeFilter'
 import MultiSelectFilter from '../components/MultiSelectFilter'
 import { formatRuntime } from '../lib/movieUtils'
 import { formatIMDBRating } from '../lib/movieUtils'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Tables } from '../types/supabase';
 
 type MovieRow = Tables<'movies'>;
@@ -384,11 +384,12 @@ export default function MyMovies() {
   // Grid view movie card component
   const GridMovieCard = ({ movie }: { movie: MovieWithElo }) => {
     const FALLBACK_IMAGE = 'https://via.placeholder.com/300x445.png?text=No+Image'
-    
+    const navigate = useNavigate();
+    if (!movie) return null; // null check for missing movie data
     const handleCardClick = (e: React.MouseEvent) => {
       // Only navigate if the click is not on the delete button
       if ((e.target as HTMLElement).closest('button')) return;
-      window.location.href = `/movie/${movie.id}`;
+      navigate(`/movie/${movie.id}`);
     };
 
     return (

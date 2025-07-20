@@ -75,3 +75,21 @@ export default tseslint.config({
   },
 })
 ```
+
+## Deployment Notes for Vercel
+
+- To fix 404 errors on page refresh for dynamic routes, add a `vercel.json` file to the project root with:
+
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
+```
+
+- Ensure your Vercel project has the following environment variables set in the dashboard:
+  - `VITE_SUPABASE_URL`
+  - `VITE_SUPABASE_ANON_KEY`
+
+These should match your local development values.
