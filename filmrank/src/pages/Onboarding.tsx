@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useInfiniteQuery } from '../hooks/use-infinite-query';
 import type { Tables } from '../types/supabase';
-import JSZip from 'jszip';
-import { parseOMDBResponse } from '../lib/movieUtils';
-import type { OMDBResponse } from '../lib/movieUtils';
+import { importMoviesFromFile, formatImportResult, type ImportStatus } from '../lib/movieImportUtils';
 
 const GENRE_OPTIONS = [
   'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror',
@@ -111,7 +109,7 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
 
 function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }: any) {
   // Import status state
-  const [importStatus, setImportStatus] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
+  const [importStatus, setImportStatus] = useState<ImportStatus>({ status: 'idle', message: '' });
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -127,33 +125,13 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
   const handleFinalizeImport = async () => {
     if (!file) return;
     setIsProcessing(true);
-    setImportStatus({ status: 'loading', message: 'Processing your movies...' });
+    
     try {
-      let csvText = '';
-      if (file.name.endsWith('.zip')) {
-        const zip = await JSZip.loadAsync(file);
-        const watchedFile = zip.file(/watched\.csv$/i)[0];
-        if (!watchedFile) throw new Error('watched.csv not found in ZIP. Please upload the Letterboxd export ZIP or the watched.csv file.');
-        csvText = await watchedFile.async('text');
-      } else if (file.name.endsWith('.csv')) {
-        csvText = await file.text();
-      } else {
-        throw new Error('Unsupported file type. Please upload a Letterboxd ZIP export or a watched.csv file.');
-      }
-      const rows = csvText.split('\n');
-      const movieData = rows.slice(1).map(row => {
-        const columns = row.split(',');
-        const title = columns[1]?.trim();
-        const year = columns[2]?.trim();
-        return { title, year };
-      }).filter(movie => movie.title && movie.title.length > 0);
-      if (movieData.length === 0) {
-        throw new Error('No valid movies found in the file');
-      }
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
-      // Update user profile with onboarding data
+
+      // Update user profile with onboarding data first
       const { error: profileError } = await supabase
         .from('users')
         .update({
@@ -163,76 +141,17 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
         })
         .eq('id', user.id);
       if (profileError) throw profileError;
-      let added = 0;
-      let skipped = 0;
-      let failed = 0;
-      let failedTitles: string[] = [];
-      for (const { title, year } of movieData) {
-        try {
-          let query = supabase
-            .from('movies')
-            .select('id, imdb_id, title, year, alt_title')
-            .or(`title.ilike."${title}",alt_title.ilike."${title}"`)
-            .limit(10);
-          if (year && !isNaN(Number(year))) {
-            query = query.eq('year', Number(year));
-          }
-          let { data: movies, error: searchError } = await query;
-          let movieId: string | null = null;
-          if (searchError) throw searchError;
-          if (movies && movies.length > 0) {
-            const match = movies.find(m => (!year || m.year === Number(year)));
-            movieId = (match || movies[0]).id;
-          } else {
-            // Fetch from OMDb with year if available
-            const params = new URLSearchParams({ title });
-            if (year && year.length > 0) {
-              params.append('year', year);
-            }
-            const response = await fetch(`/api/omdb?${params.toString()}`);
-            const omdb: OMDBResponse = await response.json();
-            if (omdb.Response === 'True') {
-              const movieInsertData = { ...parseOMDBResponse(omdb), alt_title: title };
-              const { data: inserted, error: insertError } = await supabase
-                .from('movies')
-                .insert([movieInsertData])
-                .select()
-                .single();
-              if (insertError) throw insertError;
-              movieId = inserted.id;
-            } else {
-              failed++;
-              failedTitles.push(title);
-              continue;
-            }
-          }
-          // Check if user already has this movie
-          const { data: userMovies, error: userMovieError } = await supabase
-            .from('user_movies')
-            .select()
-            .eq('user_id', user.id)
-            .eq('movie_id', movieId)
-            .limit(1);
-          if (userMovieError) throw userMovieError;
-          if (userMovies && userMovies.length > 0) {
-            skipped++;
-            continue;
-          }
-          // Add to user_movies
-          const { error: addUserMovieError } = await supabase
-            .from('user_movies')
-            .insert({ movie_id: movieId, user_id: user.id });
-          if (addUserMovieError) throw addUserMovieError;
-          added++;
-        } catch (err) {
-          failed++;
-          failedTitles.push(title);
-        }
-      }
+
+      // Use the optimized import utility
+      const result = await importMoviesFromFile(file, user.id, {
+        onProgress: setImportStatus
+      });
+
       setImportStatus({
         status: 'success',
-        message: `Added: ${added}, Skipped: ${skipped}, Failed: ${failed}${failedTitles.length ? ' (Failed: ' + failedTitles.join(', ') + ')' : ''}`
+        message: formatImportResult(result)
       });
+
       // Complete onboarding
       if (onImportComplete) onImportComplete();
     } catch (err) {
@@ -277,12 +196,22 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
             <div className="text-sm text-gray-700">Selected file: {file.name}</div>
           )}
           {importStatus.status !== 'idle' && (
-            <div className={`text-center text-sm ${
-              importStatus.status === 'success' ? 'text-green-600' :
-              importStatus.status === 'error' ? 'text-red-600' :
-              'text-blue-600'
-            }`}>
-              {importStatus.message}
+            <div className="space-y-2">
+              <div className={`text-center text-sm ${
+                importStatus.status === 'success' ? 'text-green-600' :
+                importStatus.status === 'error' ? 'text-red-600' :
+                'text-blue-600'
+              }`}>
+                {importStatus.message}
+              </div>
+              {importStatus.status === 'loading' && importStatus.progress !== undefined && (
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${importStatus.progress}%` }}
+                  ></div>
+                </div>
+              )}
             </div>
           )}
         </div>
