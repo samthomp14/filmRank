@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import RangeFilter from '../components/RangeFilter'
 import MultiSelectFilter from '../components/MultiSelectFilter'
@@ -6,6 +6,7 @@ import { formatRuntime } from '../lib/movieUtils'
 import { formatIMDBRating } from '../lib/movieUtils'
 import { Link, useNavigate } from 'react-router-dom'
 import type { Tables } from '../types/supabase';
+import { useInfiniteQuery } from '../hooks/use-infinite-query'
 
 type MovieRow = Tables<'movies'>;
 interface MovieWithElo extends MovieRow {
@@ -66,10 +67,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ title, isExpanded, onTogg
 }
 
 export default function MyMovies() {
-  const [movies, setMovies] = useState<MovieWithElo[]>([])
+  // Remove movies, setMovies, loading, setLoading, error, setError, fetchMovies
   const [filteredMovies, setFilteredMovies] = useState<MovieWithElo[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [movieToDelete, setMovieToDelete] = useState<MovieWithElo | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
@@ -112,9 +111,60 @@ export default function MyMovies() {
   // Change sortOption to only track field and direction
   const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ field: 'title', direction: 'asc' })
 
+  // Infinite query for user_movies with movie join
+  const {
+    data: userMoviesData,
+    isLoading,
+    isFetching,
+    error,
+    hasMore,
+    fetchNextPage
+  } = useInfiniteQuery<{ elo_score: number; movies: MovieRow }>({
+    tableName: 'user_movies',
+    columns: `elo_score, movies:movies!user_movies_movie_id_fkey (
+      id, title, year, runtime, rating, genre, director, language, country, imdb_rating, url
+    )`,
+    pageSize: 20,
+    // trailingQuery: (query) => query.order('created_at', { ascending: false }),
+  })
+
+  // Combine and flatten movies
+  const movies: MovieWithElo[] = (userMoviesData || []).map((m) => ({
+    ...m.movies,
+    elo_score: m.elo_score,
+  }))
+
+  // Infinite scroll: observe bottom sentinel
+  const bottomRef = useRef<HTMLDivElement | null>(null)
+  const observer = useRef<IntersectionObserver | null>(null)
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [entry] = entries
+    if (entry.isIntersecting && hasMore && !isFetching) {
+      fetchNextPage()
+    }
+  }, [hasMore, isFetching, fetchNextPage])
+
   useEffect(() => {
-    fetchMovies()
-  }, [])
+    if (bottomRef.current) {
+      observer.current = new window.IntersectionObserver(handleObserver, { threshold: 1.0 })
+      observer.current.observe(bottomRef.current)
+    }
+    return () => {
+      if (observer.current && bottomRef.current) {
+        observer.current.unobserve(bottomRef.current)
+      }
+    }
+  }, [handleObserver])
+
+  useEffect(() => {
+    // Extract filter options from movies data
+    const ratings = [...new Set(movies.map(m => m.rating).filter((r): r is string => !!r))].sort();
+    const genres = [...new Set(movies.flatMap(m => m.genre?.split(', ') || []).filter((g): g is string => !!g))].sort();
+    const directors = [...new Set(movies.map(m => m.director).filter((d): d is string => !!d))].sort();
+    const languages = [...new Set(movies.flatMap(m => m.language?.split(', ') || []).filter((l): l is string => !!l))].sort();
+    const countries = [...new Set(movies.flatMap(m => m.country?.split(', ') || []).filter((c): c is string => !!c))].sort();
+    setFilterOptions({ ratings, genres, directors, languages, countries })
+  }, [movies])
 
   useEffect(() => {
     // Filter movies based on all filters
@@ -205,61 +255,8 @@ export default function MyMovies() {
   // Apply sort to filteredMovies
   const sortedMovies = sortMovies(filteredMovies)
 
-  const fetchMovies = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No user found')
+  // Remove fetchMovies, loading, setLoading, setMovies, setError, error state
 
-      const { data, error } = await supabase
-        .from('user_movies')
-        .select(`
-          elo_score,
-          movies:movies!user_movies_movie_id_fkey (
-            id,
-            title,
-            year,
-            runtime,
-            rating,
-            genre,
-            director,
-            language,
-            country,
-            imdb_rating,
-            url
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      
-      const movieData: MovieWithElo[] = (data as { movies: MovieRow; elo_score: number }[]).map((m) => ({
-        ...m.movies,
-        elo_score: m.elo_score,
-      }));
-      setMovies(movieData)
-      
-      // Extract filter options from movies data
-      const ratings = [...new Set(movieData.map(m => m.rating).filter((r): r is string => !!r))].sort();
-      const genres = [...new Set(movieData.flatMap(m => m.genre?.split(', ') || []).filter((g): g is string => !!g))].sort();
-      const directors = [...new Set(movieData.map(m => m.director).filter((d): d is string => !!d))].sort();
-      const languages = [...new Set(movieData.flatMap(m => m.language?.split(', ') || []).filter((l): l is string => !!l))].sort();
-      const countries = [...new Set(movieData.flatMap(m => m.country?.split(', ') || []).filter((c): c is string => !!c))].sort();
-      
-      setFilterOptions({
-        ratings,
-        genres,
-        directors,
-        languages,
-        countries
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch movies')
-    } finally {
-      setLoading(false)
-    }
-  }
-  
   const handleDelete = async (movie: MovieWithElo) => {
     try {
 
@@ -274,10 +271,10 @@ export default function MyMovies() {
 
       if (error) throw error
 
-      setMovies(movies.filter(m => m.id !== movie.id))
+      // setMovies(movies.filter(m => m.id !== movie.id)) // This line is no longer needed
       setMovieToDelete(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete movie')
+      // setError(err instanceof Error ? err.message : 'Failed to delete movie') // This line is no longer needed
     }
   }
 
@@ -430,7 +427,7 @@ export default function MyMovies() {
     )
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-gray-600 text-lg">Loading movies...</div>
@@ -441,19 +438,19 @@ export default function MyMovies() {
   if (error) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-red-600 text-lg">{error}</div>
+        <div className="text-red-600 text-lg">{error.message || error.toString()}</div>
       </div>
     )
   }
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8">
-      <div className={`${showFilters ? 'max-w-[1400px]' : 'max-w-7xl'} mx-auto transition-all duration-300 ease-in-out`}>
-        <div className="flex gap-6 transition-all duration-300 ease-in-out">
-          {/* Filter Sidebar */}
-          <div className={`${showFilters ? 'w-96' : 'w-0'} overflow-hidden transition-all duration-300 ease-in-out`}>
-            {showFilters && (
-              <div className="w-96 bg-white rounded-xl shadow-md">
+    <div className="py-6 px-2 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto transition-all duration-300 ease-in-out">
+        <div className="flex flex-col lg:flex-row gap-6 transition-all duration-300 ease-in-out">
+          {/* Filter Sidebar - Desktop Only */}
+          {showFilters && (
+            <div className="hidden lg:block w-96">
+              <div className="w-96 bg-white rounded-xl shadow-md border border-gray-200 sticky top-24 self-start">
                 <div className="flex flex-col">
                   {/* Header */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -467,13 +464,11 @@ export default function MyMovies() {
                       </svg>
                     </button>
                   </div>
-
                   {/* Filter Content */}
                   <div className="p-4 space-y-6">
                     {/* Basic Filters - Always Visible */}
                     <div className="space-y-4">
                       <h4 className="text-sm font-medium text-gray-700">Basic Filters</h4>
-                      
                       {/* Year Range */}
                       <RangeFilter
                         label="Year Range"
@@ -485,7 +480,6 @@ export default function MyMovies() {
                         }))}
                         defaultValue={{ min: 1900, max: new Date().getFullYear() }}
                       />
-
                       {/* Runtime Range */}
                       <RangeFilter
                         label="Runtime (minutes)"
@@ -497,7 +491,6 @@ export default function MyMovies() {
                         }))}
                         defaultValue={{ min: 0, max: 300 }}
                       />
-
                       {/* IMDB Rating Range */}
                       <RangeFilter
                         label="IMDB Rating"
@@ -511,7 +504,6 @@ export default function MyMovies() {
                         defaultValue={{ min: 0, max: 10 }}
                       />
                     </div>
-
                     {/* Complex Filters - Collapsible */}
                     <FilterSection
                       title="Complex Filters"
@@ -537,7 +529,6 @@ export default function MyMovies() {
                           }))}
                           placeholder="Select ratings..."
                         />
-
                         {/* Genre Filter */}
                         <MultiSelectFilter
                           label="Genre"
@@ -549,7 +540,6 @@ export default function MyMovies() {
                           }))}
                           placeholder="Select genres..."
                         />
-
                         {/* Director Filter */}
                         <MultiSelectFilter
                           label="Director"
@@ -561,7 +551,6 @@ export default function MyMovies() {
                           }))}
                           placeholder="Select directors..."
                         />
-
                         {/* Language Filter */}
                         <MultiSelectFilter
                           label="Language"
@@ -573,7 +562,6 @@ export default function MyMovies() {
                           }))}
                           placeholder="Select languages..."
                         />
-
                         {/* Country Filter */}
                         <MultiSelectFilter
                           label="Country"
@@ -588,7 +576,6 @@ export default function MyMovies() {
                       </div>
                     </FilterSection>
                   </div>
-
                   {/* Footer */}
                   <div className="p-4 border-t border-gray-200">
                     <button
@@ -610,108 +597,249 @@ export default function MyMovies() {
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-
+            </div>
+          )}
           {/* Main Content */}
-          <div className="flex-1 bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Library</h1>
-            
-            {/* Search and Filter Bar */}
-            {movies.length > 0 && (
-              <div className="mb-6 space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+          <div className={`flex-1 ${!showFilters ? 'mx-auto max-w-3xl' : ''}`}> 
+            <div className="px-2 sm:px-6 lg:px-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Library</h1>
+              {/* Search and Filter Bar */}
+              {movies.length > 0 && (
+                <div className="mb-6 space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Search movies by title..."
+                        value={filters.searchTerm}
+                        onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Search movies by title..."
-                      value={filters.searchTerm}
-                      onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  
-                  {/* View Toggle */}
-                  <div className="flex items-center gap-2">
+                    {/* View Toggle */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                          viewMode === 'list'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setViewMode('grid')}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                          viewMode === 'grid'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                      </button>
+                    </div>
+                    {/* Sort Dropdown and Toggle */}
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="sort" className="text-sm text-gray-700">Sort by:</label>
+                      <select
+                        id="sort"
+                        value={sortOption.field}
+                        onChange={e => setSortOption(opt => ({ ...opt, field: e.target.value }))}
+                        className="px-2 py-1 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="title">Title</option>
+                        <option value="year">Year</option>
+                        <option value="imdb_rating">IMDB Rating</option>
+                        <option value="runtime">Runtime</option>
+                        <option value="elo_score">ELO Score</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setSortOption(opt => ({ ...opt, direction: opt.direction === 'asc' ? 'desc' : 'asc' }))}
+                        className="p-2 rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        title={`Sort ${sortOption.direction === 'asc' ? 'Descending' : 'Ascending'}`}
+                      >
+                        {sortOption.direction === 'asc' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" /></svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        )}
+                      </button>
+                    </div>
                     <button
-                      onClick={() => setViewMode('list')}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                        viewMode === 'list'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
                       </svg>
-                    </button>
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                        viewMode === 'grid'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                      </svg>
+                      Filters
                     </button>
                   </div>
-                  
-                  {/* Sort Dropdown and Toggle */}
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="sort" className="text-sm text-gray-700">Sort by:</label>
-                    <select
-                      id="sort"
-                      value={sortOption.field}
-                      onChange={e => setSortOption(opt => ({ ...opt, field: e.target.value }))}
-                      className="px-2 py-1 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="title">Title</option>
-                      <option value="year">Year</option>
-                      <option value="imdb_rating">IMDB Rating</option>
-                      <option value="runtime">Runtime</option>
-                      <option value="elo_score">ELO Score</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => setSortOption(opt => ({ ...opt, direction: opt.direction === 'asc' ? 'desc' : 'asc' }))}
-                      className="p-2 rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      title={`Sort ${sortOption.direction === 'asc' ? 'Descending' : 'Ascending'}`}
-                    >
-                      {sortOption.direction === 'asc' ? (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" /></svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                      )}
-                    </button>
-                  </div>
-                  
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-                    </svg>
-                    Filters
-                  </button>
                 </div>
-                
-                {(filters.searchTerm || showFilters) && (
-                  <p className="text-sm text-gray-600">
-                    Showing {filteredMovies.length} of {movies.length} movies
-                  </p>
-                )}
-              </div>
-            )}
+              )}
+              {/* Filter Panel - Mobile Only, rendered after Filters button */}
+              {showFilters && (
+                <div className="lg:hidden w-full bg-white rounded-xl shadow-md border border-gray-200 mt-4 mb-4">
+                  <div className="flex flex-col">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                      <h3 className="text-lg font-medium text-gray-900">Filters</h3>
+                      <button
+                        onClick={() => setShowFilters(false)}
+                        className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-lg p-1"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    {/* Filter Content */}
+                    <div className="p-4 space-y-6">
+                      {/* Basic Filters - Always Visible */}
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-medium text-gray-700">Basic Filters</h4>
+                        {/* Year Range */}
+                        <RangeFilter
+                          label="Year Range"
+                          min={filters.yearRange.min}
+                          max={filters.yearRange.max}
+                          onRangeChange={(min, max) => setFilters(prev => ({
+                            ...prev,
+                            yearRange: { min, max }
+                          }))}
+                          defaultValue={{ min: 1900, max: new Date().getFullYear() }}
+                        />
+                        {/* Runtime Range */}
+                        <RangeFilter
+                          label="Runtime (minutes)"
+                          min={filters.runtimeRange.min}
+                          max={filters.runtimeRange.max}
+                          onRangeChange={(min, max) => setFilters(prev => ({
+                            ...prev,
+                            runtimeRange: { min, max }
+                          }))}
+                          defaultValue={{ min: 0, max: 300 }}
+                        />
+                        {/* IMDB Rating Range */}
+                        <RangeFilter
+                          label="IMDB Rating"
+                          min={filters.imdbRatingRange.min}
+                          max={filters.imdbRatingRange.max}
+                          onRangeChange={(min, max) => setFilters(prev => ({
+                            ...prev,
+                            imdbRatingRange: { min, max }
+                          }))}
+                          step={0.1}
+                          defaultValue={{ min: 0, max: 10 }}
+                        />
+                      </div>
+                      {/* Complex Filters - Collapsible */}
+                      <FilterSection
+                        title="Complex Filters"
+                        isExpanded={expandedSections.complexFilters}
+                        onToggle={() => setExpandedSections(prev => ({ ...prev, complexFilters: !prev.complexFilters }))}
+                        hasActiveFilters={
+                          filters.selectedRatings.length > 0 ||
+                          filters.selectedGenres.length > 0 ||
+                          filters.selectedDirectors.length > 0 ||
+                          filters.selectedLanguages.length > 0 ||
+                          filters.selectedCountries.length > 0
+                        }
+                      >
+                        <div className="space-y-4">
+                          {/* Rating Filter */}
+                          <MultiSelectFilter
+                            label="Rating"
+                            options={filterOptions.ratings}
+                            selectedOptions={filters.selectedRatings}
+                            onSelectionChange={(selectedRatings) => setFilters(prev => ({
+                              ...prev,
+                              selectedRatings
+                            }))}
+                            placeholder="Select ratings..."
+                          />
+                          {/* Genre Filter */}
+                          <MultiSelectFilter
+                            label="Genre"
+                            options={filterOptions.genres}
+                            selectedOptions={filters.selectedGenres}
+                            onSelectionChange={(selectedGenres) => setFilters(prev => ({
+                              ...prev,
+                              selectedGenres
+                            }))}
+                            placeholder="Select genres..."
+                          />
+                          {/* Director Filter */}
+                          <MultiSelectFilter
+                            label="Director"
+                            options={filterOptions.directors}
+                            selectedOptions={filters.selectedDirectors}
+                            onSelectionChange={(selectedDirectors) => setFilters(prev => ({
+                              ...prev,
+                              selectedDirectors
+                            }))}
+                            placeholder="Select directors..."
+                          />
+                          {/* Language Filter */}
+                          <MultiSelectFilter
+                            label="Language"
+                            options={filterOptions.languages}
+                            selectedOptions={filters.selectedLanguages}
+                            onSelectionChange={(selectedLanguages) => setFilters(prev => ({
+                              ...prev,
+                              selectedLanguages
+                            }))}
+                            placeholder="Select languages..."
+                          />
+                          {/* Country Filter */}
+                          <MultiSelectFilter
+                            label="Country"
+                            options={filterOptions.countries}
+                            selectedOptions={filters.selectedCountries}
+                            onSelectionChange={(selectedCountries) => setFilters(prev => ({
+                              ...prev,
+                              selectedCountries
+                            }))}
+                            placeholder="Select countries..."
+                          />
+                        </div>
+                      </FilterSection>
+                    </div>
+                    {/* Footer */}
+                    <div className="p-4 border-t border-gray-200">
+                      <button
+                        onClick={() => setFilters({
+                          searchTerm: '',
+                          yearRange: { min: 1900, max: new Date().getFullYear() },
+                          runtimeRange: { min: 0, max: 300 },
+                          imdbRatingRange: { min: 0, max: 10 },
+                          selectedRatings: [],
+                          selectedGenres: [],
+                          selectedDirectors: [],
+                          selectedLanguages: [],
+                          selectedCountries: []
+                        })}
+                        className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      >
+                        Clear All Filters
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+              
 
             {/* Filter Tags/Chips */}
             {activeTags.length > 0 && (
@@ -780,16 +908,18 @@ export default function MyMovies() {
                 </button>
               </div>
             ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full px-2 sm:px-0">
                 {sortedMovies.map((movie) => (
                   <GridMovieCard key={movie.id} movie={movie} />
                 ))}
+                <div ref={bottomRef} />
+                {isFetching && <div className="col-span-full text-center py-4 text-gray-500">Loading more...</div>}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 px-2 sm:px-0">
                 {sortedMovies.map((movie) => (
-                  <div key={movie.id} className="hover:bg-gray-100 transition duration-150 ease-in-out rounded-lg">
-                    <Link to={`/movie/${movie.id}`} className="block bg-gray-50 rounded-lg p-6 focus:outline-none focus:ring-2 focus:ring-blue-500" state={{ from: 'my-movies' }}>
+                  <div key={movie.id} className="bg-white rounded-xl shadow hover:shadow-md transition duration-150 ease-in-out">
+                    <Link to={`/movie/${movie.id}`} className="block rounded-xl p-6 focus:outline-none focus:ring-2 focus:ring-blue-500" state={{ from: 'my-movies' }}>
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <h2 className="text-xl font-semibold text-gray-900 mb-2">{movie.title}</h2>
@@ -831,12 +961,13 @@ export default function MyMovies() {
                     </Link>
                   </div>
                 ))}
+                <div ref={bottomRef} />
+                {isFetching && <div className="text-center py-4 text-gray-500">Loading more...</div>}
               </div>
             )}
           </div>
         </div>
       </div>
-    </div>
 
       {/* Delete Confirmation Modal */}
       {movieToDelete && (
@@ -865,4 +996,4 @@ export default function MyMovies() {
       )}
     </div>
   )
-} 
+}

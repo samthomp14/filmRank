@@ -1,5 +1,5 @@
-{
-  "rewrites": [
-    { "source": "/((?!api|_next|static|[\\w-]+\\.\\w+).*)", "destination": "/" }
-  ]
-} 
+// {
+//   "rewrites": [
+//     { "source": "/((?!api|_next|static|[\\w-]+\\.\\w+).*)", "destination": "/" }
+//   ]
+// }
