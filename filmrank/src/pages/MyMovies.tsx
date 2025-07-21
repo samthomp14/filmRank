@@ -256,7 +256,7 @@ export default function MyMovies() {
   const sortedMovies = sortMovies(filteredMovies)
 
   // Remove fetchMovies, loading, setLoading, setMovies, setError, error state
-
+  
   const handleDelete = async (movie: MovieWithElo) => {
     try {
 
@@ -448,9 +448,9 @@ export default function MyMovies() {
       <div className="max-w-7xl mx-auto transition-all duration-300 ease-in-out">
         <div className="flex flex-col lg:flex-row gap-6 transition-all duration-300 ease-in-out">
           {/* Filter Sidebar - Desktop Only */}
-          {showFilters && (
+            {showFilters && (
             <div className="hidden lg:block w-96">
-              <div className="w-96 bg-white rounded-xl shadow-md border border-gray-200 sticky top-24 self-start">
+              <div className="w-96 bg-white rounded-xl shadow-md border border-gray-200 mt-16">
                 <div className="flex flex-col">
                   {/* Header */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -597,95 +597,95 @@ export default function MyMovies() {
                   </div>
                 </div>
               </div>
-            </div>
+          </div>
           )}
           {/* Main Content */}
-          <div className={`flex-1 ${!showFilters ? 'mx-auto max-w-3xl' : ''}`}> 
+          <div className={`flex-1 transition-[margin,max-width] duration-300 ${!showFilters ? 'mx-auto max-w-3xl' : ''}`}> 
             <div className="px-2 sm:px-6 lg:px-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Library</h1>
-              {/* Search and Filter Bar */}
-              {movies.length > 0 && (
-                <div className="mb-6 space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Search movies by title..."
-                        value={filters.searchTerm}
-                        onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    {/* View Toggle */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setViewMode('list')}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                          viewMode === 'list'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => setViewMode('grid')}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                          viewMode === 'grid'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                      </button>
-                    </div>
-                    {/* Sort Dropdown and Toggle */}
-                    <div className="flex items-center gap-2">
-                      <label htmlFor="sort" className="text-sm text-gray-700">Sort by:</label>
-                      <select
-                        id="sort"
-                        value={sortOption.field}
-                        onChange={e => setSortOption(opt => ({ ...opt, field: e.target.value }))}
-                        className="px-2 py-1 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="title">Title</option>
-                        <option value="year">Year</option>
-                        <option value="imdb_rating">IMDB Rating</option>
-                        <option value="runtime">Runtime</option>
-                        <option value="elo_score">ELO Score</option>
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => setSortOption(opt => ({ ...opt, direction: opt.direction === 'asc' ? 'desc' : 'asc' }))}
-                        className="p-2 rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        title={`Sort ${sortOption.direction === 'asc' ? 'Descending' : 'Ascending'}`}
-                      >
-                        {sortOption.direction === 'asc' ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" /></svg>
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                        )}
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Library</h1>
+            {/* Search and Filter Bar */}
+            {movies.length > 0 && (
+              <div className="mb-6 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
-                      Filters
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search movies by title..."
+                      value={filters.searchTerm}
+                      onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                        viewMode === 'list'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                        viewMode === 'grid'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
                     </button>
                   </div>
+                  {/* Sort Dropdown and Toggle */}
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="sort" className="text-sm text-gray-700">Sort by:</label>
+                    <select
+                      id="sort"
+                      value={sortOption.field}
+                      onChange={e => setSortOption(opt => ({ ...opt, field: e.target.value }))}
+                      className="px-2 py-1 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="title">Title</option>
+                      <option value="year">Year</option>
+                      <option value="imdb_rating">IMDB Rating</option>
+                      <option value="runtime">Runtime</option>
+                      <option value="elo_score">ELO Score</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setSortOption(opt => ({ ...opt, direction: opt.direction === 'asc' ? 'desc' : 'asc' }))}
+                      className="p-2 rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      title={`Sort ${sortOption.direction === 'asc' ? 'Descending' : 'Ascending'}`}
+                    >
+                      {sortOption.direction === 'asc' ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" /></svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                    </svg>
+                    Filters
+                  </button>
+                </div>
                 </div>
               )}
               {/* Filter Panel - Mobile Only, rendered after Filters button */}
@@ -836,8 +836,8 @@ export default function MyMovies() {
                       </button>
                     </div>
                   </div>
-                </div>
-              )}
+              </div>
+            )}
             </div>
               
 
@@ -965,9 +965,9 @@ export default function MyMovies() {
                 {isFetching && <div className="text-center py-4 text-gray-500">Loading more...</div>}
               </div>
             )}
-          </div>
         </div>
       </div>
+    </div>
 
       {/* Delete Confirmation Modal */}
       {movieToDelete && (
@@ -996,4 +996,4 @@ export default function MyMovies() {
       )}
     </div>
   )
-}
+} 
