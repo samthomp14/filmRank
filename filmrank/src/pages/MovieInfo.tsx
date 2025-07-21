@@ -108,24 +108,25 @@ function MovieInfo() {
                 {/* Movie Poster */}
                 <div className="lg:col-span-1">
                   <div className="sticky top-8">
-                    {movie.url ? (
+                    {movie.url && movie.url !== 'N/A' ? (
                       <div className="relative group">
                         <img
                           src={movie.url}
                           alt={movie.title}
                           className="w-full h-auto rounded-xl shadow-2xl transition-transform duration-300 group-hover:scale-105"
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.src = '/public/no_poster_placeholder.png';
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     ) : (
                       <div className="w-full aspect-[2/3] bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl shadow-2xl flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="text-gray-400 text-4xl mb-2">🎬</div>
-                          <span className="text-gray-500 font-medium">No poster available</span>
-                        </div>
+                        <img
+                          src={require('../../public/no_poster_placeholder.png')}
+                          alt="No poster available"
+                          className="w-1/2 h-auto mx-auto rounded-lg opacity-80"
+                        />
                       </div>
                     )}
                   </div>

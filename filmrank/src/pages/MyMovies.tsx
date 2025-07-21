@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef} from 'react'
 import { supabase } from '../lib/supabaseClient'
 import RangeFilter from '../components/RangeFilter'
 import MultiSelectFilter from '../components/MultiSelectFilter'
@@ -6,7 +6,6 @@ import { formatRuntime } from '../lib/movieUtils'
 import { formatIMDBRating } from '../lib/movieUtils'
 import { Link, useNavigate } from 'react-router-dom'
 import type { Tables } from '../types/supabase';
-import { useInfiniteQuery } from '../hooks/use-infinite-query'
 
 type MovieRow = Tables<'movies'>;
 interface MovieWithElo extends MovieRow {
@@ -68,10 +67,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ title, isExpanded, onTogg
 
 export default function MyMovies() {
   // Remove movies, setMovies, loading, setLoading, error, setError, fetchMovies
+  const [movies, setMovies] = useState<MovieWithElo[]>([])
   const [filteredMovies, setFilteredMovies] = useState<MovieWithElo[]>([])
   const [movieToDelete, setMovieToDelete] = useState<MovieWithElo | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   
   // Filter state
   const [filters, setFilters] = useState<FilterState>({
@@ -111,50 +113,40 @@ export default function MyMovies() {
   // Change sortOption to only track field and direction
   const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ field: 'title', direction: 'asc' })
 
-  // Infinite query for user_movies with movie join
-  const {
-    data: userMoviesData,
-    isLoading,
-    isFetching,
-    error,
-    hasMore,
-    fetchNextPage
-  } = useInfiniteQuery<{ elo_score: number; movies: MovieRow }>({
-    tableName: 'user_movies',
-    columns: `elo_score, movies:movies!user_movies_movie_id_fkey (
-      id, title, year, runtime, rating, genre, director, language, country, imdb_rating, url
-    )`,
-    pageSize: 20,
-    // trailingQuery: (query) => query.order('created_at', { ascending: false }),
-  })
-
-  // Combine and flatten movies
-  const movies: MovieWithElo[] = (userMoviesData || []).map((m) => ({
-    ...m.movies,
-    elo_score: m.elo_score,
-  }))
-
-  // Infinite scroll: observe bottom sentinel
-  const bottomRef = useRef<HTMLDivElement | null>(null)
-  const observer = useRef<IntersectionObserver | null>(null)
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [entry] = entries
-    if (entry.isIntersecting && hasMore && !isFetching) {
-      fetchNextPage()
-    }
-  }, [hasMore, isFetching, fetchNextPage])
-
+  // Fetch all user movies on mount
   useEffect(() => {
-    if (bottomRef.current) {
-      observer.current = new window.IntersectionObserver(handleObserver, { threshold: 1.0 })
-      observer.current.observe(bottomRef.current)
-    }
-    return () => {
-      if (observer.current && bottomRef.current) {
-        observer.current.unobserve(bottomRef.current)
+    let isMounted = true;
+    async function fetchMovies() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) throw userError;
+        if (!user) throw new Error('No user found');
+        const { data, error: moviesError } = await supabase
+          .from('user_movies')
+          .select(`elo_score, movies:movies!user_movies_movie_id_fkey (
+            id, title, year, runtime, rating, genre, director, language, country, imdb_rating, url
+          )`)
+          .eq('user_id', user.id);
+        if (moviesError) throw moviesError;
+        const movies: MovieWithElo[] = (data || []).map((m: any) => ({
+          ...m.movies,
+          elo_score: m.elo_score,
+        }));
+        if (isMounted) setMovies(movies);
+      } catch (err: any) {
+        if (isMounted) setError(err instanceof Error ? err : new Error('Failed to fetch movies'));
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     }
-  }, [handleObserver])
+    fetchMovies();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Remove infinite scroll logic
+  const bottomRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     // Extract filter options from movies data
@@ -913,7 +905,6 @@ export default function MyMovies() {
                   <GridMovieCard key={movie.id} movie={movie} />
                 ))}
                 <div ref={bottomRef} />
-                {isFetching && <div className="col-span-full text-center py-4 text-gray-500">Loading more...</div>}
               </div>
             ) : (
               <div className="space-y-4 px-2 sm:px-0">
@@ -962,7 +953,6 @@ export default function MyMovies() {
                   </div>
                 ))}
                 <div ref={bottomRef} />
-                {isFetching && <div className="text-center py-4 text-gray-500">Loading more...</div>}
               </div>
             )}
         </div>
