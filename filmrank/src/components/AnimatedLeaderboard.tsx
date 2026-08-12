@@ -97,13 +97,13 @@ export default function AnimatedLeaderboard() {
   const getPositionColor = (position: number) => {
     switch (position) {
       case 1:
-        return 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900'
+        return 'bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950'
       case 2:
-        return 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-700'
+        return 'bg-gradient-to-r from-stone-300 to-stone-400 text-stone-800'
       case 3:
-        return 'bg-gradient-to-r from-amber-600 to-amber-700 text-amber-100'
+        return 'bg-gradient-to-r from-amber-700 to-amber-800 text-amber-100'
       default:
-        return 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800'
+        return 'bg-stone-100 text-stone-500'
     }
   }
 
@@ -127,11 +127,11 @@ export default function AnimatedLeaderboard() {
       animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+      <div className="bg-card rounded-2xl shadow-xl shadow-black/10 p-6 border border-border">
+        <h4 className="text-lg font-display font-semibold text-foreground mb-4 text-center">
           Your Evolving Rankings
         </h4>
-        
+
         <div className="relative">
           <div className="space-y-3">
             <AnimatePresence mode="wait">
@@ -142,19 +142,19 @@ export default function AnimatedLeaderboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 300, 
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
                     damping: 30,
                     layout: { duration: 0.8, ease: "easeOut" }
                   }}
                   className={`
                     flex items-center justify-between p-3 rounded-lg border
-                    ${movie.position === 1 ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200 bg-gray-50'}
+                    ${movie.position === 1 ? 'border-accent/40 bg-accent/10' : 'border-border bg-muted'}
                   `}
                 >
                   <div className="flex items-center space-x-3">
-                    <motion.div 
+                    <motion.div
                       className={`
                         w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                         ${getPositionColor(movie.position)}
@@ -165,21 +165,21 @@ export default function AnimatedLeaderboard() {
                       {getPositionIcon(movie.position)}
                     </motion.div>
                     <div>
-                      <div className={`font-medium ${movie.position === 1 ? 'text-yellow-800' : 'text-gray-800'}`}>
+                      <div className={`font-medium ${movie.position === 1 ? 'text-accent-foreground' : 'text-foreground'}`}>
                         {movie.title}
                       </div>
                     </div>
                   </div>
-                  
+
                   {movie.position === 1 && (
-                    <motion.div 
+                    <motion.div
                       className="flex items-center space-x-1"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
                     >
-                      <span className="text-yellow-500">⭐</span>
-                      <span className="text-xs font-medium text-yellow-700">Top</span>
+                      <span className="text-accent">⭐</span>
+                      <span className="text-xs font-medium text-accent-foreground">Top</span>
                     </motion.div>
                   )}
                 </motion.div>
@@ -187,10 +187,10 @@ export default function AnimatedLeaderboard() {
             </AnimatePresence>
           </div>
         </div>
-        
+
         <div className="mt-4 text-center">
-          <motion.div 
-            className="text-xs text-gray-500"
+          <motion.div
+            className="text-xs text-muted-foreground"
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >

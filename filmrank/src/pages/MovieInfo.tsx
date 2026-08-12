@@ -60,10 +60,10 @@ function MovieInfo() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-gray-600 text-lg font-medium">Loading movie information...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="text-muted-foreground text-lg font-medium">Loading movie information...</div>
         </div>
       </div>
     )
@@ -71,18 +71,18 @@ function MovieInfo() {
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-400 text-6xl mb-4">🎬</div>
-          <div className="text-gray-600 text-xl font-medium">Movie not found</div>
-          <div className="text-gray-500 mt-2">The movie you're looking for doesn't exist.</div>
+          <div className="text-muted-foreground text-6xl mb-4">🎬</div>
+          <div className="text-muted-foreground text-xl font-medium">Movie not found</div>
+          <div className="text-muted-foreground mt-2">The movie you're looking for doesn't exist.</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
@@ -92,7 +92,7 @@ function MovieInfo() {
                 if (from === 'my-movies') navigate('/my-movies')
                 else navigate('/ranking')
               }}
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 mb-4"
+              className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors duration-200 mb-4"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -102,7 +102,7 @@ function MovieInfo() {
           </div>
 
           {/* Main Content */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl shadow-xl border border-border overflow-hidden">
             <div className="p-8 lg:p-12">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
                 {/* Movie Poster */}
@@ -121,9 +121,9 @@ function MovieInfo() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     ) : (
-                      <div className="w-full aspect-[2/3] bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl shadow-2xl flex items-center justify-center">
+                      <div className="w-full aspect-[2/3] bg-muted rounded-xl shadow-2xl flex items-center justify-center">
                         <img
-                          src={require('../../public/no_poster_placeholder.png')}
+                          src="/no_poster_placeholder.png"
                           alt="No poster available"
                           className="w-1/2 h-auto mx-auto rounded-lg opacity-80"
                         />
@@ -138,13 +138,13 @@ function MovieInfo() {
                     {/* Title and Basic Info */}
                     <div>
                       <div className="flex items-start gap-3 mb-4">
-                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight flex-1">
+                        <h1 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight flex-1">
                           {movie.title}
                         </h1>
                         {(movie.imdb_id || getOMDBField(movie.metadata, 'imdbID')) && (
                           <button
                             onClick={handleIMDBLink}
-                            className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                            className="text-muted-foreground hover:text-primary transition-colors duration-200"
                             title="View on IMDB"
                           >
                             <i className="fa fa-external-link" aria-hidden="true"></i>
@@ -155,22 +155,22 @@ function MovieInfo() {
                       {/* Quick Stats */}
                       <div className="flex flex-wrap gap-4 mb-6">
                         {movie.year && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted-foreground">
                             {formatYear(movie.year)}
                           </span>
                         )}
                         {movie.runtime && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted-foreground">
                             {formatRuntime(movie.runtime)}
                           </span>
                         )}
                         {movie.rating && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary text-secondary-foreground">
                             {movie.rating}
                           </span>
                         )}
                         {movie.imdb_rating && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent/20 text-accent-foreground">
                             {formatIMDBRating(movie.imdb_rating)}
                           </span>
                         )}
@@ -179,9 +179,9 @@ function MovieInfo() {
 
                     {/* Plot */}
                     {getOMDBField(movie.metadata, 'Plot') && (
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Synopsis</h3>
-                        <p className="text-gray-700 leading-relaxed">{getOMDBField(movie.metadata, 'Plot')}</p>
+                      <div className="bg-muted rounded-xl p-6 border border-border">
+                        <h3 className="text-lg font-semibold text-foreground mb-3">Synopsis</h3>
+                        <p className="text-muted-foreground leading-relaxed">{getOMDBField(movie.metadata, 'Plot')}</p>
                       </div>
                     )}
 
@@ -190,30 +190,30 @@ function MovieInfo() {
                       {/* Left Column */}
                       <div className="space-y-4">
                         {movie.director && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Director</div>
-                            <div className="text-gray-900 font-medium">{movie.director}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Director</div>
+                            <div className="text-foreground font-medium">{movie.director}</div>
                           </div>
                         )}
                         
                         {getOMDBField(movie.metadata, 'Writer') && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Writer</div>
-                            <div className="text-gray-900 font-medium">{getOMDBField(movie.metadata, 'Writer')}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Writer</div>
+                            <div className="text-foreground font-medium">{getOMDBField(movie.metadata, 'Writer')}</div>
                           </div>
                         )}
                         
                         {movie.genre && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Genre</div>
-                            <div className="text-gray-900 font-medium">{movie.genre}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Genre</div>
+                            <div className="text-foreground font-medium">{movie.genre}</div>
                           </div>
                         )}
                         
                         {getOMDBField(movie.metadata, 'Released') && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Release Date</div>
-                            <div className="text-gray-900 font-medium">{getOMDBField(movie.metadata, 'Released')}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Release Date</div>
+                            <div className="text-foreground font-medium">{getOMDBField(movie.metadata, 'Released')}</div>
                           </div>
                         )}
                       </div>
@@ -221,23 +221,23 @@ function MovieInfo() {
                       {/* Right Column */}
                       <div className="space-y-4">
                         {movie.language && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Language</div>
-                            <div className="text-gray-900 font-medium">{movie.language}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Language</div>
+                            <div className="text-foreground font-medium">{movie.language}</div>
                           </div>
                         )}
                         
                         {movie.country && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Country</div>
-                            <div className="text-gray-900 font-medium">{movie.country}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Country</div>
+                            <div className="text-foreground font-medium">{movie.country}</div>
                           </div>
                         )}
                         
                         {getOMDBField(movie.metadata, 'Awards') && (
-                          <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                            <div className="text-sm font-medium text-gray-500 mb-1">Awards</div>
-                            <div className="text-gray-900 font-medium">{getOMDBField(movie.metadata, 'Awards')}</div>
+                          <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
+                            <div className="text-sm font-medium text-muted-foreground mb-1">Awards</div>
+                            <div className="text-foreground font-medium">{getOMDBField(movie.metadata, 'Awards')}</div>
                           </div>
                         )}
                       </div>
@@ -245,9 +245,9 @@ function MovieInfo() {
 
                     {/* Cast */}
                     {getOMDBField(movie.metadata, 'Actors') && (
-                      <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Cast</h3>
-                        <p className="text-gray-700">{getOMDBField(movie.metadata, 'Actors')}</p>
+                      <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
+                        <h3 className="text-lg font-semibold text-foreground mb-3">Cast</h3>
+                        <p className="text-muted-foreground">{getOMDBField(movie.metadata, 'Actors')}</p>
                       </div>
                     )}
                   </div>
