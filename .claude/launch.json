@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "filmrank-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "filmrank", "run", "dev", "--", "--port", "5173"],
+      "port": 5173
+    }
+  ]
+}
