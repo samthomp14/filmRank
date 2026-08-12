@@ -1,0 +1,83 @@
+filmrank/src/index.css
+  s_660a623448e4bc::t_cdacb40d03d20a 26-28,30,32-33,35-41,43-51,54-68,70-77
+filmrank/src/pages/Landing.tsx
+  s_343fb6d1ef5a7c::t_35d929d3b74ab2 3,20,31,37-38,64,78-79,81-90,92,94-99,101-107,179-186,198
+  s_343fb6d1ef5a7c::t_288d0c96b96fc2 9-12,41-42,46-48,50-51,53,55-57,59-61,63,65-68,70-74,77,118,122,126,130,146-147,150,158,166,177,187,189-190,192-195,197,199-200
+  s_660a623448e4bc::t_b0e543643a4a74 35,39-40,45,49,52,54,62,69,75,80,91,93,100,113,116-117,119,123,127-128,131,143,145,148,151-152,154-155,159-160,162-163,167-168,170-171,178,188,191,196
+filmrank/src/components/Footer.tsx
+  s_660a623448e4bc::t_892deaee75882b 5,8-9,11
+filmrank/index.html
+  s_343fb6d1ef5a7c::t_fc1e2b8b04bed8 9-11
+filmrank/src/components/AnimatedLeaderboard.tsx
+  s_660a623448e4bc::t_db15b49124db72 130-131
+  s_343fb6d1ef5a7c::t_768d78d40b2603 102,106
+  s_660a623448e4bc::t_908777566b722f 153
+  s_660a623448e4bc::t_4a23cc25addff8 193
+  s_343fb6d1ef5a7c::t_0094f1463a8dc1 100,104
+  s_660a623448e4bc::t_5ca9827dea26ba 181-182
+  s_343fb6d1ef5a7c::t_fcd429bc440cbc 134,145-147,157,173,175,190,192
+  s_660a623448e4bc::t_615aed02e15ebc 168
+filmrank/src/components/ComparisonAnimation.tsx
+  s_343fb6d1ef5a7c::t_9b7a9c1a43c648 105
+  s_660a623448e4bc::t_cd91cb6557d6ce 122
+  s_343fb6d1ef5a7c::t_4e088bc18195c1 8-15,24,50-67,70-76,137,142-147,154,158,177,193,211-216,223,227,245,261,274
+  s_343fb6d1ef5a7c::t_ad25f11cbfb3e8 82
+  s_660a623448e4bc::t_1cf0fa7dc34ed9 165,233
+  s_343fb6d1ef5a7c::t_f78561cf7faff7 117-118,121,130,134,140,180,205,248
+  s_660a623448e4bc::t_64d61394d5d144 206-207
+filmrank/tailwind.config.js
+  s_343fb6d1ef5a7c::t_95f3a738782d98 10-12
+filmrank/src/pages/MovieInfo.tsx
+  s_660a623448e4bc::t_0bd625318c2423 238-240
+  s_660a623448e4bc::t_c93b160f23ef00 231-233
+  s_660a623448e4bc::t_82b9691568c9f6 224-226
+  s_660a623448e4bc::t_a89ca79a6f7844 248-250
+  s_660a623448e4bc::t_93c47689a16270 158,163,168,173
+  s_660a623448e4bc::t_e23c5df92f610d 200-202
+  s_660a623448e4bc::t_36f9e3eb5bc7f7 207-209
+  s_660a623448e4bc::t_c1f506ef518426 193-195
+  s_660a623448e4bc::t_2edaf5e5ffc392 214-216
+  s_660a623448e4bc::t_bfd826a9789880 124
+  s_660a623448e4bc::t_bea433cb0336bb 105
+  s_660a623448e4bc::t_8fdd56579a8647 95
+  s_660a623448e4bc::t_426228a72c7f0d 182-184
+  s_660a623448e4bc::t_6db3d206a1f876 141,147
+  s_660a623448e4bc::t_b5f968a30953ef 63,65-66,74,76-78,85
+  s_343fb6d1ef5a7c::t_e705817229b0cf 126
+filmrank/src/components/Navbar.tsx
+  s_660a623448e4bc::t_9779cbe0cb35ed 63,69,75,81,87,93,102
+  s_343fb6d1ef5a7c::t_0d4d3ef60a5240 35-37
+  s_660a623448e4bc::t_fda12b31029176 108,120,124-129,133-134
+  s_660a623448e4bc::t_280b1259a76496 40
+  s_660a623448e4bc::t_7ebf96c0967041 29
+  s_660a623448e4bc::t_f6c07e4410c1fd 51,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "60fa71e1d7c53f401ea44172bf5a7c0f466e39e1",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_343fb6d1ef5a7c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df30c061-1a88-4b93-918c-66df5f62f317",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    },
+    "s_660a623448e4bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6419513a-c563-43c8-91e7-fdd2c1b3f649",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
