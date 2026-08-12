@@ -1,0 +1,25 @@
+.claude/launch.json
+  s_343fb6d1ef5a7c::t_a1288b6614e07e 7
+  s_343fb6d1ef5a7c::t_56afaa881cee09 1-6,8-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "eee77a24dd7c9d17201979d264047ffcb9751292",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_343fb6d1ef5a7c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df30c061-1a88-4b93-918c-66df5f62f317",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
