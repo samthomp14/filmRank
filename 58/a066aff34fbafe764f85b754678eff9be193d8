@@ -1,0 +1,27 @@
+.gitignore
+  h_4e1d4ad18f97c2 33
+  s_a024cd28c7c25f::t_13fc10c82504b1 32
+filmrank/src/pages/Dashboard.tsx
+  s_a024cd28c7c25f::t_8408f3abc66334 4-6,9-60,67,69-71,84,86,92,94,99-104,107-108,110-183,206,248-277,280,284-289,298-321,336
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "58a066aff34fbafe764f85b754678eff9be193d8",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_a024cd28c7c25f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65527df9-632b-4833-af85-5ba265350de0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
