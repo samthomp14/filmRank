@@ -325,11 +325,16 @@ export default function Dashboard() {
         {winStreak && (
           <div className="mb-10">
             <h2 className="mb-4 font-marquee text-lg font-semibold uppercase tracking-[.06em] text-foreground">On a Streak 🔥</h2>
-            <div className="flex items-center gap-6">
-              <Poster url={winStreak.movie.url} title={winStreak.movie.title} size="w-16 h-24" />
-              <div className="min-w-0">
-                <div className="text-lg font-semibold text-foreground">{winStreak.movie.title}</div>
-                <div className="text-sm text-success">{winStreak.streak} wins in a row</div>
+            <div className="flex gap-4">
+              <div className="w-24 flex-shrink-0">
+                <div className="relative">
+                  <Poster url={winStreak.movie.url} title={winStreak.movie.title} size="w-full aspect-[2/3]" />
+                  <span className="absolute -right-1 -top-1 rounded-full bg-success px-1.5 py-0.5 text-[10px] font-bold text-success-foreground shadow">
+                    {winStreak.streak}🔥
+                  </span>
+                </div>
+                <div className="mt-2 truncate text-xs font-medium text-foreground">{winStreak.movie.title}</div>
+                <div className="text-[11px] text-success">{winStreak.streak} wins in a row</div>
               </div>
             </div>
           </div>
