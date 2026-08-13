@@ -2,16 +2,24 @@ import { Link } from 'react-router-dom'
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-border bg-background py-4 px-4 text-muted-foreground text-sm">
-      <div className="container max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
-        <div className="flex justify-center space-x-8">
-          <Link to="/login" className="hover:text-primary transition">Login</Link>
-          <a href="mailto:hello@filmrank.app" className="hover:text-primary transition">Contact</a>
+    <footer className="bg-marquee-footer px-4 py-7">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 md:flex-row">
+        <span className="font-wordmark text-[16px] tracking-[.06em] text-foreground">FilmRank</span>
+        <div className="flex items-center gap-6">
+          <Link to="/login" className="font-marquee text-[12px] font-medium uppercase tracking-[.1em] text-marquee-tertiary hover:text-accent">
+            Login
+          </Link>
+          <a
+            href="mailto:hello@filmrank.app"
+            className="font-marquee text-[12px] font-medium uppercase tracking-[.1em] text-marquee-tertiary hover:text-accent"
+          >
+            Contact
+          </a>
         </div>
-        <div className="text-center md:text-right text-xs text-muted-foreground">
-          © {new Date().getFullYear()} FilmRank. All rights reserved.
-        </div>
+        <span className="font-marquee text-[11px] text-marquee-tertiary">
+          © {new Date().getFullYear()} FilmRank
+        </span>
       </div>
     </footer>
   )
-} 
+}

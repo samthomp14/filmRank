@@ -65,7 +65,7 @@ function Ranking() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Loading rankings...</div>
+        <div className="text-muted-foreground text-lg">Loading rankings...</div>
       </div>
     )
   }
@@ -73,24 +73,24 @@ function Ranking() {
   if (movies.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">No movies ranked yet.</div>
+        <div className="text-muted-foreground text-lg">No movies ranked yet.</div>
       </div>
     )
   }
 
   return (
     <div className="py-12 px-2 max-w-6xl w-full mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Top 10 Films</h1>
+      <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground mb-8 text-center">My Top 10 Films</h1>
       <div className="space-y-4">
         {movies.map((movie, idx) => (
           <div
             key={movie.id}
-            className="w-full bg-white rounded-lg shadow p-3 sm:p-6 hover:bg-gray-50 transition duration-150 ease-in-out cursor-pointer"
+            className="w-full bg-card border border-border rounded-lg shadow p-3 sm:p-6 hover:bg-secondary transition duration-150 ease-in-out cursor-pointer"
             onClick={() => navigate(`/movie/${movie.id}`)}
           >
             <div className="flex flex-row items-center justify-between gap-3 sm:gap-6">
-              <span className="text-xl sm:text-3xl font-bold text-blue-600 min-w-[36px] sm:min-w-[60px]">#{idx + 1}</span>
-              <h2 className="flex-1 text-base sm:text-2xl font-semibold text-gray-900 whitespace-normal break-words px-2">{movie.title}</h2>
+              <span className="text-xl sm:text-3xl font-bold text-primary min-w-[36px] sm:min-w-[60px]">#{idx + 1}</span>
+              <h2 className="flex-1 text-base sm:text-2xl font-semibold text-foreground whitespace-normal break-words px-2">{movie.title}</h2>
               {movie.poster_url && (
                 <img
                   src={movie.poster_url}

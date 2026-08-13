@@ -14,7 +14,7 @@ const FALLBACK_IMAGE = '/no_poster_placeholder.png';
 // Simple spinner component
 const Spinner = () => (
   <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
@@ -126,7 +126,7 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
       <div className="w-full max-w-2xl flex flex-col sm:flex-row gap-2 mb-4 items-center">
         <input
           type="text"
-          className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 px-4 py-2 rounded-lg border border-border bg-background focus:ring-2 focus:ring-primary focus:border-primary"
           placeholder="Search movies by title..."
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -135,7 +135,7 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
           <span>Hide already added</span>
           <button
             type="button"
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showOnlyUnadded ? 'bg-blue-600' : 'bg-gray-300'}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showOnlyUnadded ? 'bg-primary' : 'bg-muted'}`}
             onClick={() => setShowOnlyUnadded(v => !v)}
             aria-pressed={showOnlyUnadded}
             aria-label="Toggle hide already added"
@@ -148,7 +148,7 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
       </div>
       <div className="w-full max-w-5xl">
         {error ? (
-          <div className="text-red-600 text-center py-12">{error}</div>
+          <div className="text-destructive text-center py-12">{error}</div>
         ) : (
           <div ref={gridRef} className="relative grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-x-3 gap-y-4 mb-6 min-h-[340px]">
             {filteredMovies.map(movie => {
@@ -174,7 +174,7 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
               return (
                 <div key={movie.id} className="flex justify-center items-center">
                   <div
-                    className={`relative aspect-[2/3] w-[120px] rounded-lg overflow-hidden shadow transition-all duration-200 ease-in-out cursor-pointer group bg-white`}
+                    className={`relative aspect-[2/3] w-[120px] rounded-lg overflow-hidden shadow transition-all duration-200 ease-in-out cursor-pointer group bg-card`}
                     onMouseEnter={handleMouseEnter}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
@@ -182,12 +182,12 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
                     <img
                       src={!movie.url || movie.url === 'N/A' ? FALLBACK_IMAGE : movie.url}
                       alt={movie.title}
-                      className="w-full h-full object-cover bg-gray-200"
+                      className="w-full h-full object-cover bg-muted"
                       onError={e => { if (e.currentTarget.src !== window.location.origin + FALLBACK_IMAGE) e.currentTarget.src = FALLBACK_IMAGE; }}
                     />
                     {/* Heart icon only on hover */}
                     <button
-                      className={`absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${alreadyAdded ? 'text-red-500' : 'text-gray-400 hover:text-red-500'} ${alreadyAdded ? 'pointer-events-none' : ''}`}
+                      className={`absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${alreadyAdded ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'} ${alreadyAdded ? 'pointer-events-none' : ''}`}
                       disabled={alreadyAdded || addingId === movie.id}
                       title={alreadyAdded ? 'Already in your library' : 'Add to library'}
                       onClick={() => handleAdd(movie)}
@@ -235,14 +235,14 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
         {totalPages > 1 && (
           <div className="flex justify-center gap-2 mb-4">
             <button
-              className="px-3 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+              className="px-3 py-1 rounded bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50"
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
             >
               Previous
             </button>
             <button
-              className="px-3 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+              className="px-3 py-1 rounded bg-secondary text-foreground hover:bg-secondary/80 disabled:opacity-50"
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={page === totalPages - 1}
             >

@@ -224,9 +224,9 @@ export default function AddMovie() {
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Add a Movie</h1>
+          <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground mb-6 text-center">Add a Movie</h1>
           {loading ? (
-            <div className="text-center text-gray-600 py-12">Loading your library...</div>
+            <div className="text-center text-muted-foreground py-12">Loading your library...</div>
           ) : (
             <>
               <MovieGallery
@@ -236,9 +236,9 @@ export default function AddMovie() {
               />
               {/* OMDb fallback prompt at bottom */}
               <div className="mt-8 flex flex-col items-center">
-                <div className="text-gray-600 mb-2">Don't see it here?</div>
+                <div className="text-muted-foreground mb-2">Don't see it here?</div>
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
                   onClick={() => setShowOmdbPrompt(true)}
                 >
                   Search OMDb by Title & Year
@@ -250,9 +250,9 @@ export default function AddMovie() {
       </div>
       {/* OMDb Prompt Modal */}
       {showOmdbPrompt && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Search OMDb</h3>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-medium text-foreground mb-4">Search OMDb</h3>
             <form onSubmit={handleOmdbPrompt} className="space-y-4">
               <input
                 type="text"
@@ -260,19 +260,19 @@ export default function AddMovie() {
                 onChange={e => setOmdbTitle(e.target.value)}
                 placeholder="Movie Title"
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <input
                 type="text"
                 value={omdbYear}
                 onChange={e => setOmdbYear(e.target.value)}
                 placeholder="Year (optional)"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:border-primary"
               />
-              {omdbError && <div className="text-red-600 text-sm">{omdbError}</div>}
+              {omdbError && <div className="text-destructive text-sm">{omdbError}</div>}
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowOmdbPrompt(false)} className="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Search</button>
+                <button type="button" onClick={() => setShowOmdbPrompt(false)} className="px-4 py-2 rounded bg-secondary text-foreground hover:bg-secondary/80">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90">Search</button>
               </div>
             </form>
           </div>
@@ -281,9 +281,9 @@ export default function AddMovie() {
       {/* OMDb Result Modal (stub) */}
       {omdbModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-          <div className="bg-white/95 border border-gray-200 rounded-2xl shadow-2xl max-w-3xl w-full flex flex-col px-0 py-0 overflow-hidden">
+          <div className="bg-card/95 border border-border rounded-2xl shadow-2xl max-w-3xl w-full flex flex-col px-0 py-0 overflow-hidden">
             <div className="px-8 pt-8 pb-4">
-              <h3 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">
+              <h3 className="text-xl font-bold text-foreground mb-2 tracking-tight">
                 {omdbModal.alreadyInLibrary
                   ? 'You already have this movie in your library!'
                   : omdbModal.id && !omdbModal.isOmdb
@@ -291,20 +291,20 @@ export default function AddMovie() {
                   : 'Review and confirm'}
               </h3>
             </div>
-            <div className="flex flex-row gap-0 items-stretch bg-white">
+            <div className="flex flex-row gap-0 items-stretch bg-card">
               <div className="flex items-center justify-center px-8 py-8">
-                <img src={omdbModal.poster} alt={omdbModal.title} className="w-56 h-80 object-cover rounded-xl shadow-lg border border-gray-200" />
+                <img src={omdbModal.poster} alt={omdbModal.title} className="w-56 h-80 object-cover rounded-xl shadow-lg border border-border" />
               </div>
               <div className="flex flex-col justify-center px-8 py-8 min-w-[220px] flex-1">
-                <div className="font-extrabold text-3xl text-gray-900 mb-2 leading-tight">{omdbModal.title}</div>
-                {omdbModal.year && <div className="text-blue-700 text-lg font-semibold mb-2">{omdbModal.year}</div>}
-                <div className="text-gray-700 text-base mb-4">Director:<br /><span className="font-medium text-lg text-gray-900">{omdbModal.director}</span></div>
+                <div className="font-extrabold text-3xl text-foreground mb-2 leading-tight">{omdbModal.title}</div>
+                {omdbModal.year && <div className="text-primary text-lg font-semibold mb-2">{omdbModal.year}</div>}
+                <div className="text-muted-foreground text-base mb-4">Director:<br /><span className="font-medium text-lg text-foreground">{omdbModal.director}</span></div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 px-8 py-6 bg-white border-t border-gray-100 rounded-b-2xl">
-              <button onClick={handleOmdbDeny} className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium transition">{omdbModal.alreadyInLibrary ? 'Close' : 'No'}</button>
+            <div className="flex justify-end gap-3 px-8 py-6 bg-card border-t border-border rounded-b-2xl">
+              <button onClick={handleOmdbDeny} className="px-5 py-2 rounded-lg bg-secondary text-foreground hover:bg-secondary/80 font-medium transition">{omdbModal.alreadyInLibrary ? 'Close' : 'No'}</button>
               {!omdbModal.alreadyInLibrary && (
-                <button onClick={handleOmdbConfirm} className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow transition">Add to Library</button>
+                <button onClick={handleOmdbConfirm} className="px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow transition">Add to Library</button>
               )}
             </div>
           </div>

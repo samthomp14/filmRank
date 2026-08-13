@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
+const navLinkClass =
+  'font-marquee text-[13px] font-medium uppercase tracking-[.08em] text-muted-foreground hover:text-accent transition-colors px-3 py-2'
+
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -26,86 +29,72 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-background border-b border-border relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <img
-                src="/filmRankLogo.png"
-                alt="FilmRank Logo"
-                className="h-10 w-auto object-contain"
-              />
-              <span className="text-2xl font-bold text-foreground">FilmRank</span>
-            </Link>
-          </div>
+    <header className="marquee-scrim sticky top-0 z-40 border-b border-marquee-hairline backdrop-blur">
+      <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="flex items-center gap-[11px]">
+          <span className="block h-[11px] w-[11px] rounded-full bg-marquee-bulb shadow-[0_0_12px_2px_rgba(232,190,74,.7)]" />
+          <span className="font-wordmark text-[19px] tracking-[.06em] text-foreground">FilmRank</span>
+        </Link>
 
-          {/* Hamburger button (mobile only) */}
-          <button
-            className="md:hidden flex items-center p-2 rounded focus:outline-none"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? (
-              <XMarkIcon className="h-6 w-6 text-foreground" />
-            ) : (
-              <Bars3Icon className="h-6 w-6 text-foreground" />
-            )}
-          </button>
+        {/* Hamburger button (mobile only) */}
+        <button
+          className="flex items-center rounded p-2 text-foreground focus:outline-none md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+        </button>
 
-          {/* Nav links (desktop) */}
-          <div className="hidden md:flex items-center space-x-4">
+        {/* Nav links (desktop) */}
+        <div className="hidden items-center gap-1 md:flex">
+          {user ? (
+            <>
+              <Link to="/compare" className={navLinkClass}>Compare</Link>
+              <Link to="/add" className={navLinkClass}>Add Movie</Link>
+              <Link to="/ranking" className={navLinkClass}>Rankings</Link>
+              <Link to="/my-movies" className={navLinkClass}>Library</Link>
+              <Link to="/profile" className={navLinkClass}>Profile</Link>
+              <button onClick={handleSignOut} className={navLinkClass}>Sign Out</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className={navLinkClass}>Log In</Link>
+              <Link
+                to="/signup"
+                className="ml-2 rounded bg-primary px-5 py-[10px] font-marquee text-[13px] font-semibold uppercase tracking-[.06em] text-primary-foreground shadow-[0_0_0_1px_rgba(232,190,74,.5),0_8px_20px_-8px_rgba(201,82,47,.7)]"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile menu dropdown */}
+      {menuOpen && (
+        <div className="marquee-scrim absolute left-0 top-[64px] z-50 w-full border-b border-marquee-hairline shadow-lg backdrop-blur md:hidden">
+          <div className="flex flex-col items-start gap-1 px-4 py-3">
             {user ? (
               <>
-                <Link
-                  to="/compare"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
-                >
-                  Compare
-                </Link>
-                <Link
-                  to="/add"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
-                >
-                  Add Movie
-                </Link>
-                <Link
-                  to="/ranking"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
-                >
-                  Rankings
-                </Link>
-                <Link
-                  to="/my-movies"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
-                >
-                  Library
-                </Link>
-                <Link
-                  to="/profile"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
-                >
-                  Profile
-                </Link>
+                <Link to="/compare" className={navLinkClass} onClick={() => setMenuOpen(false)}>Compare</Link>
+                <Link to="/add" className={navLinkClass} onClick={() => setMenuOpen(false)}>Add Movie</Link>
+                <Link to="/ranking" className={navLinkClass} onClick={() => setMenuOpen(false)}>Rankings</Link>
+                <Link to="/my-movies" className={navLinkClass} onClick={() => setMenuOpen(false)}>Library</Link>
+                <Link to="/profile" className={navLinkClass} onClick={() => setMenuOpen(false)}>Profile</Link>
                 <button
-                  onClick={handleSignOut}
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                  onClick={() => { handleSignOut(); setMenuOpen(false) }}
+                  className={`${navLinkClass} w-full text-left`}
                 >
                   Sign Out
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
-                >
-                  Log In
-                </Link>
+                <Link to="/login" className={navLinkClass} onClick={() => setMenuOpen(false)}>Log In</Link>
                 <Link
                   to="/signup"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                  className="mt-1 w-full rounded bg-primary px-5 py-[10px] text-center font-marquee text-[13px] font-semibold uppercase tracking-[.06em] text-primary-foreground"
+                  onClick={() => setMenuOpen(false)}
                 >
                   Sign Up
                 </Link>
@@ -113,30 +102,7 @@ export default function Navbar() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Mobile menu dropdown */}
-      {menuOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full bg-background border-b border-border shadow-lg z-50">
-          <div className="flex flex-col items-start px-4 py-2 space-y-2">
-            {user ? (
-              <>
-                <Link to="/compare" className="w-full py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>Compare</Link>
-                <Link to="/add" className="w-full py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>Add Movie</Link>
-                <Link to="/ranking" className="w-full py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>Rankings</Link>
-                <Link to="/my-movies" className="w-full py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>Library</Link>
-                <Link to="/profile" className="w-full py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>Profile</Link>
-                <button onClick={() => { handleSignOut(); setMenuOpen(false); }} className="w-full py-2 text-muted-foreground hover:text-primary text-left">Sign Out</button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="w-full py-2 text-muted-foreground hover:text-primary" onClick={() => setMenuOpen(false)}>Log In</Link>
-                <Link to="/signup" className="w-full py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 text-center" onClick={() => setMenuOpen(false)}>Sign Up</Link>
-              </>
-            )}
-          </div>
-        </div>
       )}
-    </nav>
+    </header>
   )
-} 
+}

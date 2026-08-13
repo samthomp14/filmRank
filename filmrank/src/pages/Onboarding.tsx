@@ -37,23 +37,23 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Welcome to FilmRank!</h1>
-      <p className="text-lg text-gray-600 mb-4 text-center">
+      <h1 className="text-3xl font-bold text-foreground mb-6 text-center">Welcome to FilmRank!</h1>
+      <p className="text-lg text-muted-foreground mb-4 text-center">
         Let's get you set up with a quick profile. This helps us personalize your experience and recommendations.
       </p>
-      <p className="text-base text-gray-500 mb-8 text-center">
+      <p className="text-base text-muted-foreground mb-8 text-center">
         You can always update your profile later in your account settings.
       </p>
       <div className="space-y-8">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
             Display Name *
           </label>
           <input
             type="text"
             id="name"
             name="name"
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter your name"
             autoComplete="name"
             value={name}
@@ -62,10 +62,10 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Favorite Genres
           </label>
-          <p className="text-xs text-gray-500 mb-2">Select up to 3 genres</p>
+          <p className="text-xs text-muted-foreground mb-2">Select up to 3 genres</p>
           <div className="w-full">
             <div className="flex flex-wrap gap-2 justify-center">
               {GENRE_OPTIONS.map((genre) => {
@@ -77,8 +77,8 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
                     type="button"
                     className={`px-3 py-1 rounded-full border focus:outline-none transition-colors
                       ${selected
-                        ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
-                        : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-50'}
+                        ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                        : 'bg-background text-primary border-primary hover:bg-primary/10'}
                       ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                     onClick={() => handleGenreToggle(genre)}
@@ -95,7 +95,7 @@ function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext 
         <div className="flex justify-end">
           <button 
             type="button" 
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+            className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleNext}
             disabled={!name.trim()}
           >
@@ -167,47 +167,47 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-center">Import Your Movie Library</h2>
-      <p className="text-base text-gray-600 mb-4 text-center">
+      <p className="text-base text-muted-foreground mb-4 text-center">
         If you already track your movies on Letterboxd, you can quickly import your watched list here.<br />
-        <span className="text-gray-500">Don't use Letterboxd? <b>Add movies manually</b> instead.</span>
+        <span className="text-muted-foreground">Don't use Letterboxd? <b>Add movies manually</b> instead.</span>
       </p>
       <div className="flex flex-col items-center gap-6">
-        <div className="bg-gray-50 rounded-lg p-4 flex flex-col items-center gap-4 w-full max-w-md">
-          <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-blue-600 rounded-lg border-2 border-blue-600 border-dashed cursor-pointer hover:bg-blue-50">
+        <div className="bg-secondary rounded-lg p-4 flex flex-col items-center gap-4 w-full max-w-md">
+          <label className="w-full flex flex-col items-center px-4 py-6 bg-background text-primary rounded-lg border-2 border-primary border-dashed cursor-pointer hover:bg-primary/10">
             <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             <span className="text-sm font-medium">Click to upload ZIP or CSV</span>
             <input type="file" accept=".csv,.zip" className="hidden" onChange={handleFileUpload} disabled={isProcessing} />
           </label>
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-muted-foreground text-center">
             Import your movies from Letterboxd by uploading your exported <b>ZIP file</b> or the <b>watched.csv</b> file.<br />
-            <span className="text-gray-500">We recommend uploading the ZIP file directly – we'll find the right file for you!</span><br />
+            <span className="text-muted-foreground">We recommend uploading the ZIP file directly – we'll find the right file for you!</span><br />
             <a
               href="https://letterboxd.com/settings/data/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-700"
+              className="text-primary hover:text-accent"
             >
               Get your Letterboxd export
             </a>
           </p>
           {file && (
-            <div className="text-sm text-gray-700">Selected file: {file.name}</div>
+            <div className="text-sm text-foreground">Selected file: {file.name}</div>
           )}
           {importStatus.status !== 'idle' && (
             <div className="space-y-2">
               <div className={`text-center text-sm ${
-                importStatus.status === 'success' ? 'text-green-600' :
-                importStatus.status === 'error' ? 'text-red-600' :
-                'text-blue-600'
+                importStatus.status === 'success' ? 'text-success' :
+                importStatus.status === 'error' ? 'text-destructive' :
+                'text-primary'
               }`}>
                 {importStatus.message}
               </div>
               {importStatus.status === 'loading' && importStatus.progress !== undefined && (
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${importStatus.progress}%` }}
                   ></div>
                 </div>
@@ -217,11 +217,11 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
         </div>
         <div className="flex gap-4 justify-between w-full max-w-md">
           {onBack && (
-            <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack} disabled={isProcessing}>Back</button>
+            <button type="button" className="px-4 py-2 rounded bg-secondary hover:bg-secondary/80 text-foreground" onClick={onBack} disabled={isProcessing}>Back</button>
           )}
           <div className="flex gap-4 ml-auto">
-            <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onManual} disabled={isProcessing}>Add movies manually</button>
-            <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium" onClick={handleFinalizeImport} disabled={!file || isProcessing}>Finalize Import</button>
+            <button type="button" className="px-4 py-2 rounded bg-secondary hover:bg-secondary/80 text-foreground" onClick={onManual} disabled={isProcessing}>Add movies manually</button>
+            <button type="button" className="px-6 py-2 rounded bg-primary hover:bg-primary/90 text-primary-foreground font-medium" onClick={handleFinalizeImport} disabled={!file || isProcessing}>Finalize Import</button>
           </div>
         </div>
       </div>
@@ -305,7 +305,7 @@ function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
   return (
     <div className="flex flex-col items-center w-full pb-16">
       <h2 className="text-2xl font-bold mb-6 text-center">Add Movies to Your Library</h2>
-      <p className="text-base text-gray-600 mb-4 text-center">
+      <p className="text-base text-muted-foreground mb-4 text-center">
         Browse our movie catalog and select the films you've already watched. This helps us get your recommendations and rankings started!
       </p>
       <div className="w-full mb-6">
@@ -317,9 +317,9 @@ function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
       </div>
       <div className="flex gap-4 justify-between mt-8 w-full max-w-5xl mb-8">
         {onBack && (
-          <button type="button" className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700" onClick={onBack} disabled={isSaving}>Back</button>
+          <button type="button" className="px-4 py-2 rounded bg-secondary hover:bg-secondary/80 text-foreground" onClick={onBack} disabled={isSaving}>Back</button>
         )}
-        <button type="button" className="px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto" onClick={handleFinish} disabled={isSaving}>Finish</button>
+        <button type="button" className="px-6 py-2 rounded bg-primary hover:bg-primary/90 text-primary-foreground font-medium ml-auto" onClick={handleFinish} disabled={isSaving}>Finish</button>
       </div>
     </div>
   );
@@ -339,7 +339,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
     navigate('/dashboard');
   };
   return (
-    <div className="flex justify-center bg-gray-50 px-4">
+    <div className="flex justify-center bg-background px-4">
       <div className="w-full max-w-5xl mx-auto flex flex-col items-center pt-12 md:pt-20">
         {step === 1 && (
           <ProfileStep

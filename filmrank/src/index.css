@@ -40,6 +40,8 @@ img {
     --accent-foreground: 36 30% 15%;
     --destructive: 350 70% 48%;
     --destructive-foreground: 0 0% 98%;
+    --success: 142 55% 32%;
+    --success-foreground: 0 0% 98%;
     --border: 38 20% 88%;
     --input: 38 20% 88%;
     --ring: 8 64% 48%;
@@ -68,6 +70,8 @@ img {
     --accent-foreground: 25 35% 12%;
     --destructive: 350 65% 45%;
     --destructive-foreground: 0 0% 98%;
+    --success: 142 60% 42%;
+    --success-foreground: 0 0% 98%;
     --border: 27 23% 18%;
     --input: 27 23% 18%;
     --ring: 14 62% 49%;
@@ -106,7 +110,7 @@ img {
   50% { opacity: .7; }
 }
 
-.marquee-page ::selection {
+::selection {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
 }

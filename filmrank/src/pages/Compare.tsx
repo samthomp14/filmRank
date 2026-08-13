@@ -123,7 +123,7 @@ function Compare() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Loading movies...</div>
+        <div className="text-muted-foreground text-lg">Loading movies...</div>
       </div>
     )
   }
@@ -131,7 +131,7 @@ function Compare() {
   if (!movies || movies.length < 2) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Not enough movies to compare.</div>
+        <div className="text-muted-foreground text-lg">Not enough movies to compare.</div>
       </div>
     )
   }
@@ -141,14 +141,14 @@ function Compare() {
       <div className="max-w-4xl w-full">
         {/* Header Section */}
         <div className="text-center mb-16 relative">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Which movie do you prefer?</h1>
-          <p className="text-gray-600">
+          <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground mb-2">Which movie do you prefer?</h1>
+          <p className="text-muted-foreground">
             You've made {comparisonsToday} comparisons today
           </p>
           {/* Information Icon */}
           <button
             onClick={() => setShowModal(true)}
-            className="absolute top-0 right-0 p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-full"
+            className="absolute top-0 right-0 p-2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-full"
             aria-label="Show tips and controls"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,8 +169,8 @@ function Compare() {
             />
 
             {/* VS Text */}
-            <div className="px-2 sm:px-6 py-2 rounded-full shadow-sm bg-white">
-              <span className="text-2xl font-bold text-gray-400">VS</span>
+            <div className="px-2 sm:px-6 py-2 rounded-full shadow-sm bg-card">
+              <span className="text-2xl font-bold text-muted-foreground">VS</span>
             </div>
 
             {/* Second Movie */}
@@ -187,7 +187,7 @@ function Compare() {
         <div className="flex justify-center">
           <button
             onClick={handleSkip}
-            className="text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-lg px-4 py-2"
+            className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-lg px-4 py-2"
           >
             Skip this pair
           </button>
@@ -197,11 +197,11 @@ function Compare() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
+          <div className="bg-card border border-border rounded-lg max-w-md w-full p-6 relative">
             {/* Close Button */}
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-full"
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-full"
               aria-label="Close modal"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,28 +211,28 @@ function Compare() {
 
             {/* Modal Content */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Tips & Controls</h3>
+              <h3 className="text-lg font-semibold text-foreground">Tips & Controls</h3>
               
               <div className="space-y-3">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">How to compare:</h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-medium text-foreground mb-2">How to compare:</h4>
+                  <p className="text-sm text-muted-foreground">
                     Click on the movie you prefer. The more you compare, the more accurate your rankings will become!
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Keyboard shortcuts:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">←</kbd> Choose left movie</li>
-                    <li>• <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">→</kbd> Choose right movie</li>
-                    <li>• <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Space</kbd> Skip this pair</li>
+                  <h4 className="font-medium text-foreground mb-2">Keyboard shortcuts:</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• <kbd className="px-2 py-1 bg-secondary rounded text-xs">←</kbd> Choose left movie</li>
+                    <li>• <kbd className="px-2 py-1 bg-secondary rounded text-xs">→</kbd> Choose right movie</li>
+                    <li>• <kbd className="px-2 py-1 bg-secondary rounded text-xs">Space</kbd> Skip this pair</li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Today's progress:</h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-medium text-foreground mb-2">Today's progress:</h4>
+                  <p className="text-sm text-muted-foreground">
                     You've made <span className="font-semibold">{comparisonsToday}</span> comparisons today.
                   </p>
                 </div>
@@ -241,7 +241,7 @@ function Compare() {
               <div className="pt-4">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 >
                   Got it!
                 </button>

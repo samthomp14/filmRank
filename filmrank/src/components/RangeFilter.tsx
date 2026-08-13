@@ -35,7 +35,7 @@ export default function RangeFilter({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-2">{label}</label>
       <div className="flex gap-2 items-center min-w-0">
         <input
           type="number"
@@ -43,16 +43,16 @@ export default function RangeFilter({
           placeholder={placeholder.min}
           value={min}
           onChange={(e) => handleMinChange(e.target.value)}
-          className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 min-w-0 px-3 py-2 border border-border bg-background rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
         />
-        <span className="text-gray-500 flex-shrink-0">to</span>
+        <span className="text-muted-foreground flex-shrink-0">to</span>
         <input
           type="number"
           step={step}
           placeholder={placeholder.max}
           value={max}
           onChange={(e) => handleMaxChange(e.target.value)}
-          className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 min-w-0 px-3 py-2 border border-border bg-background rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
         />
       </div>
     </div>

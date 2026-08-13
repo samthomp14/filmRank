@@ -173,7 +173,7 @@ export default function Landing() {
   const right = demo ? demo.films[demo.pair[1]] ?? null : null
 
   return (
-    <div className="dark marquee-page min-h-screen bg-background font-sans text-foreground">
+    <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="marquee-scrim sticky top-0 z-[5] flex items-center justify-between gap-6 border-b border-marquee-hairline px-10 py-[18px] backdrop-blur">
         <div className="flex items-center gap-[11px]">
           <span className="block h-[11px] w-[11px] rounded-full bg-marquee-bulb shadow-[0_0_12px_2px_rgba(232,190,74,.7)]" />

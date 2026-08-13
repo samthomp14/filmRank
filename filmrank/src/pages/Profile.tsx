@@ -99,7 +99,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Loading profile...</div>
+        <div className="text-muted-foreground text-lg">Loading profile...</div>
       </div>
     )
   }
@@ -107,7 +107,7 @@ export default function Profile() {
   if (error) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-red-600 text-lg">{error}</div>
+        <div className="text-destructive text-lg">{error}</div>
       </div>
     )
   }
@@ -115,47 +115,47 @@ export default function Profile() {
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-card border border-border rounded-xl shadow-md overflow-hidden">
           <div className="p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Profile</h1>
+            <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground mb-8 text-center">Profile</h1>
             
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Account Information</h2>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <h2 className="text-lg font-semibold text-foreground mb-2">Account Information</h2>
+                <div className="bg-secondary rounded-lg p-4 space-y-3">
                   <div>
-                    <span className="text-sm text-gray-500">Email</span>
-                    <p className="text-gray-900">{profile?.email}</p>
+                    <span className="text-sm text-muted-foreground">Email</span>
+                    <p className="text-foreground">{profile?.email}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Member Since</span>
-                    <p className="text-gray-900">{profile?.created_at}</p>
+                    <span className="text-sm text-muted-foreground">Member Since</span>
+                    <p className="text-foreground">{profile?.created_at}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Last Sign In</span>
-                    <p className="text-gray-900">{profile?.last_sign_in}</p>
+                    <span className="text-sm text-muted-foreground">Last Sign In</span>
+                    <p className="text-foreground">{profile?.last_sign_in}</p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Import Movies</h2>
-                <div className="bg-gray-50 rounded-lg p-4">
+                <h2 className="text-lg font-semibold text-foreground mb-2">Import Movies</h2>
+                <div className="bg-secondary rounded-lg p-4">
                   <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Import your movies from Letterboxd by uploading your exported <b>ZIP file</b> or the <b>watched.csv</b> file.<br />
-                      <span className="text-gray-500">We recommend uploading the ZIP file directly – we'll find the right file for you!</span><br />
+                      <span className="text-muted-foreground">We recommend uploading the ZIP file directly – we'll find the right file for you!</span><br />
                       <a 
                         href="https://letterboxd.com/settings/data/" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700"
+                        className="text-primary hover:text-accent"
                       >
                         Get your Letterboxd export here
                       </a>
                     </p>
                     <div className="flex items-center justify-center w-full">
-                      <label className="w-full flex flex-col items-center px-4 py-6 bg-white text-blue-600 rounded-lg border-2 border-blue-600 border-dashed cursor-pointer hover:bg-blue-50">
+                      <label className="w-full flex flex-col items-center px-4 py-6 bg-background text-primary rounded-lg border-2 border-primary border-dashed cursor-pointer hover:bg-primary/10">
                         <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
@@ -172,16 +172,16 @@ export default function Profile() {
                     {importStatus.status !== 'idle' && (
                       <div className="space-y-2">
                         <div className={`text-center text-sm ${
-                          importStatus.status === 'success' ? 'text-green-600' :
-                          importStatus.status === 'error' ? 'text-red-600' :
-                          'text-blue-600'
+                          importStatus.status === 'success' ? 'text-success' :
+                          importStatus.status === 'error' ? 'text-destructive' :
+                          'text-primary'
                         }`}>
                           {importStatus.message}
                         </div>
                         {importStatus.status === 'loading' && importStatus.progress !== undefined && (
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="w-full bg-muted rounded-full h-2">
                             <div 
-                              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                              className="bg-primary h-2 rounded-full transition-all duration-300" 
                               style={{ width: `${importStatus.progress}%` }}
                             ></div>
                           </div>
@@ -193,11 +193,11 @@ export default function Profile() {
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">My Library</h2>
-                <div className="bg-gray-50 rounded-lg p-4">
+                <h2 className="text-lg font-semibold text-foreground mb-2">My Library</h2>
+                <div className="bg-secondary rounded-lg p-4">
                   <Link
                     to="/my-movies"
-                    className="w-full bg-white text-blue-600 px-4 py-2 rounded-lg font-medium border border-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center"
+                    className="w-full bg-background text-primary px-4 py-2 rounded-lg font-medium border border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background flex items-center justify-center"
                   >
                     View Library
                   </Link>
@@ -205,11 +205,11 @@ export default function Profile() {
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Security</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-2">Security</h2>
                 {isEditing ? (
                   <form onSubmit={handlePasswordChange} className="space-y-4">
                     <div>
-                      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="newPassword" className="block text-sm font-medium text-foreground mb-1">
                         New Password
                       </label>
                       <input
@@ -217,12 +217,12 @@ export default function Profile() {
                         id="newPassword"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:border-primary"
                         required
                       />
                     </div>
                     <div>
-                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1">
                         Confirm Password
                       </label>
                       <input
@@ -230,14 +230,14 @@ export default function Profile() {
                         id="confirmPassword"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:border-primary"
                         required
                       />
                     </div>
                     <div className="flex space-x-4">
                       <button
                         type="submit"
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                       >
                         Update Password
                       </button>
@@ -248,17 +248,17 @@ export default function Profile() {
                           setNewPassword('')
                           setConfirmPassword('')
                         }}
-                        className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                        className="flex-1 bg-secondary text-foreground px-4 py-2 rounded-lg font-medium hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                       >
                         Cancel
                       </button>
                     </div>
                   </form>
                 ) : (
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="bg-secondary rounded-lg p-4">
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="w-full bg-white text-blue-600 px-4 py-2 rounded-lg font-medium border border-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className="w-full bg-background text-primary px-4 py-2 rounded-lg font-medium border border-primary hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                     >
                       Change Password
                     </button>

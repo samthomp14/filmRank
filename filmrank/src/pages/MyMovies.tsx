@@ -34,21 +34,21 @@ interface FilterSectionProps {
 
 const FilterSection: React.FC<FilterSectionProps> = ({ title, isExpanded, onToggle, children, hasActiveFilters = false }) => {
   return (
-    <div className="border border-gray-200 rounded-lg">
+    <div className="border border-border rounded-lg">
       <button
         onClick={onToggle}
-        className="w-full px-4 py-3 flex items-center justify-between text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-150"
+        className="w-full px-4 py-3 flex items-center justify-between text-left bg-secondary hover:bg-secondary/80 rounded-lg transition-colors duration-150"
       >
         <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900">{title}</span>
+          <span className="font-medium text-foreground">{title}</span>
           {hasActiveFilters && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/15 text-primary">
               Active
             </span>
           )}
         </div>
         <svg
-          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -278,7 +278,7 @@ export default function MyMovies() {
       key: 'searchTerm', 
       label: 'Title', 
       value: filters.searchTerm,
-      color: 'bg-purple-100 text-purple-800'
+      color: 'bg-purple-500/15 text-purple-300'
     })
     
     if (filters.yearRange.min !== 1900 || filters.yearRange.max !== new Date().getFullYear()) {
@@ -286,7 +286,7 @@ export default function MyMovies() {
         key: 'yearRange', 
         label: 'Year', 
         value: `${filters.yearRange.min} - ${filters.yearRange.max}`,
-        color: 'bg-blue-100 text-blue-800'
+        color: 'bg-blue-500/15 text-blue-300'
       })
     }
     
@@ -295,7 +295,7 @@ export default function MyMovies() {
         key: 'runtimeRange', 
         label: 'Runtime', 
         value: `${filters.runtimeRange.min} - ${filters.runtimeRange.max} min`,
-        color: 'bg-green-100 text-green-800'
+        color: 'bg-green-500/15 text-green-300'
       })
     }
     
@@ -304,7 +304,7 @@ export default function MyMovies() {
         key: 'imdbRatingRange', 
         label: 'IMDB', 
         value: `${filters.imdbRatingRange.min} - ${filters.imdbRatingRange.max}`,
-        color: 'bg-yellow-100 text-yellow-800'
+        color: 'bg-yellow-500/15 text-yellow-300'
       })
     }
     
@@ -313,7 +313,7 @@ export default function MyMovies() {
         key: 'ratings', 
         label: 'Rating', 
         value: filters.selectedRatings.join(', '),
-        color: 'bg-red-100 text-red-800'
+        color: 'bg-red-500/15 text-red-300'
       })
     }
     
@@ -322,7 +322,7 @@ export default function MyMovies() {
         key: 'genres', 
         label: 'Genre', 
         value: filters.selectedGenres.join(', '),
-        color: 'bg-indigo-100 text-indigo-800'
+        color: 'bg-indigo-500/15 text-indigo-300'
       })
     }
     
@@ -331,7 +331,7 @@ export default function MyMovies() {
         key: 'directors', 
         label: 'Director', 
         value: filters.selectedDirectors.join(', '),
-        color: 'bg-pink-100 text-pink-800'
+        color: 'bg-pink-500/15 text-pink-300'
       })
     }
     
@@ -340,7 +340,7 @@ export default function MyMovies() {
         key: 'languages', 
         label: 'Language', 
         value: filters.selectedLanguages.join(', '),
-        color: 'bg-orange-100 text-orange-800'
+        color: 'bg-orange-500/15 text-orange-300'
       })
     }
     
@@ -349,7 +349,7 @@ export default function MyMovies() {
         key: 'countries', 
         label: 'Country', 
         value: filters.selectedCountries.join(', '),
-        color: 'bg-teal-100 text-teal-800'
+        color: 'bg-teal-500/15 text-teal-300'
       })
     }
     
@@ -387,7 +387,7 @@ export default function MyMovies() {
           <img
             src={movie.url || FALLBACK_IMAGE}
             alt={movie.title}
-            className="w-full h-full object-cover bg-gray-200 pointer-events-none"
+            className="w-full h-full object-cover bg-muted pointer-events-none"
             onError={(e) => {
               e.currentTarget.src = FALLBACK_IMAGE
             }}
@@ -399,7 +399,7 @@ export default function MyMovies() {
               e.stopPropagation();
               setMovieToDelete(movie);
             }}
-            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 z-10 pointer-events-auto"
+            className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background z-10 pointer-events-auto"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -408,11 +408,11 @@ export default function MyMovies() {
         </div>
         {/* Title and year */}
         <div className="mt-2">
-          <h3 className="font-semibold text-gray-900 text-sm leading-tight truncate" title={movie.title}>
+          <h3 className="font-semibold text-foreground text-sm leading-tight truncate" title={movie.title}>
             {movie.title}
           </h3>
           {movie.year && (
-            <p className="text-gray-500 text-xs mt-1">{movie.year}</p>
+            <p className="text-muted-foreground text-xs mt-1">{movie.year}</p>
           )}
         </div>
       </div>
@@ -422,7 +422,7 @@ export default function MyMovies() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Loading movies...</div>
+        <div className="text-muted-foreground text-lg">Loading movies...</div>
       </div>
     )
   }
@@ -430,7 +430,7 @@ export default function MyMovies() {
   if (error) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-red-600 text-lg">{error.message || error.toString()}</div>
+        <div className="text-destructive text-lg">{error.message || error.toString()}</div>
       </div>
     )
   }
@@ -442,14 +442,14 @@ export default function MyMovies() {
           {/* Filter Sidebar - Desktop Only */}
             {showFilters && (
             <div className="hidden lg:block w-96">
-              <div className="w-96 bg-white rounded-xl shadow-md border border-gray-200 mt-16">
+              <div className="w-96 bg-card rounded-xl shadow-md border border-border mt-16">
                 <div className="flex flex-col">
                   {/* Header */}
                   <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-900">Filters</h3>
+                    <h3 className="text-lg font-medium text-foreground">Filters</h3>
                     <button
                       onClick={() => setShowFilters(false)}
-                      className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-lg p-1"
+                      className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-lg p-1"
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -460,7 +460,7 @@ export default function MyMovies() {
                   <div className="p-4 space-y-6">
                     {/* Basic Filters - Always Visible */}
                     <div className="space-y-4">
-                      <h4 className="text-sm font-medium text-gray-700">Basic Filters</h4>
+                      <h4 className="text-sm font-medium text-foreground">Basic Filters</h4>
                       {/* Year Range */}
                       <RangeFilter
                         label="Year Range"
@@ -569,7 +569,7 @@ export default function MyMovies() {
                     </FilterSection>
                   </div>
                   {/* Footer */}
-                  <div className="p-4 border-t border-gray-200">
+                  <div className="p-4 border-t border-border">
                     <button
                       onClick={() => setFilters({
                         searchTerm: '',
@@ -582,7 +582,7 @@ export default function MyMovies() {
                         selectedLanguages: [],
                         selectedCountries: []
                       })}
-                      className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      className="w-full px-4 py-2 text-sm font-medium text-foreground bg-secondary border border-border rounded-lg hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                     >
                       Clear All Filters
                     </button>
@@ -594,14 +594,14 @@ export default function MyMovies() {
           {/* Main Content */}
           <div className={`flex-1 transition-[margin,max-width] duration-300 ${!showFilters ? 'mx-auto max-w-3xl' : ''}`}> 
             <div className="px-2 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Library</h1>
+            <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground mb-8 text-center">My Library</h1>
             {/* Search and Filter Bar */}
             {movies.length > 0 && (
               <div className="mb-6 space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -610,7 +610,7 @@ export default function MyMovies() {
                       placeholder="Search movies by title..."
                       value={filters.searchTerm}
                       onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full pl-10 pr-3 py-2 border border-border rounded-lg leading-5 bg-background placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                     />
                   </div>
                   {/* View Toggle */}
@@ -619,8 +619,8 @@ export default function MyMovies() {
                       onClick={() => setViewMode('list')}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                         viewMode === 'list'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-foreground hover:bg-secondary/80'
                       }`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -631,8 +631,8 @@ export default function MyMovies() {
                       onClick={() => setViewMode('grid')}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                         viewMode === 'grid'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-foreground hover:bg-secondary/80'
                       }`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -642,12 +642,12 @@ export default function MyMovies() {
                   </div>
                   {/* Sort Dropdown and Toggle */}
                   <div className="flex items-center gap-2">
-                    <label htmlFor="sort" className="text-sm text-gray-700">Sort by:</label>
+                    <label htmlFor="sort" className="text-sm text-foreground">Sort by:</label>
                     <select
                       id="sort"
                       value={sortOption.field}
                       onChange={e => setSortOption(opt => ({ ...opt, field: e.target.value }))}
-                      className="px-2 py-1 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-2 py-1 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="title">Title</option>
                       <option value="year">Year</option>
@@ -658,7 +658,7 @@ export default function MyMovies() {
                     <button
                       type="button"
                       onClick={() => setSortOption(opt => ({ ...opt, direction: opt.direction === 'asc' ? 'desc' : 'asc' }))}
-                      className="p-2 rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="p-2 rounded border border-border bg-background hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary"
                       title={`Sort ${sortOption.direction === 'asc' ? 'Descending' : 'Ascending'}`}
                     >
                       {sortOption.direction === 'asc' ? (
@@ -670,7 +670,7 @@ export default function MyMovies() {
                   </div>
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center gap-2"
+                    className="px-4 py-2 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background flex items-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
@@ -682,14 +682,14 @@ export default function MyMovies() {
               )}
               {/* Filter Panel - Mobile Only, rendered after Filters button */}
               {showFilters && (
-                <div className="lg:hidden w-full bg-white rounded-xl shadow-md border border-gray-200 mt-4 mb-4">
+                <div className="lg:hidden w-full bg-card rounded-xl shadow-md border border-border mt-4 mb-4">
                   <div className="flex flex-col">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                      <h3 className="text-lg font-medium text-gray-900">Filters</h3>
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <h3 className="text-lg font-medium text-foreground">Filters</h3>
                       <button
                         onClick={() => setShowFilters(false)}
-                        className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded-lg p-1"
+                        className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-lg p-1"
                       >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -700,7 +700,7 @@ export default function MyMovies() {
                     <div className="p-4 space-y-6">
                       {/* Basic Filters - Always Visible */}
                       <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-gray-700">Basic Filters</h4>
+                        <h4 className="text-sm font-medium text-foreground">Basic Filters</h4>
                         {/* Year Range */}
                         <RangeFilter
                           label="Year Range"
@@ -822,7 +822,7 @@ export default function MyMovies() {
                           selectedLanguages: [],
                           selectedCountries: []
                         })}
-                        className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                        className="w-full px-4 py-2 text-sm font-medium text-foreground bg-secondary border border-border rounded-lg hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                       >
                         Clear All Filters
                       </button>
@@ -841,7 +841,7 @@ export default function MyMovies() {
                     {tag.label}: {tag.value}
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-blue-600 hover:text-blue-800 focus:outline-none"
+                      className="ml-2 text-foreground/70 hover:text-foreground focus:outline-none"
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -861,7 +861,7 @@ export default function MyMovies() {
                     selectedLanguages: [],
                     selectedCountries: []
                   })}
-                  className="ml-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none"
+                  className="ml-2 px-3 py-1 rounded-full text-xs font-medium bg-muted text-foreground hover:bg-muted/70 focus:outline-none"
                 >
                   Clear All
                 </button>
@@ -870,17 +870,17 @@ export default function MyMovies() {
 
             
             {movies.length === 0 ? (
-              <div className="text-center text-gray-600">
+              <div className="text-center text-muted-foreground">
                 <p className="mb-4">You haven't added any movies yet.</p>
                 <a
                   href="/add"
-                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 >
                   Add Your First Movie
                 </a>
               </div>
             ) : filteredMovies.length === 0 && (filters.searchTerm || filters.selectedRatings.length > 0 || filters.selectedGenres.length > 0 || filters.selectedDirectors.length > 0 || filters.selectedLanguages.length > 0 || filters.selectedCountries.length > 0) ? (
-              <div className="text-center text-gray-600">
+              <div className="text-center text-muted-foreground">
                 <p className="mb-4">No movies found matching your filters.</p>
                 <button
                   onClick={() => setFilters({
@@ -894,7 +894,7 @@ export default function MyMovies() {
                     selectedLanguages: [],
                     selectedCountries: []
                   })}
-                  className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 >
                   Clear All Filters
                 </button>
@@ -909,30 +909,30 @@ export default function MyMovies() {
             ) : (
               <div className="space-y-4 px-2 sm:px-0">
                 {sortedMovies.map((movie) => (
-                  <div key={movie.id} className="bg-white rounded-xl shadow hover:shadow-md transition duration-150 ease-in-out">
-                    <Link to={`/movie/${movie.id}`} className="block rounded-xl p-6 focus:outline-none focus:ring-2 focus:ring-blue-500" state={{ from: 'my-movies' }}>
+                  <div key={movie.id} className="bg-card border border-border rounded-xl shadow hover:shadow-md transition duration-150 ease-in-out">
+                    <Link to={`/movie/${movie.id}`} className="block rounded-xl p-6 focus:outline-none focus:ring-2 focus:ring-primary" state={{ from: 'my-movies' }}>
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <h2 className="text-xl font-semibold text-gray-900 mb-2">{movie.title}</h2>
-                          <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                          <h2 className="text-xl font-semibold text-foreground mb-2">{movie.title}</h2>
+                          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                             {movie.year && (
-                              <span className="bg-gray-200 px-2 py-1 rounded">{movie.year}</span>
+                              <span className="bg-muted px-2 py-1 rounded">{movie.year}</span>
                             )}
                             {movie.runtime && (
-                              <span className="bg-gray-200 px-2 py-1 rounded">{formatRuntime(movie.runtime)}</span>
+                              <span className="bg-muted px-2 py-1 rounded">{formatRuntime(movie.runtime)}</span>
                             )}
                             {movie.rating && (
-                              <span className="bg-gray-200 px-2 py-1 rounded">{movie.rating}</span>
+                              <span className="bg-muted px-2 py-1 rounded">{movie.rating}</span>
                             )}
                             {movie.imdb_rating && (
-                              <span className="bg-gray-200 px-2 py-1 rounded">{formatIMDBRating(movie.imdb_rating)}</span>
+                              <span className="bg-muted px-2 py-1 rounded">{formatIMDBRating(movie.imdb_rating)}</span>
                             )}
                           </div>
                           {movie.genre && (
-                            <p className="text-sm text-gray-500 mt-1">{movie.genre}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{movie.genre}</p>
                           )}
                           {movie.director && (
-                            <p className="text-sm text-gray-500">Director: {movie.director}</p>
+                            <p className="text-sm text-muted-foreground">Director: {movie.director}</p>
                           )}
                         </div>
                         <div className="flex items-center ml-4">
@@ -941,7 +941,7 @@ export default function MyMovies() {
                               e.preventDefault();
                               setMovieToDelete(movie);
                             }}
-                            className="text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg p-2"
+                            className="text-destructive hover:text-destructive/80 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background rounded-lg p-2"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -961,22 +961,22 @@ export default function MyMovies() {
 
       {/* Delete Confirmation Modal */}
       {movieToDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Movie</h3>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-medium text-foreground mb-4">Delete Movie</h3>
+            <p className="text-muted-foreground mb-6">
               Are you sure you want to delete "{movieToDelete.title}"? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setMovieToDelete(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-lg hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(movieToDelete)}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive rounded-lg hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background"
               >
                 Delete
               </button>

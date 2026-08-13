@@ -84,7 +84,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600 text-lg">Loading dashboard...</div>
+        <div className="text-muted-foreground text-lg">Loading dashboard...</div>
       </div>
     )
   }
@@ -93,25 +93,25 @@ export default function Dashboard() {
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome to FilmRank</h1>
-          <p className="mt-4 text-lg text-gray-600">Your personal movie ranking system</p>
+          <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground">Welcome to FilmRank</h1>
+          <p className="mt-4 text-lg text-muted-foreground">Your personal movie ranking system</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-card border border-border rounded-xl shadow-md overflow-hidden">
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
               <div className="space-y-4">
                 <Link
                   to="/compare"
-                  className="block w-full bg-blue-600 text-white text-center px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-150 ease-in-out"
+                  className="block w-full bg-primary text-primary-foreground text-center px-4 py-3 rounded-lg font-medium hover:bg-primary/90 transition duration-150 ease-in-out"
                 >
                   Compare Movies
                 </Link>
                 <Link
                   to="/add"
-                  className="block w-full bg-white text-blue-600 text-center px-4 py-3 rounded-lg font-medium border border-blue-600 hover:bg-blue-50 transition duration-150 ease-in-out"
+                  className="block w-full bg-background text-primary text-center px-4 py-3 rounded-lg font-medium border border-primary hover:bg-primary/10 transition duration-150 ease-in-out"
                 >
                   Add New Movie
                 </Link>
@@ -120,19 +120,19 @@ export default function Dashboard() {
           </div>
 
           {/* Stats */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-card border border-border rounded-xl shadow-md overflow-hidden">
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Stats</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">Your Stats</h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total Movies</span>
-                  <span className="text-2xl font-bold text-blue-600">{stats.totalMovies}</span>
+                  <span className="text-muted-foreground">Total Movies</span>
+                  <span className="text-2xl font-bold text-primary">{stats.totalMovies}</span>
                 </div>
                 {stats.topMovie && (
                   <div className="pt-4 border-t">
-                    <span className="text-gray-600 block mb-2">Top Rated Movie</span>
-                    <span className="text-lg font-semibold text-gray-900">{stats.topMovie.title}</span>
-                    <span className="block text-sm text-gray-500">Elo: {stats.topMovie.elo_score.toFixed(0)}</span>
+                    <span className="text-muted-foreground block mb-2">Top Rated Movie</span>
+                    <span className="text-lg font-semibold text-foreground">{stats.topMovie.title}</span>
+                    <span className="block text-sm text-muted-foreground">Elo: {stats.topMovie.elo_score.toFixed(0)}</span>
                   </div>
                 )}
               </div>
@@ -140,20 +140,20 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Movies */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-card border border-border rounded-xl shadow-md overflow-hidden">
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Movies</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">Recent Movies</h2>
               {stats.recentMovies.length > 0 ? (
                 <ul className="space-y-3">
                   {stats.recentMovies.map((movie) => (
                     <li key={movie.id} className="flex justify-between items-center">
-                      <span className="text-gray-900">{movie.title}</span>
-                      <span className="text-sm text-gray-500">Elo: {movie.elo_score.toFixed(0)}</span>
+                      <span className="text-foreground">{movie.title}</span>
+                      <span className="text-sm text-muted-foreground">Elo: {movie.elo_score.toFixed(0)}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-500">No movies added yet</p>
+                <p className="text-muted-foreground">No movies added yet</p>
               )}
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function Dashboard() {
         <div className="text-center">
           <Link
             to="/ranking"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-150 ease-in-out"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 transition duration-150 ease-in-out"
           >
             View Full Rankings
           </Link>

@@ -8,7 +8,7 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			display: ['"Fraunces"', 'ui-serif', 'serif'],
+  			display: ['"Oswald"', 'sans-serif'],
   			marquee: ['"Oswald"', 'sans-serif'],
   			wordmark: ['"Limelight"', 'serif']
   		},
@@ -47,6 +47,10 @@ export default {
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			success: {
+  				DEFAULT: 'hsl(var(--success))',
+  				foreground: 'hsl(var(--success-foreground))'
   			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
