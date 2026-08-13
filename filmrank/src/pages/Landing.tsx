@@ -49,6 +49,16 @@ function drawPair(n: number, exclude?: [number, number]): [number, number] {
   return [a, b]
 }
 
+function drawOpponent(n: number, exclude: number[]): number {
+  let candidate = 0
+  let guard = 0
+  do {
+    candidate = Math.floor(Math.random() * n)
+    guard++
+  } while (exclude.includes(candidate) && guard < 50)
+  return candidate
+}
+
 export default function Landing() {
   const [demo, setDemo] = useState<DemoState | null>(null)
   const [demoUnavailable, setDemoUnavailable] = useState(false)
@@ -134,7 +144,13 @@ export default function Landing() {
         const delta = before.indexOf(id) - i
         if (delta > 0) moves[id] = delta
       })
-      return { films, picks: s.picks + 1, pair: drawPair(films.length, s.pair), moves }
+
+      const winnerIdx = films.findIndex((f) => f.id === winnerId)
+      const loserIdx = films.findIndex((f) => f.id === loserId)
+      const opponentIdx = drawOpponent(films.length, [winnerIdx, loserIdx])
+      const pair: [number, number] = s.pair[0] === winnerIdx ? [winnerIdx, opponentIdx] : [opponentIdx, winnerIdx]
+
+      return { films, picks: s.picks + 1, pair, moves }
     })
   }
 
