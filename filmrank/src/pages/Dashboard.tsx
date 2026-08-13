@@ -49,16 +49,14 @@ function daysAgo(dateStr: string) {
 
 function Poster({ url, title, size }: { url: string | null; title: string; size: string }) {
   return (
-    <div className="poster-frame flex-shrink-0 rounded p-[5px]">
-      <img
-        src={url || FALLBACK_IMAGE}
-        alt={title}
-        className={`${size} rounded-sm object-cover`}
-        onError={(e) => {
-          e.currentTarget.src = FALLBACK_IMAGE
-        }}
-      />
-    </div>
+    <img
+      src={url || FALLBACK_IMAGE}
+      alt={title}
+      className={`${size} rounded-sm object-cover ring-1 ring-accent/50`}
+      onError={(e) => {
+        e.currentTarget.src = FALLBACK_IMAGE
+      }}
+    />
   )
 }
 
@@ -253,8 +251,8 @@ export default function Dashboard() {
 
         {/* Top Ranked spotlight */}
         {stats.topMovies.length > 0 && (
-          <div className="marquee-frame mb-8 rounded-xl p-1">
-            <div className="rounded-lg border border-border bg-card p-6">
+          <div className="marquee-frame mb-8 rounded-[6px] p-1">
+            <div className="rounded-[3px] border border-border bg-card p-6">
               <div className="mb-4 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">Top Ranked</div>
               <div className="grid grid-cols-3 gap-4 sm:gap-6">
                 {stats.topMovies.map((movie, i) => (
@@ -304,16 +302,16 @@ export default function Dashboard() {
           {movers.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto pb-2">
               {movers.map((m) => (
-                <div key={m.movie.id} className="w-24 flex-shrink-0">
+                <Link key={m.movie.id} to={`/movie/${m.movie.id}`} className="group w-24 flex-shrink-0">
                   <div className="relative">
-                    <Poster url={m.movie.url} title={m.movie.title} size="w-full aspect-[2/3]" />
+                    <Poster url={m.movie.url} title={m.movie.title} size="w-full aspect-[2/3] transition-transform duration-200 group-hover:scale-105" />
                     <span className="absolute -right-1 -top-1 rounded-full bg-success px-1.5 py-0.5 text-[10px] font-bold text-success-foreground shadow">
                       ▲{m.net}
                     </span>
                   </div>
                   <div className="mt-2 truncate text-xs font-medium text-foreground">{m.movie.title}</div>
                   <div className="text-[11px] text-muted-foreground">{m.wins}W – {m.losses}L</div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -326,16 +324,16 @@ export default function Dashboard() {
           <div className="mb-10">
             <h2 className="mb-4 font-marquee text-lg font-semibold uppercase tracking-[.06em] text-foreground">On a Streak 🔥</h2>
             <div className="flex gap-4">
-              <div className="w-24 flex-shrink-0">
+              <Link to={`/movie/${winStreak.movie.id}`} className="group w-24 flex-shrink-0">
                 <div className="relative">
-                  <Poster url={winStreak.movie.url} title={winStreak.movie.title} size="w-full aspect-[2/3]" />
+                  <Poster url={winStreak.movie.url} title={winStreak.movie.title} size="w-full aspect-[2/3] transition-transform duration-200 group-hover:scale-105" />
                   <span className="absolute -right-1 -top-1 rounded-full bg-success px-1.5 py-0.5 text-[10px] font-bold text-success-foreground shadow">
                     {winStreak.streak}🔥
                   </span>
                 </div>
                 <div className="mt-2 truncate text-xs font-medium text-foreground">{winStreak.movie.title}</div>
                 <div className="text-[11px] text-success">{winStreak.streak} wins in a row</div>
-              </div>
+              </Link>
             </div>
           </div>
         )}
