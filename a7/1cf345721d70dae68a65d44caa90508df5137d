@@ -1,0 +1,25 @@
+filmrank/src/pages/Landing.tsx
+  s_a024cd28c7c25f::t_fd825f0d6a75fd 147-153
+  s_a024cd28c7c25f::t_14d20ba26e875b 52-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a71cf345721d70dae68a65d44caa90508df5137d",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_a024cd28c7c25f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65527df9-632b-4833-af85-5ba265350de0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
