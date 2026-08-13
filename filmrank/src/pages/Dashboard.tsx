@@ -312,14 +312,16 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Win Streak spotlight */}
+        {/* Win Streak */}
         {winStreak && (
-          <div className="mb-10 flex items-center gap-6 rounded-xl border border-border bg-card p-6">
-            <Poster url={winStreak.movie.url} title={winStreak.movie.title} size="w-16 h-24" />
-            <div className="min-w-0">
-              <div className="mb-2 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">On a Streak 🔥</div>
-              <div className="text-lg font-semibold text-foreground">{winStreak.movie.title}</div>
-              <div className="text-sm text-success">{winStreak.streak} wins in a row</div>
+          <div className="mb-10">
+            <h2 className="mb-4 font-marquee text-lg font-semibold uppercase tracking-[.06em] text-foreground">On a Streak 🔥</h2>
+            <div className="flex items-center gap-6">
+              <Poster url={winStreak.movie.url} title={winStreak.movie.title} size="w-16 h-24" />
+              <div className="min-w-0">
+                <div className="text-lg font-semibold text-foreground">{winStreak.movie.title}</div>
+                <div className="text-sm text-success">{winStreak.streak} wins in a row</div>
+              </div>
             </div>
           </div>
         )}
