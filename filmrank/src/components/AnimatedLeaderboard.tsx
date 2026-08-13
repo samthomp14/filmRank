@@ -1,203 +1,48 @@
-import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import type { RankedRow } from '../lib/demoTypes'
 
-interface MovieRanking {
-  id: number
-  title: string
-  position: number
+interface AnimatedLeaderboardProps {
+  rows: RankedRow[]
+  listLabel: string
 }
 
-export default function AnimatedLeaderboard() {
-  const [rankings, setRankings] = useState<MovieRanking[]>([
-    { id: 1, title: "The Shawshank Redemption", position: 1 },
-    { id: 2, title: "Pulp Fiction", position: 2 },
-    { id: 3, title: "The Dark Knight", position: 3 },
-    { id: 4, title: "Fight Club", position: 4 },
-    { id: 5, title: "Inception", position: 5 }
-  ])
-
-  const [isVisible, setIsVisible] = useState(false)
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Show component with entrance animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true)
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [])
-
-  // Animate rankings every 8 seconds
-  useEffect(() => {
-    const startAnimationCycle = () => {
-      // Clear any existing timeout
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current)
-      }
-      
-      // Schedule next animation
-      animationTimeoutRef.current = setTimeout(() => {
-        animateRankings()
-        startAnimationCycle() // Schedule the next one
-      }, 8000) // Fixed 8 second interval
-    }
-
-    // Start first animation after initial delay
-    const initialTimer = setTimeout(() => {
-      animateRankings()
-      startAnimationCycle() // Start the recurring schedule
-    }, 4000) // Start after 4 seconds
-
-    return () => {
-      clearTimeout(initialTimer)
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  const animateRankings = () => {
-    // Pick one random movie to move
-    const movieToMove = Math.floor(Math.random() * 5)
-    const currentPosition = rankings[movieToMove].position
-    let newPosition
-    
-    // Determine new position (avoid staying in same position)
-    do {
-      newPosition = Math.floor(Math.random() * 5) + 1
-    } while (newPosition === currentPosition)
-    
-    // Create new rankings array with updated positions
-    const tempRankings = [...rankings]
-    
-    // Find the movie to move
-    const movieToMoveData = tempRankings[movieToMove]
-    
-    // Remove it from current position
-    tempRankings.splice(movieToMove, 1)
-    
-    // Insert it at new position
-    tempRankings.splice(newPosition - 1, 0, movieToMoveData)
-    
-    // Update all positions
-    tempRankings.forEach((movie, index) => {
-      movie.position = index + 1
-    })
-    
-    console.log('Animation:', { 
-      movieToMove: movieToMoveData.title,
-      from: currentPosition, 
-      to: newPosition
-    })
-    
-    // Update state
-    setRankings(tempRankings)
-  }
-
-  const getPositionColor = (position: number) => {
-    switch (position) {
-      case 1:
-        return 'bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950'
-      case 2:
-        return 'bg-gradient-to-r from-stone-300 to-stone-400 text-stone-800'
-      case 3:
-        return 'bg-gradient-to-r from-amber-700 to-amber-800 text-amber-100'
-      default:
-        return 'bg-stone-100 text-stone-500'
-    }
-  }
-
-  const getPositionIcon = (position: number) => {
-    switch (position) {
-      case 1:
-        return '🥇'
-      case 2:
-        return '🥈'
-      case 3:
-        return '🥉'
-      default:
-        return `${position}`
-    }
-  }
-
+export default function AnimatedLeaderboard({ rows, listLabel }: AnimatedLeaderboardProps) {
   return (
-    <motion.div 
-      className="w-full max-w-md mx-auto"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-    >
-      <div className="bg-card rounded-2xl shadow-xl shadow-black/10 p-6 border border-border">
-        <h4 className="text-lg font-display font-semibold text-foreground mb-4 text-center">
-          Your Evolving Rankings
-        </h4>
-
-        <div className="relative">
-          <div className="space-y-3">
-            <AnimatePresence mode="wait">
-              {rankings.map((movie) => (
-                <motion.div
-                  key={movie.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    layout: { duration: 0.8, ease: "easeOut" }
-                  }}
-                  className={`
-                    flex items-center justify-between p-3 rounded-lg border
-                    ${movie.position === 1 ? 'border-accent/40 bg-accent/10' : 'border-border bg-muted'}
-                  `}
-                >
-                  <div className="flex items-center space-x-3">
-                    <motion.div
-                      className={`
-                        w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                        ${getPositionColor(movie.position)}
-                      `}
-                      layout
-                      transition={{ duration: 0.6, ease: "easeOut" }}
-                    >
-                      {getPositionIcon(movie.position)}
-                    </motion.div>
-                    <div>
-                      <div className={`font-medium ${movie.position === 1 ? 'text-accent-foreground' : 'text-foreground'}`}>
-                        {movie.title}
-                      </div>
-                    </div>
-                  </div>
-
-                  {movie.position === 1 && (
-                    <motion.div
-                      className="flex items-center space-x-1"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-                    >
-                      <span className="text-accent">⭐</span>
-                      <span className="text-xs font-medium text-accent-foreground">Top</span>
-                    </motion.div>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+    <div className="marquee-frame-thin rounded-[6px] p-[14px]">
+      <div className="rounded-[2px] bg-marquee-paper p-[18px_20px] shadow-[inset_0_0_0_1px_rgba(0,0,0,.18)]">
+        <div className="mb-[10px] font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-primary">
+          {listLabel}
         </div>
-
-        <div className="mt-4 text-center">
-          <motion.div
-            className="text-xs text-muted-foreground"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            Rankings update as you compare movies...
-          </motion.div>
+        <div>
+          <AnimatePresence initial={false}>
+            {rows.map((row) => (
+              <motion.div
+                key={row.id}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ layout: { duration: 0.5, ease: 'easeOut' }, opacity: { duration: 0.3 } }}
+                className="grid grid-cols-[28px_1fr_34px_auto] items-center gap-3 border-t border-marquee-paper-divider py-[11px]"
+              >
+                <span className="font-marquee text-[12px] font-medium text-primary">
+                  {String(row.position).padStart(2, '0')}
+                </span>
+                <span className="font-marquee text-[16px] font-semibold uppercase tracking-[.07em] text-marquee-paper-foreground">
+                  {row.title}
+                </span>
+                <span
+                  className="text-right font-marquee text-[11px] font-medium tracking-[.06em] text-marquee-movement transition-opacity duration-300"
+                  style={{ opacity: row.move > 0 ? 1 : 0 }}
+                >
+                  ▲{row.move || ''}
+                </span>
+                <span className="font-marquee text-[11px] font-medium text-marquee-paper-muted">{row.year ?? ''}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
-} 
+}

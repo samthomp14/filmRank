@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Landing page" description="Pre-login landing page with a live head-to-head demo in the hero." -->
+<helmet>
+<script src="./ds-base.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Limelight&display=swap" rel="stylesheet" />
+<style>
+body{margin:0;background:#12100E}
+::selection{background:#E8BE4A;color:#2A1D14}
+a{color:#E8BE4A;text-decoration:none}
+a:hover{color:#F7DC9C}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bulbs{0%,100%{opacity:1}50%{opacity:.7}}
+</style>
+</helmet>
+<div style="background:#12100E;color:#F4EADB;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh">
+<header style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 40px;background:rgba(18,16,14,.92);backdrop-filter:blur(8px);border-bottom:1px solid #2A231C;position:sticky;top:0;z-index:5">
+<div style="display:flex;align-items:center;gap:11px"><span style="width:11px;height:11px;border-radius:50%;background:#FFE7A6;box-shadow:0 0 12px 2px rgba(232,190,74,.7);display:block"></span><span style="font-family:Limelight,serif;font-size:19px;letter-spacing:.06em;color:#F4EADB">FilmRank</span></div>
+<div style="display:flex;align-items:center;gap:22px"><a href="#" style="font-family:Oswald,sans-serif;font-size:15px;letter-spacing:.04em;color:#9A8F80">Sign in</a><a href="#" style="font-family:Oswald,sans-serif;font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#C9522F;color:#FFF3E2;padding:10px 20px;border-radius:4px;box-shadow:0 0 0 1px rgba(232,190,74,.5),0 8px 20px -8px rgba(201,82,47,.7)">Create free account</a></div>
+</header>
+<div style="height:16px;background:radial-gradient(circle at 12px 8px,#FFE7A6 0 3.2px,rgba(232,190,74,.3) 4px,transparent 4.6px) 0 0/24px 16px,linear-gradient(#B9451F,#8E2F16);animation:bulbs 2.8s ease-in-out infinite"></div>
+
+<section style="max-width:1080px;margin:0 auto;padding:60px 40px 76px">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px"><span style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#E8BE4A">Now showing</span><span style="width:5px;height:5px;border-radius:50%;background:#4A3E31"></span><span style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#7E7365">Round {{ roundLabel }} · no stars, no scores out of ten</span></div>
+<h1 style="font-family:Oswald,sans-serif;font-size:60px;line-height:1.06;letter-spacing:.015em;font-weight:600;text-transform:uppercase;margin:0 0 18px;max-width:17ch">Which one did you like more?</h1>
+<p style="font-size:17px;line-height:1.6;color:#9A8F80;max-width:52ch;margin:0 0 40px">That is the whole app. Pick a side below and watch a ranked list build itself out of your answers.</p>
+
+<div style="max-width:760px;padding:20px;border-radius:6px;background:radial-gradient(circle at 12px 8px,#FFE7A6 0 3px,rgba(232,190,74,.28) 3.8px,transparent 4.4px) 0 0/24px 16px repeat-x,radial-gradient(circle at 12px 8px,#FFE7A6 0 3px,rgba(232,190,74,.28) 3.8px,transparent 4.4px) 0 100%/24px 16px repeat-x,radial-gradient(circle at 8px 12px,#FFE7A6 0 3px,rgba(232,190,74,.28) 3.8px,transparent 4.4px) 0 0/16px 24px repeat-y,radial-gradient(circle at 8px 12px,#FFE7A6 0 3px,rgba(232,190,74,.28) 3.8px,transparent 4.4px) 100% 0/16px 24px repeat-y,linear-gradient(160deg,#B9451F,#8E2F16);box-shadow:0 30px 60px -30px rgba(255,180,90,.35)">
+<div style="background:#1A1613;border:1px solid #3A2E24;border-radius:3px;padding:22px">
+<div style="display:grid;grid-template-columns:1fr 68px 1fr;align-items:center">
+<button onClick="{{ pickLeft }}" style="text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;border:none;background:transparent;display:block;transition:transform .18s" style-hover="transform:translateY(-3px)">
+<div style="background:linear-gradient(160deg,#3A2E24,#221B15 55%,#332921);border-radius:4px;padding:9px;box-shadow:0 22px 40px -22px rgba(0,0,0,.9),inset 0 0 0 1px rgba(232,190,74,.5)">
+<div style="position:relative;aspect-ratio:2/3;overflow:hidden;background:repeating-linear-gradient(45deg,#EFE4CE 0 9px,#E6D9BF 9px 18px)">
+<div style="position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.3) 0 22%,rgba(255,255,255,.04) 22% 34%,transparent 34% 62%,rgba(255,255,255,.14) 62% 70%,transparent 70%);pointer-events:none"></div>
+<span style="position:absolute;left:12px;bottom:12px;font-family:Oswald,sans-serif;font-weight:500;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#A2967F">poster</span>
+</div>
+<div style="padding:12px 4px 4px;text-align:center">
+<div style="font-family:Oswald,sans-serif;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.25;color:#F4EADB">{{ leftTitle }}</div>
+<div style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.12em;color:#E8BE4A;margin-top:6px">{{ leftYear }}</div>
+</div>
+</div>
+</button>
+<div style="display:flex;align-items:center;justify-content:center"><span style="width:46px;height:46px;border-radius:50%;background:#C9522F;color:#FFF3E2;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 3px rgba(232,190,74,.55),0 0 18px rgba(232,190,74,.3)">VS</span></div>
+<button onClick="{{ pickRight }}" style="text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;border:none;background:transparent;display:block;transition:transform .18s" style-hover="transform:translateY(-3px)">
+<div style="background:linear-gradient(160deg,#3A2E24,#221B15 55%,#332921);border-radius:4px;padding:9px;box-shadow:0 22px 40px -22px rgba(0,0,0,.9),inset 0 0 0 1px rgba(232,190,74,.5)">
+<div style="position:relative;aspect-ratio:2/3;overflow:hidden;background:repeating-linear-gradient(135deg,#EFE4CE 0 9px,#E6D9BF 9px 18px)">
+<div style="position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.3) 0 22%,rgba(255,255,255,.04) 22% 34%,transparent 34% 62%,rgba(255,255,255,.14) 62% 70%,transparent 70%);pointer-events:none"></div>
+<span style="position:absolute;left:12px;bottom:12px;font-family:Oswald,sans-serif;font-weight:500;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#A2967F">poster</span>
+</div>
+<div style="padding:12px 4px 4px;text-align:center">
+<div style="font-family:Oswald,sans-serif;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;line-height:1.25;color:#F4EADB">{{ rightTitle }}</div>
+<div style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.12em;color:#E8BE4A;margin-top:6px">{{ rightYear }}</div>
+</div>
+</div>
+</button>
+</div>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:14px;margin-top:20px"><span style="font-family:Oswald,sans-serif;font-weight:500;font-size:12px;color:#7E7365">Haven't seen one?</span><button onClick="{{ skip }}" style="font-family:Oswald,sans-serif;font-weight:500;font-size:12px;color:#9A8F80;background:transparent;border:1px solid #3A2E24;border-radius:4px;padding:7px 14px;cursor:pointer" style-hover="border-color:#E8BE4A;color:#E8BE4A">Skip this pair</button></div>
+
+<sc-if value="{{ showPrompt }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:28px;max-width:760px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#1A1613;border:1px solid #3A2E24;border-radius:4px;padding:16px 20px;animation:fadeUp .35s ease both">
+<p style="font-size:14px;line-height:1.5;color:#9A8F80;margin:0;flex:1;min-width:260px">You're four picks into a ranking. It disappears when you close the tab — keep it and it becomes your Top 100.</p>
+<a href="#" style="font-family:Oswald,sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#E8BE4A;color:#2A1D14;padding:11px 22px;border-radius:4px;white-space:nowrap">Save my list</a>
+</div>
+</sc-if>
+</section>
+
+<section style="border-top:1px solid #2A231C;border-bottom:1px solid #2A231C;background:#171310">
+<div style="max-width:1080px;margin:0 auto;padding:58px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:36px">
+<div><div style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.2em;color:#E8BE4A;margin-bottom:12px">01</div><h3 style="font-family:Oswald,sans-serif;font-size:20px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px">Pick a side</h3><p style="font-size:14px;line-height:1.65;color:#9A8F80;margin:0">Two films at a time. One click, no review box, no half-star agonising.</p></div>
+<div><div style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.2em;color:#E8BE4A;margin-bottom:12px">02</div><h3 style="font-family:Oswald,sans-serif;font-size:20px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px">The list reorders</h3><p style="font-size:14px;line-height:1.65;color:#9A8F80;margin:0">Every answer moves both films. Ten picks in, the order already looks like you.</p></div>
+<div><div style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.2em;color:#E8BE4A;margin-bottom:12px">03</div><h3 style="font-family:Oswald,sans-serif;font-size:20px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px">Your top 100 writes itself</h3><p style="font-size:14px;line-height:1.65;color:#9A8F80;margin:0">Come back whenever. The ranking keeps sharpening in the background.</p></div>
+</div>
+</section>
+
+<section style="max-width:1080px;margin:0 auto;padding:72px 40px">
+<div style="display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center">
+<div>
+<h2 style="font-family:Oswald,sans-serif;font-size:40px;line-height:1.1;letter-spacing:.015em;font-weight:600;text-transform:uppercase;margin:0 0 16px">A list you'd actually defend</h2>
+<p style="font-size:16px;line-height:1.65;color:#9A8F80;margin:0 0 26px;max-width:42ch">Star ratings flatten everything into fours and fives. Comparisons force a real answer, so the order at the top means something.</p>
+<a href="#" style="display:inline-block;font-family:Oswald,sans-serif;font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#C9522F;color:#FFF3E2;padding:13px 26px;border-radius:4px;box-shadow:0 0 0 1px rgba(232,190,74,.5),0 10px 22px -8px rgba(201,82,47,.6)">Create free account</a>
+<p style="font-family:Oswald,sans-serif;font-weight:500;font-size:12px;color:#7E7365;margin:16px 0 0">Free. About thirty seconds.</p>
+</div>
+<div style="padding:14px;border-radius:6px;background:radial-gradient(circle at 10px 7px,#FFE7A6 0 2.6px,rgba(232,190,74,.25) 3.3px,transparent 3.9px) 0 0/20px 14px repeat-x,radial-gradient(circle at 10px 7px,#FFE7A6 0 2.6px,rgba(232,190,74,.25) 3.3px,transparent 3.9px) 0 100%/20px 14px repeat-x,linear-gradient(160deg,#B9451F,#8E2F16)">
+<div style="background:#F2EDE1;border-radius:2px;padding:18px 20px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)">
+<div style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8E2F16;margin-bottom:10px">{{ listLabel }}</div>
+<sc-for list="{{ sampleTop }}" as="row" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:28px 1fr 34px auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #D6CCB6">
+<span style="font-family:Oswald,sans-serif;font-weight:500;font-size:12px;color:#C9522F">{{ row.pos }}</span>
+<span style="font-family:Oswald,sans-serif;font-size:16px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#231D18">{{ row.title }}</span>
+<span style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.06em;color:#1F7A4D;text-align:right;opacity:{{ row.moveOpacity }};transition:opacity .3s">▲{{ row.move }}</span>
+<span style="font-family:Oswald,sans-serif;font-weight:500;font-size:11px;color:#8B8377">{{ row.year }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</section>
+
+<div style="height:16px;background:radial-gradient(circle at 12px 8px,#FFE7A6 0 3.2px,rgba(232,190,74,.3) 4px,transparent 4.6px) 0 0/24px 16px,linear-gradient(#B9451F,#8E2F16)"></div>
+<footer style="background:#0E0C0A;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap"><span style="font-family:Limelight,serif;font-size:16px;letter-spacing:.06em;color:#F4EADB">FilmRank</span><span style="font-family:Oswald,sans-serif;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7E7365">Start with two films.</span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  constructor(p){
+    super(p);
+    const films = [
+      ['Heat',1995],['Chungking Express',1994],['Paris, Texas',1984],['Whiplash',2014],
+      ['Zodiac',2007],['In the Mood for Love',2000],['Aliens',1986],['Burning',2018],
+      ['The Thing',1982],['Past Lives',2023]
+    ].map((f,i)=>({id:i,title:f[0],year:f[1],score:0}));
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('filmrank.demo') || 'null'); } catch(e){}
+    this.state = saved && saved.films && saved.films.length===films.length
+      ? { films: saved.films, pair: saved.pair || [0,1], picks: saved.picks || 0, moves: saved.moves || {} }
+      : { films, pair:[0,1], picks:0, moves:{} };
+  }
+  persist(){
+    const {films,pair,picks,moves} = this.state;
+    try { localStorage.setItem('filmrank.demo', JSON.stringify({films,pair,picks,moves})); } catch(e){}
+  }
+  nextPair(exclude){
+    const n = this.state.films.length;
+    let a,b,guard=0;
+    do { a=Math.floor(Math.random()*n); b=Math.floor(Math.random()*n); guard++; }
+    while ((a===b || (exclude && a===exclude[0] && b===exclude[1])) && guard<50);
+    return [a,b];
+  }
+  pick(winner, loser){
+    this.setState(s=>{
+      const before = this.order(s.films).map(f=>f.id);
+      const films = s.films.map(f=> f.id===winner ? {...f,score:f.score+1} : f.id===loser ? {...f,score:f.score-0.5} : f);
+      const after = this.order(films).map(f=>f.id);
+      const moves = {};
+      after.forEach((id,i)=>{ const d = before.indexOf(id)-i; if(d>0) moves[id]='+'+d; });
+      return { films, picks:s.picks+1, pair:this.nextPair(s.pair), moves };
+    }, ()=>this.persist());
+  }
+  order(films){ return [...films].sort((x,y)=> y.score-x.score || x.id-y.id); }
+  renderVals(){
+    const s = this.state;
+    const L = s.films[s.pair[0]], R = s.films[s.pair[1]];
+    return {
+      roundLabel: String(s.picks+1).padStart(2,'0'),
+      leftTitle:L.title, leftYear:L.year, rightTitle:R.title, rightYear:R.year,
+      showPrompt: s.picks>=4,
+      pickLeft: ()=>this.pick(L.id,R.id),
+      pickRight: ()=>this.pick(R.id,L.id),
+      skip: ()=>this.setState(st=>({pair:this.nextPair(st.pair)}), ()=>this.persist()),
+      listLabel: s.picks===0 ? 'Your list · not started' : 'Your list · ' + s.picks + (s.picks===1?' pick':' picks'),
+      sampleTop: this.order(s.films).slice(0,6).map((f,i)=>({
+        pos: String(i+1).padStart(2,'0'),
+        title: f.title,
+        year: f.year,
+        move: s.moves[f.id] || '',
+        moveOpacity: s.moves[f.id] ? 1 : 0
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -8,7 +8,9 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			display: ['"Fraunces"', 'ui-serif', 'serif']
+  			display: ['"Fraunces"', 'ui-serif', 'serif'],
+  			marquee: ['"Oswald"', 'sans-serif'],
+  			wordmark: ['"Limelight"', 'serif']
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -55,6 +57,21 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			marquee: {
+  				hairline: 'var(--marquee-hairline)',
+  				dot: 'var(--marquee-dot)',
+  				tertiary: 'var(--marquee-tertiary)',
+  				'link-hover': 'var(--marquee-link-hover)',
+  				bulb: 'var(--marquee-bulb)',
+  				band: 'var(--marquee-band)',
+  				footer: 'var(--marquee-footer)',
+  				paper: 'var(--marquee-paper)',
+  				'paper-foreground': 'var(--marquee-paper-foreground)',
+  				'paper-muted': 'var(--marquee-paper-muted)',
+  				'paper-divider': 'var(--marquee-paper-divider)',
+  				movement: 'var(--marquee-movement)',
+  				'poster-label': 'var(--marquee-poster-label)'
   			}
   		}
   	}

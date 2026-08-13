@@ -51,30 +51,118 @@ img {
     --radius: 0.75rem;
   }
   .dark {
-    --background: 20 14% 8%;
-    --foreground: 40 30% 96%;
-    --card: 20 12% 12%;
-    --card-foreground: 40 30% 96%;
-    --popover: 20 12% 12%;
-    --popover-foreground: 40 30% 96%;
-    --primary: 8 70% 55%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 20 10% 16%;
-    --secondary-foreground: 40 30% 96%;
-    --muted: 20 10% 16%;
-    --muted-foreground: 30 10% 65%;
-    --accent: 42 80% 62%;
-    --accent-foreground: 36 30% 12%;
+    /* Marquee Pop, dark — nudged to the FilmRank landing-page design tokens */
+    --background: 30 13% 6%;
+    --foreground: 36 53% 91%;
+    --card: 26 16% 9%;
+    --card-foreground: 36 53% 91%;
+    --popover: 26 16% 9%;
+    --popover-foreground: 36 53% 91%;
+    --primary: 14 62% 49%;
+    --primary-foreground: 35 100% 94%;
+    --secondary: 27 15% 14%;
+    --secondary-foreground: 36 53% 91%;
+    --muted: 26 18% 8%;
+    --muted-foreground: 35 11% 55%;
+    --accent: 44 77% 60%;
+    --accent-foreground: 25 35% 12%;
     --destructive: 350 65% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 20 10% 20%;
-    --input: 20 10% 20%;
-    --ring: 8 70% 55%;
-    --chart-1: 8 70% 55%;
-    --chart-2: 42 80% 62%;
+    --border: 27 23% 18%;
+    --input: 27 23% 18%;
+    --ring: 14 62% 49%;
+    --chart-1: 14 62% 49%;
+    --chart-2: 44 77% 60%;
     --chart-3: 93 30% 45%;
     --chart-4: 210 55% 60%;
     --chart-5: 280 45% 65%;
+
+    /* Marquee-only roles with no shadcn slot to reuse */
+    --marquee-hairline: #2A231C;
+    --marquee-dot: #4A3E31;
+    --marquee-tertiary: #7E7365;
+    --marquee-link-hover: #F7DC9C;
+    --marquee-bulb: #FFE7A6;
+    --marquee-gradient-start: #B9451F;
+    --marquee-gradient-end: #8E2F16;
+    --marquee-band: #171310;
+    --marquee-footer: #0E0C0A;
+    --marquee-frame-start: #3A2E24;
+    --marquee-frame-mid: #221B15;
+    --marquee-frame-end: #332921;
+    --marquee-poster-a: #EFE4CE;
+    --marquee-poster-b: #E6D9BF;
+    --marquee-poster-label: #A2967F;
+    --marquee-paper: #F2EDE1;
+    --marquee-paper-foreground: #231D18;
+    --marquee-paper-muted: #8B8377;
+    --marquee-paper-divider: #D6CCB6;
+    --marquee-movement: #1F7A4D;
+  }
+}
+
+@keyframes bulbs {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .7; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.marquee-page ::selection {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+@layer utilities {
+  .bulb-strip,
+  .bulb-strip-static {
+    background:
+      radial-gradient(circle at 12px 8px, var(--marquee-bulb) 0 3.2px, rgba(232, 190, 74, .3) 4px, transparent 4.6px) 0 0/24px 16px,
+      linear-gradient(var(--marquee-gradient-start), var(--marquee-gradient-end));
+  }
+  .bulb-strip {
+    animation: bulbs 2.8s ease-in-out infinite;
+  }
+
+  .marquee-frame {
+    background:
+      radial-gradient(circle at 12px 8px, var(--marquee-bulb) 0 3px, rgba(232, 190, 74, .28) 3.8px, transparent 4.4px) 0 0/24px 16px repeat-x,
+      radial-gradient(circle at 12px 8px, var(--marquee-bulb) 0 3px, rgba(232, 190, 74, .28) 3.8px, transparent 4.4px) 0 100%/24px 16px repeat-x,
+      radial-gradient(circle at 8px 12px, var(--marquee-bulb) 0 3px, rgba(232, 190, 74, .28) 3.8px, transparent 4.4px) 0 0/16px 24px repeat-y,
+      radial-gradient(circle at 8px 12px, var(--marquee-bulb) 0 3px, rgba(232, 190, 74, .28) 3.8px, transparent 4.4px) 100% 0/16px 24px repeat-y,
+      linear-gradient(160deg, var(--marquee-gradient-start), var(--marquee-gradient-end));
+    box-shadow: 0 30px 60px -30px rgba(255, 180, 90, .35);
+  }
+
+  .marquee-frame-thin {
+    background:
+      radial-gradient(circle at 10px 7px, var(--marquee-bulb) 0 2.6px, rgba(232, 190, 74, .25) 3.3px, transparent 3.9px) 0 0/20px 14px repeat-x,
+      radial-gradient(circle at 10px 7px, var(--marquee-bulb) 0 2.6px, rgba(232, 190, 74, .25) 3.3px, transparent 3.9px) 0 100%/20px 14px repeat-x,
+      linear-gradient(160deg, var(--marquee-gradient-start), var(--marquee-gradient-end));
+  }
+
+  .poster-frame {
+    background: linear-gradient(160deg, var(--marquee-frame-start), var(--marquee-frame-mid) 55%, var(--marquee-frame-end));
+    box-shadow: 0 22px 40px -22px rgba(0, 0, 0, .9), inset 0 0 0 1px rgba(232, 190, 74, .5);
+  }
+
+  .poster-glare {
+    background: linear-gradient(115deg, rgba(255, 255, 255, .3) 0 22%, rgba(255, 255, 255, .04) 22% 34%, transparent 34% 62%, rgba(255, 255, 255, .14) 62% 70%, transparent 70%);
+  }
+
+  .poster-placeholder-a {
+    background: repeating-linear-gradient(45deg, var(--marquee-poster-a) 0 9px, var(--marquee-poster-b) 9px 18px);
+  }
+
+  .poster-placeholder-b {
+    background: repeating-linear-gradient(135deg, var(--marquee-poster-a) 0 9px, var(--marquee-poster-b) 9px 18px);
+  }
+
+  .marquee-scrim {
+    background: rgba(18, 16, 14, .92);
   }
 }
 

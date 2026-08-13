@@ -1,205 +1,264 @@
-import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import {
-  CheckCircleIcon,
-  PlusIcon,
-  ArrowsRightLeftIcon,
-  SparklesIcon,
-  FilmIcon,
-  ArrowRightIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline'
-import AnimatedLeaderboard from '../components/AnimatedLeaderboard'
 import ComparisonAnimation from '../components/ComparisonAnimation'
+import AnimatedLeaderboard from '../components/AnimatedLeaderboard'
+import type { DemoFilm, RankedRow } from '../lib/demoTypes'
+
+const STORAGE_KEY = 'filmrank.demo'
+const POOL_SIZE = 10
+
+interface DemoState {
+  films: DemoFilm[]
+  pair: [number, number]
+  picks: number
+  moves: Record<string, number>
+}
+
+const STEPS = [
+  {
+    n: '01',
+    title: 'Pick a side',
+    body: 'Two films at a time. One click, no review box, no half-star agonising.',
+  },
+  {
+    n: '02',
+    title: 'The list reorders',
+    body: 'Every answer moves both films. Ten picks in, the order already looks like you.',
+  },
+  {
+    n: '03',
+    title: 'Your top 100 writes itself',
+    body: 'Come back whenever. The ranking keeps sharpening in the background.',
+  },
+]
+
+function orderFilms(films: DemoFilm[]) {
+  return [...films].sort((a, b) => b.score - a.score)
+}
+
+function drawPair(n: number, exclude?: [number, number]): [number, number] {
+  let a = 0
+  let b = 0
+  let guard = 0
+  do {
+    a = Math.floor(Math.random() * n)
+    b = Math.floor(Math.random() * n)
+    guard++
+  } while ((a === b || (exclude && a === exclude[0] && b === exclude[1])) && guard < 50)
+  return [a, b]
+}
 
 export default function Landing() {
-  const navigate = useNavigate()
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
-  const [picksMade, setPicksMade] = useState(0)
+  const [demo, setDemo] = useState<DemoState | null>(null)
+  const [demoUnavailable, setDemoUnavailable] = useState(false)
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      setIsLoggedIn(!!data.session)
+    let cancelled = false
+
+    async function init() {
+      let pool: { id: string; title: string; year: number | null; url: string | null }[] = []
+
+      const { data, error } = await supabase
+        .from('movies')
+        .select('id, title, year, url')
+        .not('url', 'is', null)
+        .order('imdb_rating', { ascending: false, nullsFirst: false })
+        .limit(40)
+      if (!error && data) pool = data
+
+      if (pool.length < 2) {
+        const fallback = await supabase.from('movies').select('id, title, year, url').limit(40)
+        if (!fallback.error && fallback.data) pool = fallback.data
+      }
+
+      if (cancelled) return
+
+      if (pool.length < 2) {
+        setDemoUnavailable(true)
+        return
+      }
+
+      const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, POOL_SIZE)
+      const freshFilms: DemoFilm[] = shuffled.map((m) => ({
+        id: m.id,
+        title: m.title,
+        year: m.year,
+        posterUrl: m.url,
+        score: 0,
+      }))
+
+      let restored: DemoState | null = null
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
+        if (saved && Array.isArray(saved.films) && saved.films.length === freshFilms.length) {
+          restored = {
+            films: saved.films,
+            pair: saved.pair ?? [0, 1],
+            picks: saved.picks ?? 0,
+            moves: saved.moves ?? {},
+          }
+        }
+      } catch {
+        // corrupt localStorage state — fall back to a fresh pool below
+      }
+
+      setDemo(restored ?? { films: freshFilms, pair: [0, 1], picks: 0, moves: {} })
     }
-    checkSession()
+
+    init()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const handleStartRanking = () => {
-    navigate(isLoggedIn ? '/compare' : '/signup')
+  useEffect(() => {
+    if (!demo) return
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(demo))
+    } catch {
+      // storage unavailable/full — the demo still works in-memory
+    }
+  }, [demo])
+
+  const pick = (winnerId: string, loserId: string) => {
+    setDemo((s) => {
+      if (!s) return s
+      const before = orderFilms(s.films).map((f) => f.id)
+      const films = s.films.map((f) =>
+        f.id === winnerId ? { ...f, score: f.score + 1 } : f.id === loserId ? { ...f, score: f.score - 0.5 } : f
+      )
+      const after = orderFilms(films).map((f) => f.id)
+      const moves: Record<string, number> = {}
+      after.forEach((id, i) => {
+        const delta = before.indexOf(id) - i
+        if (delta > 0) moves[id] = delta
+      })
+      return { films, picks: s.picks + 1, pair: drawPair(films.length, s.pair), moves }
+    })
   }
 
+  const skip = () => {
+    setDemo((s) => (s ? { ...s, pair: drawPair(s.films.length, s.pair) } : s))
+  }
+
+  const orderedFilms = demo ? orderFilms(demo.films) : []
+  const topRows: RankedRow[] = orderedFilms.slice(0, 6).map((f, i) => ({
+    position: i + 1,
+    id: f.id,
+    title: f.title,
+    year: f.year,
+    move: demo?.moves[f.id] ?? 0,
+  }))
+  const roundLabel = demo ? String(demo.picks + 1).padStart(2, '0') : '01'
+  const listLabel =
+    !demo || demo.picks === 0 ? 'Your list · not started' : `Your list · ${demo.picks} ${demo.picks === 1 ? 'pick' : 'picks'}`
+  const showSavePrompt = !!demo && demo.picks >= 4
+  const left = demo ? demo.films[demo.pair[0]] ?? null : null
+  const right = demo ? demo.films[demo.pair[1]] ?? null : null
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Hero Section */}
-      <section className="relative w-full overflow-hidden pt-16 pb-20 sm:pt-20 sm:pb-28 px-4">
-        {/* Ambient color washes */}
-        <div className="pointer-events-none absolute -top-24 right-0 w-[34rem] h-[34rem] bg-primary/20 rounded-full blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute top-1/3 -left-32 w-[26rem] h-[26rem] bg-accent/20 rounded-full blur-3xl" aria-hidden="true" />
-
-        <div className="relative container max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          {/* Left: Text Content */}
-          <div className="text-left">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-6">
-              <FilmIcon className="w-4 h-4" />
-              A calmer way to rank
-            </span>
-            <h1 className="font-display text-5xl sm:text-6xl font-semibold leading-[1.05] text-foreground mb-6 tracking-tight">
-              Stop rating your movies.
-              <br />
-              Start <span className="text-primary">comparing</span> them.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mb-8">
-              No stars. No five-point scales. No staring at a blank review box. Just pick which
-              film you liked more — FilmRank quietly turns every choice into your own evolving
-              Top 100.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                onClick={handleStartRanking}
-                className="group inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3.5 rounded-full font-semibold text-base shadow-lg shadow-primary/20 transition-colors"
-              >
-                Create your free account
-                <ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
-              <a
-                href="#how-it-works"
-                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-medium text-sm transition-colors"
-              >
-                See how it works
-                <ChevronDownIcon className="w-4 h-4" />
-              </a>
-            </div>
-            <p className="mt-5 text-xs text-muted-foreground">Free forever. No credit card. Takes about 30 seconds.</p>
-          </div>
-
-          {/* Right: Interactive comparison demo */}
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <span className="text-base">👆</span> Try it — click the one you'd pick
-            </p>
-            <ComparisonAnimation onPick={() => setPicksMade((p) => p + 1)} />
-            <AnimatePresence>
-              {picksMade > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-                  className="w-full max-w-md bg-card border border-primary/20 rounded-xl shadow-lg shadow-primary/10 px-5 py-4 flex items-center justify-between gap-4"
-                >
-                  <p className="text-sm text-foreground">
-                    {picksMade === 1
-                      ? "That's the whole idea. Sign up and every pick starts building your real list."
-                      : 'Keep going and this becomes your actual Top 100.'}
-                  </p>
-                  <button
-                    onClick={() => navigate('/signup')}
-                    className="flex-shrink-0 inline-flex items-center gap-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-4 py-2 rounded-full transition-colors"
-                  >
-                    Sign up
-                    <ArrowRightIcon className="w-3.5 h-3.5" />
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+    <div className="dark marquee-page min-h-screen bg-background font-sans text-foreground">
+      <header className="marquee-scrim sticky top-0 z-[5] flex items-center justify-between gap-6 border-b border-marquee-hairline px-10 py-[18px] backdrop-blur">
+        <div className="flex items-center gap-[11px]">
+          <span className="block h-[11px] w-[11px] rounded-full bg-marquee-bulb shadow-[0_0_12px_2px_rgba(232,190,74,.7)]" />
+          <span className="font-wordmark text-[19px] tracking-[.06em] text-foreground">FilmRank</span>
         </div>
-      </section>
-
-      {/* Why FilmRank? & AnimatedLeaderboard */}
-      <section className="relative w-full border-t border-border bg-card py-20 px-4">
-        <div className="container max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div>
-            <h3 className="font-display text-2xl sm:text-3xl font-semibold text-foreground mb-6">Why FilmRank?</h3>
-            <ul className="space-y-4 text-lg text-muted-foreground">
-              <li className="flex items-start gap-3">
-                <CheckCircleIcon className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <span>No reviews to write. No guilt. No wrong answers.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircleIcon className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <span>Your list updates every time you compare — gently, naturally.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircleIcon className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <span>It's not about "best films." It's about <strong className="text-foreground">your</strong> films.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircleIcon className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <span>Low-pressure, friendly, and made for movie lovers.</span>
-              </li>
-            </ul>
-          </div>
-          <div className="h-full w-full flex items-center justify-center">
-            <AnimatedLeaderboard />
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="relative w-full border-t border-border bg-background py-20 px-4 scroll-mt-16">
-        <div className="container max-w-5xl mx-auto">
-          <h3 className="font-display text-2xl sm:text-3xl font-semibold text-foreground mb-14 text-center">How It Works</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8 relative">
-            {/* connecting line, desktop only */}
-            <div className="hidden sm:block absolute top-8 left-[16.5%] right-[16.5%] h-px bg-border" aria-hidden="true" />
-            {/* Add */}
-            <div className="relative flex flex-col items-center text-center">
-              <div className="relative z-10 bg-card border border-primary/10 p-4 rounded-full shadow-sm">
-                <PlusIcon className="w-7 h-7 text-primary" />
-              </div>
-              <span className="mt-5 font-display font-semibold text-foreground text-lg">Add</span>
-              <p className="mt-2 text-muted-foreground leading-relaxed">Add movies you've seen or want to rank.</p>
-            </div>
-            {/* Compare */}
-            <div className="relative flex flex-col items-center text-center">
-              <div className="relative z-10 bg-card border border-primary/10 p-4 rounded-full shadow-sm">
-                <ArrowsRightLeftIcon className="w-7 h-7 text-primary" />
-              </div>
-              <span className="mt-5 font-display font-semibold text-foreground text-lg">Compare</span>
-              <p className="mt-2 text-muted-foreground leading-relaxed">Pick which movie you prefer in each matchup.</p>
-            </div>
-            {/* Rank */}
-            <div className="relative flex flex-col items-center text-center">
-              <div className="relative z-10 bg-card border border-primary/10 p-4 rounded-full shadow-sm">
-                <SparklesIcon className="w-7 h-7 text-primary" />
-              </div>
-              <span className="mt-5 font-display font-semibold text-foreground text-lg">Rank</span>
-              <p className="mt-2 text-muted-foreground leading-relaxed">Your list updates automatically as you compare.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="relative w-full overflow-hidden py-20 px-4 bg-primary">
-        <div
-          className="absolute top-0 left-0 right-0 h-2 opacity-40"
-          style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.9) 1.5px, transparent 1.5px)',
-            backgroundSize: '18px 8px',
-          }}
-          aria-hidden="true"
-        />
-        <div className="container max-w-3xl mx-auto text-center">
-          <h3 className="font-display text-3xl sm:text-4xl font-semibold text-primary-foreground mb-4">
-            Your list is waiting to happen.
-          </h3>
-          <p className="text-primary-foreground/80 text-lg mb-8">
-            Add a few films, make a few comparisons, and watch your Top 100 take shape.
-          </p>
-          <button
-            onClick={handleStartRanking}
-            className="group inline-flex items-center gap-2 bg-card hover:bg-secondary text-primary px-8 py-3.5 rounded-full font-semibold text-base shadow-lg shadow-black/10 transition-colors"
+        <div className="flex items-center gap-[22px]">
+          <Link to="/login" className="font-marquee text-[15px] tracking-[.04em] text-muted-foreground hover:text-foreground">
+            Sign in
+          </Link>
+          <Link
+            to="/signup"
+            className="rounded bg-primary px-5 py-[10px] font-marquee text-[15px] font-semibold uppercase tracking-[.06em] text-primary-foreground shadow-[0_0_0_1px_rgba(232,190,74,.5),0_8px_20px_-8px_rgba(201,82,47,.7)]"
           >
-            Create your free account
-            <ArrowRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
+            Create free account
+          </Link>
+        </div>
+      </header>
+
+      <div className="bulb-strip h-4" />
+
+      <section className="mx-auto max-w-[1080px] px-10 pb-[76px] pt-[60px]">
+        <div className="mb-[18px] flex flex-wrap items-center gap-[14px]">
+          <span className="font-marquee text-[11px] font-medium uppercase tracking-[.24em] text-accent">Now showing</span>
+          <span className="h-[5px] w-[5px] rounded-full bg-marquee-dot" />
+          <span className="font-marquee text-[11px] font-medium uppercase tracking-[.18em] text-marquee-tertiary">
+            Round {roundLabel} · no stars, no scores out of ten
+          </span>
+        </div>
+
+        <h1 className="mb-[18px] max-w-[17ch] font-marquee text-[38px] font-semibold uppercase leading-[1.06] tracking-[.015em] sm:text-[60px]">
+          Which one did you like more?
+        </h1>
+        <p className="mb-10 max-w-[52ch] text-[17px] leading-[1.6] text-muted-foreground">
+          That is the whole app. Pick a side below and watch a ranked list build itself out of your answers.
+        </p>
+
+        {demoUnavailable ? (
+          <div className="max-w-[760px] rounded border border-border bg-card p-6 text-[14px] text-muted-foreground">
+            The live demo needs a few films in the catalog first — come back once some have been added.
+          </div>
+        ) : (
+          <ComparisonAnimation left={left} right={right} onPickLeft={() => left && right && pick(left.id, right.id)} onPickRight={() => left && right && pick(right.id, left.id)} onSkip={skip} loading={!demo} />
+        )}
+
+        {showSavePrompt && (
+          <div className="mt-7 flex max-w-[760px] flex-wrap items-center gap-[18px] rounded border border-border bg-card px-5 py-4 [animation:fadeUp_.35s_ease_both]">
+            <p className="min-w-[260px] flex-1 text-[14px] leading-[1.5] text-muted-foreground">
+              This list lives on this device. Save it to keep it anywhere.
+            </p>
+            <Link
+              to="/signup"
+              className="whitespace-nowrap rounded bg-accent px-[22px] py-[11px] font-marquee text-[14px] font-semibold uppercase tracking-[.06em] text-accent-foreground"
+            >
+              Save my list
+            </Link>
+          </div>
+        )}
+      </section>
+
+      <section className="border-y border-marquee-hairline bg-marquee-band">
+        <div className="mx-auto grid max-w-[1080px] grid-cols-1 gap-9 px-10 py-[58px] sm:grid-cols-3">
+          {STEPS.map((step) => (
+            <div key={step.n}>
+              <div className="mb-3 font-marquee text-[11px] font-medium tracking-[.2em] text-accent">{step.n}</div>
+              <h3 className="mb-[10px] font-marquee text-[20px] font-semibold uppercase tracking-[.06em]">{step.title}</h3>
+              <p className="text-[14px] leading-[1.65] text-muted-foreground">{step.body}</p>
+            </div>
+          ))}
         </div>
       </section>
+
+      <section className="mx-auto max-w-[1080px] px-10 py-[72px]">
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <h2 className="mb-4 font-marquee text-[32px] font-semibold uppercase leading-[1.1] tracking-[.015em] sm:text-[40px]">
+              A list you'd actually defend
+            </h2>
+            <p className="mb-[26px] max-w-[42ch] text-[16px] leading-[1.65] text-muted-foreground">
+              Star ratings flatten everything into fours and fives. Comparisons force a real answer, so the order at
+              the top means something.
+            </p>
+            <Link
+              to="/signup"
+              className="inline-block rounded bg-primary px-[26px] py-[13px] font-marquee text-[15px] font-semibold uppercase tracking-[.06em] text-primary-foreground shadow-[0_0_0_1px_rgba(232,190,74,.5),0_10px_22px_-8px_rgba(201,82,47,.6)]"
+            >
+              Create free account
+            </Link>
+            <p className="mt-4 font-marquee text-[12px] font-medium text-marquee-tertiary">Free. About thirty seconds.</p>
+          </div>
+          <AnimatedLeaderboard rows={topRows} listLabel={listLabel} />
+        </div>
+      </section>
+
+      <div className="bulb-strip-static h-4" />
+      <footer className="flex flex-wrap items-center justify-between gap-6 bg-marquee-footer px-10 py-7">
+        <span className="font-wordmark text-[16px] tracking-[.06em] text-foreground">FilmRank</span>
+        <span className="font-marquee text-[12px] font-medium uppercase tracking-[.14em] text-marquee-tertiary">
+          Start with two films.
+        </span>
+      </footer>
     </div>
   )
 }
