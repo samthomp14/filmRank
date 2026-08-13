@@ -1,0 +1,40 @@
+filmrank/src/pages/Dashboard.tsx
+  s_2716d546c3be6c::t_1e71c9bdce02b2 255-272,274
+  s_2716d546c3be6c::t_3ce747616f22f7 5
+filmrank/src/index.css
+  s_2716d546c3be6c::t_298185c657b9f8 140-143,145-156
+filmrank/src/components/ComparisonAnimation.tsx
+  s_2716d546c3be6c::t_82e7a2a045ea7d 146-159,162-178
+  s_2716d546c3be6c::t_5bca25cdf28f46 4
+filmrank/src/components/MarqueeFrame.tsx
+  s_2716d546c3be6c::t_c87e71ab2edc9b 25-27,31,34-35,39,41,54-55,85
+  s_2716d546c3be6c::t_ccc3d74df71f9e 5,90
+  s_2716d546c3be6c::t_6208d3ed9a8ac7 4,6,19-24,30,32-33,40,53,56-60,84,97,104-106
+  s_2716d546c3be6c::t_983aa4f0b963c2 1,7,11-12,17-18,64-83,86,88-89,91-96,98-103,107-111
+  h_4e1d4ad18f97c2 8
+  s_2716d546c3be6c::t_efcf1ce7c04582 2-3,13-16,61-63,87,112-114
+  s_2716d546c3be6c::t_1ad1e46e4e7b56 9-10,28-29,36-38,42-52
+.gitignore
+  h_4e1d4ad18f97c2 33-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "279f8fbb910fdd079850708a5c2500939e6338a4",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_2716d546c3be6c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3e532787-c34a-476c-9b90-fd91ac0663c0",
+        "model": "grok-4.5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
