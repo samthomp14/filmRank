@@ -1,0 +1,181 @@
+filmrank/src/components/CheckboxFilter.tsx
+  s_a024cd28c7c25f::t_cd056101532f17 26-27,29,32,37,39
+filmrank/src/components/MultiSelectFilter.tsx
+  s_a024cd28c7c25f::t_4bc263823e2202 59,66,71,80,90,92,96,106,108,114,121,130,139,143
+filmrank/src/components/MovieCard.tsx
+  s_a024cd28c7c25f::t_30745e5cb4b8cd 26-27,33,42
+filmrank/src/components/RangeFilter.tsx
+  s_a024cd28c7c25f::t_7ecf957ccd1ec8 38,46,48,55
+filmrank/src/index.css
+  s_a024cd28c7c25f::t_83c8e7984c5cca 113
+  s_a024cd28c7c25f::t_3d6010db9b3642 43-44
+  s_a024cd28c7c25f::t_65ad4be4274de0 73-74
+filmrank/src/pages/Dashboard.tsx
+  s_a024cd28c7c25f::t_0635fc37b5c3a4 129
+  s_a024cd28c7c25f::t_7567f635236de2 102,123,143
+  s_a024cd28c7c25f::t_6c91f611d58429 96
+  s_a024cd28c7c25f::t_7a7fad69ce2922 135,151,156
+  s_a024cd28c7c25f::t_3cbf2c295cb3cc 114
+  s_a024cd28c7c25f::t_2d062e489fb277 104,125,134,145,150
+  s_a024cd28c7c25f::t_2459e1ebb88aa4 166
+  s_a024cd28c7c25f::t_6825adbef8a289 108
+  s_a024cd28c7c25f::t_8f2cb2c42ad82e 87,97,128,133
+filmrank/src/components/MovieGallery.tsx
+  s_a024cd28c7c25f::t_1d50ec1d8c7123 238,245
+  s_a024cd28c7c25f::t_a7f24ed1ac2fa0 177
+  s_a024cd28c7c25f::t_55a96fcd6e5f46 185
+  s_a024cd28c7c25f::t_7af325da24e765 138
+  s_a024cd28c7c25f::t_ba939fe8eb8b39 17
+  s_a024cd28c7c25f::t_6c9bfc0b017a22 151
+  s_a024cd28c7c25f::t_e52a3008a5bc3d 190
+  s_a024cd28c7c25f::t_23d9c09b41b1c8 129
+filmrank/tailwind.config.js
+  s_a024cd28c7c25f::t_020a374f77daa1 11
+  s_a024cd28c7c25f::t_f4627cea66d80c 51-54
+filmrank/src/pages/Profile.tsx
+  s_a024cd28c7c25f::t_62631e965073fb 120
+  s_a024cd28c7c25f::t_bf7c66adb7f39c 127,131,135,147
+  s_a024cd28c7c25f::t_2ac7adec75dea0 261
+  s_a024cd28c7c25f::t_92f0e973a714f5 118
+  s_a024cd28c7c25f::t_91ed2d1f1b6b72 124,128,132,136,142,196,208
+  s_a024cd28c7c25f::t_b9e25005cbdd9b 125,143,197,258
+  s_a024cd28c7c25f::t_7ec9faec71cd6e 184
+  s_a024cd28c7c25f::t_b0b201bb6bc047 182
+  s_a024cd28c7c25f::t_86c7c492098b44 212,225
+  s_a024cd28c7c25f::t_592535f16e1998 158
+  s_a024cd28c7c25f::t_65d0e6adab9db8 200
+  s_a024cd28c7c25f::t_c25084b9c26912 175
+  s_a024cd28c7c25f::t_bbaff14dde980b 110,176
+  s_a024cd28c7c25f::t_28e67f8b8e57ff 102,145
+  s_a024cd28c7c25f::t_764183391be34a 240
+  s_a024cd28c7c25f::t_a817b7d8ffcc39 251
+  s_a024cd28c7c25f::t_1cd3c3983a174b 220,233
+  s_a024cd28c7c25f::t_0ecdd4fbb0c976 152,177
+filmrank/src/pages/Landing.tsx
+  s_a024cd28c7c25f::t_52e81ae88fff1e 176
+filmrank/index.html
+  s_a024cd28c7c25f::t_d5d33144178882 2
+filmrank/src/pages/MyMovies.tsx
+  s_a024cd28c7c25f::t_e59a3fbfdd67b9 390
+  s_a024cd28c7c25f::t_44a4ec2f21578b 402
+  s_a024cd28c7c25f::t_5fc842dbc51dc2 425
+  s_a024cd28c7c25f::t_61c8348c113276 645,650
+  s_a024cd28c7c25f::t_8e5d4f71be7357 325
+  s_a024cd28c7c25f::t_7a11bfcfa74b4f 585
+  s_a024cd28c7c25f::t_7c3cbdbf85e775 37,40,43,45
+  s_a024cd28c7c25f::t_f16bd0e61691e1 604,613
+  s_a024cd28c7c25f::t_9252bccfadfd96 51,415
+  s_a024cd28c7c25f::t_a79194d1a5722c 298
+  s_a024cd28c7c25f::t_ea56dceedfe1c8 289
+  s_a024cd28c7c25f::t_0d7dd53befa67b 343
+  s_a024cd28c7c25f::t_8547e691e214e1 307
+  s_a024cd28c7c25f::t_c61b0056d057f5 316
+  s_a024cd28c7c25f::t_6fddd09189d5e5 334
+  s_a024cd28c7c25f::t_b5cb10f44eb4c7 688-689
+  s_a024cd28c7c25f::t_1f5d65c8c43bd5 703
+  s_a024cd28c7c25f::t_ef39b0e8a5590d 673
+  s_a024cd28c7c25f::t_16cdcfcc5c8c91 844
+  s_a024cd28c7c25f::t_a54c543a5e8134 877,897
+  s_a024cd28c7c25f::t_a461ec9e98178b 463
+  s_a024cd28c7c25f::t_c5298c1eccb7a5 661
+  s_a024cd28c7c25f::t_7ed55cfc6618aa 452,692
+  s_a024cd28c7c25f::t_856c0c9d88fab6 433
+  s_a024cd28c7c25f::t_ae47a89b0a75fe 912-913,916-917,919,922,925,928,932,935,944
+  s_a024cd28c7c25f::t_d18d4635d237f0 281
+  s_a024cd28c7c25f::t_7da0bbb814b987 964-967,973,979
+  s_a024cd28c7c25f::t_af2919435dedfe 873,883
+  s_a024cd28c7c25f::t_8cafa5dd068591 445
+  s_a024cd28c7c25f::t_6ce51b568ba91d 597
+  s_a024cd28c7c25f::t_99a4f325de6419 411,449
+  s_a024cd28c7c25f::t_945b9e580a1b9c 825
+  s_a024cd28c7c25f::t_3d3c05cd33545c 685
+  s_a024cd28c7c25f::t_6dd5809d39b595 622-623,634-635
+  s_a024cd28c7c25f::t_4c5edb0370a84f 352
+  s_a024cd28c7c25f::t_081b1a1dd84f86 864
+  s_a024cd28c7c25f::t_5337f150b4d1f8 572
+filmrank/src/components/Layout.tsx
+  s_a024cd28c7c25f::t_ae480585c0cdf9 7
+  s_a024cd28c7c25f::t_3b3727f75aaaa4 9,13
+filmrank/src/pages/Login.tsx
+  s_a024cd28c7c25f::t_67ab6b12b255ab 29,31-33,36,43,50,57,65,71-72,75,77
+filmrank/src/components/Navbar.tsx
+  s_a024cd28c7c25f::t_87f0fb31eedbff 6-8,32-37,39-71,73-76,79-83,85-86,93,96-97,106,108
+filmrank/src/pages/Ranking.tsx
+  s_a024cd28c7c25f::t_9ec19d5c19a16f 68,76
+  s_a024cd28c7c25f::t_74e067f54c2a5a 88
+  s_a024cd28c7c25f::t_7902919c7988f5 92-93
+  s_a024cd28c7c25f::t_ef25df6fd274c1 83
+filmrank/src/components/Footer.tsx
+  s_a024cd28c7c25f::t_5fc23e4ca670fd 5-17,19-21,25
+filmrank/src/pages/AddMovie.tsx
+  s_a024cd28c7c25f::t_df2372b624d643 300
+  s_a024cd28c7c25f::t_1e68b6ffb87cbe 301
+  s_a024cd28c7c25f::t_ee65d81c1c0869 275,307
+  s_a024cd28c7c25f::t_8bd5e5a6061e23 263
+  s_a024cd28c7c25f::t_1d966a622f5986 270,272,274
+  s_a024cd28c7c25f::t_cb4d1ccf74b42e 294
+  s_a024cd28c7c25f::t_05122b77ee2b5c 255,286,299
+  s_a024cd28c7c25f::t_9fbc811cd5e4f5 227
+  s_a024cd28c7c25f::t_2ab7eb65878b14 253-254
+  s_a024cd28c7c25f::t_707bb22b1d65fe 304-305
+  s_a024cd28c7c25f::t_8d58e4dbf8593c 241
+  s_a024cd28c7c25f::t_b4646b38978a4d 229,239
+  s_a024cd28c7c25f::t_fe753af1438e8d 284
+  s_a024cd28c7c25f::t_4fa13333daba32 296
+filmrank/src/pages/Signup.tsx
+  s_a024cd28c7c25f::t_e10110762c8e11 29,31-33,36,43,50,57,65,71-72,75,77
+filmrank/src/components/CatalogModal.tsx
+  s_a024cd28c7c25f::t_3831178f728ce6 62,67,76
+  s_a024cd28c7c25f::t_8b6cd10c9ca7b2 85-86
+  s_a024cd28c7c25f::t_fef582a2598bd6 46-49,51,53
+filmrank/src/pages/Onboarding.tsx
+  s_a024cd28c7c25f::t_8d1179fe028234 175-176
+  s_a024cd28c7c25f::t_59e528a095d486 342
+  s_a024cd28c7c25f::t_606cf4bb73bf9f 40
+  s_a024cd28c7c25f::t_44aa22777e857c 44,68,172,183,185
+  s_a024cd28c7c25f::t_1cf1d81cc82788 49,65,196
+  s_a024cd28c7c25f::t_55e58f8a38f3b5 210
+  s_a024cd28c7c25f::t_3ab4194af562fe 41,170,308
+  s_a024cd28c7c25f::t_68023f4e8d38ef 190
+  s_a024cd28c7c25f::t_f54a6d8f667d0f 80
+  s_a024cd28c7c25f::t_0dae9e3c74d354 81
+  s_a024cd28c7c25f::t_f76c96d3a6cbf4 201-203
+  s_a024cd28c7c25f::t_6477bd83027756 224,322
+  s_a024cd28c7c25f::t_77fc002a03f366 56
+  s_a024cd28c7c25f::t_e12d868607f410 98
+  s_a024cd28c7c25f::t_c10130a6eb3376 220,223,320
+  s_a024cd28c7c25f::t_3d3c7d10de28ab 208
+filmrank/src/pages/Compare.tsx
+  s_a024cd28c7c25f::t_167b0996403511 218,225,234
+  s_a024cd28c7c25f::t_bf56e0eba4b621 219,235
+  s_a024cd28c7c25f::t_d198ec4a260c81 214
+  s_a024cd28c7c25f::t_9b7a3e8384cd3d 151,204
+  s_a024cd28c7c25f::t_494f0925cb0485 172-173
+  s_a024cd28c7c25f::t_f4e19dbbd664a6 190
+  s_a024cd28c7c25f::t_a838aafd92443d 126,134
+  s_a024cd28c7c25f::t_ff1534725fdb61 226-229
+  s_a024cd28c7c25f::t_1594b9bb838c0a 144-145
+  s_a024cd28c7c25f::t_ed299ad2754290 244
+  s_a024cd28c7c25f::t_66232ba21be1dc 200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "03fe484ed8a2f98b2eb99d0eec15716e0ca68905",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_a024cd28c7c25f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65527df9-632b-4833-af85-5ba265350de0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
