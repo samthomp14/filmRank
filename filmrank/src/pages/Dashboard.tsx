@@ -270,7 +270,6 @@ export default function Dashboard() {
                     <div className="mt-1 truncate font-marquee text-sm font-semibold uppercase tracking-[.015em] text-foreground">
                       {movie.title}
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">Elo {movie.elo_score.toFixed(0)}</div>
                   </div>
                 ))}
               </div>
