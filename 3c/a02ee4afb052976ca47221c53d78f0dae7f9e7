@@ -1,0 +1,32 @@
+filmrank/src/index.css
+  s_2716d546c3be6c::t_6062785cae2a67 161,163-179
+  s_2716d546c3be6c::t_72bffff783f552 109-114,125,127-134,136-156,160
+  s_2716d546c3be6c::t_7635817d863a07 162
+filmrank/src/components/Navbar.tsx
+  s_2716d546c3be6c::t_d67d5a2c87b85f 34-35
+filmrank/src/components/AnimatedLeaderboard.tsx
+  s_2716d546c3be6c::t_4bbf1b78902e0e 3,12-36,38-43,45
+filmrank/src/pages/Landing.tsx
+  s_2716d546c3be6c::t_dc3e3abe41b487 178-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3ca02ee4afb052976ca47221c53d78f0dae7f9e7",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_2716d546c3be6c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3e532787-c34a-476c-9b90-fd91ac0663c0",
+        "model": "grok-4.5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
