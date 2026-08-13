@@ -66,7 +66,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     totalMovies: 0,
     totalComparisons: 0,
-    topMovie: null as MovieWithJoin | null,
+    topMovies: [] as MovieWithJoin[],
     recentMovies: [] as MovieWithJoin[],
   })
   const [movers, setMovers] = useState<MoverStat[]>([])
@@ -84,14 +84,13 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
 
-      const { data: topMovieRow, error: topMovieError } = await supabase
+      const { data: topMoviesRows, error: topMoviesError } = await supabase
         .from('user_movies')
         .select(`elo_score, created_at, movies:movies!user_movies_movie_id_fkey (id, title, year, url)`)
         .eq('user_id', user.id)
         .order('elo_score', { ascending: false })
-        .limit(1)
-        .single()
-      if (topMovieError) console.error('Failed to fetch top movie:', topMovieError)
+        .limit(3)
+      if (topMoviesError) console.error('Failed to fetch top movies:', topMoviesError)
 
       const { data: recentMoviesRows, error: recentMoviesError } = await supabase
         .from('user_movies')
@@ -111,7 +110,7 @@ export default function Dashboard() {
       setStats({
         totalMovies: count || 0,
         totalComparisons: comparisons?.length || 0,
-        topMovie: topMovieRow ? unwrapMovie(topMovieRow as unknown as RawJoinRow) : null,
+        topMovies: ((topMoviesRows || []) as unknown as RawJoinRow[]).map(unwrapMovie),
         recentMovies: ((recentMoviesRows || []) as unknown as RawJoinRow[]).map(unwrapMovie),
       })
 
@@ -252,17 +251,28 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Top Movie spotlight */}
-        {stats.topMovie && (
+        {/* Top Ranked spotlight */}
+        {stats.topMovies.length > 0 && (
           <div className="marquee-frame mb-8 rounded-xl p-1">
-            <div className="flex items-center gap-6 rounded-lg border border-border bg-card p-6">
-              <Poster url={stats.topMovie.url} title={stats.topMovie.title} size="w-20 h-28 sm:w-24 sm:h-36" />
-              <div className="min-w-0">
-                <div className="mb-2 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">Top Ranked</div>
-                <div className="font-marquee text-2xl font-semibold uppercase tracking-[.015em] text-foreground sm:text-3xl">
-                  {stats.topMovie.title}
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground">Elo {stats.topMovie.elo_score.toFixed(0)}</div>
+            <div className="rounded-lg border border-border bg-card p-6">
+              <div className="mb-4 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">Top Ranked</div>
+              <div className="grid grid-cols-3 gap-4 sm:gap-6">
+                {stats.topMovies.map((movie, i) => (
+                  <div key={movie.id} className="text-center">
+                    <Poster
+                      url={movie.url}
+                      title={movie.title}
+                      size={i === 0 ? 'w-full aspect-[2/3]' : 'w-full aspect-[2/3] opacity-90'}
+                    />
+                    <div className={`mt-3 font-marquee text-xs font-semibold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
+                      #{i + 1}
+                    </div>
+                    <div className="mt-1 truncate font-marquee text-sm font-semibold uppercase tracking-[.015em] text-foreground">
+                      {movie.title}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">Elo {movie.elo_score.toFixed(0)}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
