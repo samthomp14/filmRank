@@ -153,7 +153,6 @@ export default function Landing() {
   const roundLabel = demo ? String(demo.picks + 1).padStart(2, '0') : '01'
   const listLabel =
     !demo || demo.picks === 0 ? 'Your list · not started' : `Your list · ${demo.picks} ${demo.picks === 1 ? 'pick' : 'picks'}`
-  const showSavePrompt = !!demo && demo.picks >= 4
   const left = demo ? demo.films[demo.pair[0]] ?? null : null
   const right = demo ? demo.films[demo.pair[1]] ?? null : null
 
@@ -201,20 +200,6 @@ export default function Landing() {
           </div>
         ) : (
           <ComparisonAnimation left={left} right={right} onPickLeft={() => left && right && pick(left.id, right.id)} onPickRight={() => left && right && pick(right.id, left.id)} onSkip={skip} loading={!demo} />
-        )}
-
-        {showSavePrompt && (
-          <div className="mt-7 flex max-w-[760px] flex-wrap items-center gap-[18px] rounded border border-border bg-card px-5 py-4 [animation:fadeUp_.35s_ease_both]">
-            <p className="min-w-[260px] flex-1 text-[14px] leading-[1.5] text-muted-foreground">
-              This list lives on this device. Save it to keep it anywhere.
-            </p>
-            <Link
-              to="/signup"
-              className="whitespace-nowrap rounded bg-accent px-[22px] py-[11px] font-marquee text-[14px] font-semibold uppercase tracking-[.06em] text-accent-foreground"
-            >
-              Save my list
-            </Link>
-          </div>
         )}
       </section>
 

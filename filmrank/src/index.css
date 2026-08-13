@@ -106,11 +106,6 @@ img {
   50% { opacity: .7; }
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
-
 .marquee-page ::selection {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
