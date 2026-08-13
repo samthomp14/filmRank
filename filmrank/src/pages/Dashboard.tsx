@@ -81,26 +81,29 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
 
-      const { data: topMovieRow } = await supabase
+      const { data: topMovieRow, error: topMovieError } = await supabase
         .from('user_movies')
-        .select(`elo_score, created_at, movies (id, title, year, url)`)
+        .select(`elo_score, created_at, movies:movies!user_movies_movie_id_fkey (id, title, year, url)`)
         .eq('user_id', user.id)
         .order('elo_score', { ascending: false })
         .limit(1)
         .single()
+      if (topMovieError) console.error('Failed to fetch top movie:', topMovieError)
 
-      const { data: recentMoviesRows } = await supabase
+      const { data: recentMoviesRows, error: recentMoviesError } = await supabase
         .from('user_movies')
-        .select(`elo_score, created_at, movies (id, title, year, url)`)
+        .select(`elo_score, created_at, movies:movies!user_movies_movie_id_fkey (id, title, year, url)`)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5)
+      if (recentMoviesError) console.error('Failed to fetch recent movies:', recentMoviesError)
 
-      const { data: comparisons } = await supabase
+      const { data: comparisons, error: comparisonsError } = await supabase
         .from('comparisons')
         .select('winner_movie_id, loser_movie_id, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
+      if (comparisonsError) console.error('Failed to fetch comparisons:', comparisonsError)
 
       setStats({
         totalMovies: count || 0,
