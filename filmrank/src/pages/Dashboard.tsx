@@ -251,7 +251,7 @@ export default function Dashboard() {
 
         {/* Top Ranked spotlight */}
         {stats.topMovies.length > 0 && (
-          <div className="marquee-dotted-border mb-8">
+          <div className="marquee-dotted-border mb-8 p-[14px]">
             <div className="border border-border bg-card p-6">
               <div className="mb-4 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">Top Ranked</div>
               <div className="grid grid-cols-3 gap-4 sm:gap-6">

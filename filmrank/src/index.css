@@ -137,17 +137,18 @@ img {
   }
 
   /*
-   * Unlike .marquee-frame (four independent background-gradient strips
-   * tiled from each corner), this wraps a dotted border around a
-   * FLUID-width box with the corners always landing cleanly: border-image
-   * with `round` repeat auto-scales the tile count per edge so a whole
-   * number always fits, by construction — no hand-tuned width required.
+   * Unlike .marquee-frame (independent background-gradient strips tiled
+   * from each corner) or a tiled border-image (which can show hairline
+   * seams between repeats at some zoom levels), this draws the dotted
+   * ring as ONE continuous stroked path via SVG stroke-dasharray, then
+   * stretches that single un-tiled image to fill the box. Nothing is
+   * tiled or stitched, so there's nothing to misalign or seam — the
+   * path's corners are exactly the box's corners by construction.
    */
   .marquee-dotted-border {
-    border: 14px solid transparent;
-    border-image-slice: 28;
-    border-image-repeat: round;
-    border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84'%3E%3Crect width='84' height='84' fill='%23A43A1B'/%3E%3Cg fill='%23FFE7A6'%3E%3Ccircle cx='14' cy='14' r='4'/%3E%3Ccircle cx='42' cy='14' r='4'/%3E%3Ccircle cx='70' cy='14' r='4'/%3E%3Ccircle cx='14' cy='42' r='4'/%3E%3Ccircle cx='42' cy='42' r='4'/%3E%3Ccircle cx='70' cy='42' r='4'/%3E%3Ccircle cx='14' cy='70' r='4'/%3E%3Ccircle cx='42' cy='70' r='4'/%3E%3Ccircle cx='70' cy='70' r='4'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 200'%3E%3Crect width='600' height='200' fill='%23A43A1B'/%3E%3Crect x='9' y='9' width='582' height='182' fill='none' stroke='%23FFE7A6' stroke-width='9' stroke-linecap='round' stroke-dasharray='0 26'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
     box-shadow: 0 30px 60px -30px rgba(255, 180, 90, .35);
   }
 
