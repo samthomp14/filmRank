@@ -137,14 +137,23 @@ img {
   }
 
   /*
-   * Unlike .marquee-frame (independent background-gradient strips tiled
-   * from each corner) or a tiled border-image (which can show hairline
-   * seams between repeats at some zoom levels), this draws the dotted
-   * ring as ONE continuous stroked path via SVG stroke-dasharray, then
-   * stretches that single un-tiled image to fill the box. Nothing is
-   * tiled or stitched, so there's nothing to misalign or seam — the
-   * path's corners are exactly the box's corners by construction.
+   * 9-slice border-image: a 48×48 SVG with bulbs in each corner and edge
+   * midpoint. `round` rescales the edge tiles so a whole number fit on
+   * every side — even spacing, no corner bunching from overlapping strips.
+   * (border-image disables border-radius; square frame is intentional here.)
    */
+  .marquee-border-image {
+    border: 16px solid transparent;
+    border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23B9451F'/%3E%3Ccircle cx='8' cy='8' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='24' cy='8' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='40' cy='8' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='8' cy='24' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='40' cy='24' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='8' cy='40' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='24' cy='40' r='3.2' fill='%23FFE7A6'/%3E%3Ccircle cx='40' cy='40' r='3.2' fill='%23FFE7A6'/%3E%3C/svg%3E");
+    border-image-slice: 16;
+    border-image-width: 16px;
+    border-image-repeat: round;
+    background-color: hsl(var(--card));
+    box-shadow:
+      0 30px 60px -30px rgba(255, 180, 90, .35),
+      inset 0 0 0 1px hsl(var(--border));
+  }
+
   .marquee-dotted-border {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 200'%3E%3Crect width='600' height='200' fill='%23A43A1B'/%3E%3Crect x='9' y='9' width='582' height='182' fill='none' stroke='%23FFE7A6' stroke-width='9' stroke-linecap='round' stroke-dasharray='0 26'/%3E%3C/svg%3E");
     background-size: 100% 100%;

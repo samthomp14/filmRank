@@ -31,3 +31,4 @@ dist-ssr
 .cursor
 supabase
 TODO.md
+.env*

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import type { DemoFilm } from '../lib/demoTypes'
+import MarqueeFrame from './MarqueeFrame'
 
 interface ComparisonAnimationProps {
   left: DemoFilm | null
@@ -142,41 +143,39 @@ export default function ComparisonAnimation({
 
   return (
     <div>
-      <div className="marquee-frame max-w-[760px] rounded-[6px] p-5">
-        <div className="rounded-[3px] border border-border bg-card p-[22px]">
-          {ready ? (
-            <div className="grid grid-cols-[1fr_68px_1fr] items-center">
-              <PosterSlot
-                film={left}
-                side="left"
-                placeholder="a"
-                state={slotState('left')}
-                interactive={phase === 'idle'}
-                onClick={() => choose('left')}
-              />
-              <div className="flex items-center justify-center">
-                <span className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-primary font-marquee text-[13px] font-bold tracking-[.1em] text-primary-foreground shadow-[0_0_0_3px_rgba(232,190,74,.55),0_0_18px_rgba(232,190,74,.3)]">
-                  VS
-                </span>
-              </div>
-              <PosterSlot
-                film={right}
-                side="right"
-                placeholder="b"
-                state={slotState('right')}
-                interactive={phase === 'idle'}
-                onClick={() => choose('right')}
-              />
-            </div>
-          ) : (
-            <div className="flex min-h-[280px] items-center justify-center">
-              <span className="font-marquee text-[12px] font-medium uppercase tracking-[.14em] text-muted-foreground">
-                Loading the demo…
+      <MarqueeFrame className="max-w-[760px]" contentClassName="p-[22px]">
+        {ready ? (
+          <div className="grid grid-cols-[1fr_68px_1fr] items-center">
+            <PosterSlot
+              film={left}
+              side="left"
+              placeholder="a"
+              state={slotState('left')}
+              interactive={phase === 'idle'}
+              onClick={() => choose('left')}
+            />
+            <div className="flex items-center justify-center">
+              <span className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-primary font-marquee text-[13px] font-bold tracking-[.1em] text-primary-foreground shadow-[0_0_0_3px_rgba(232,190,74,.55),0_0_18px_rgba(232,190,74,.3)]">
+                VS
               </span>
             </div>
-          )}
-        </div>
-      </div>
+            <PosterSlot
+              film={right}
+              side="right"
+              placeholder="b"
+              state={slotState('right')}
+              interactive={phase === 'idle'}
+              onClick={() => choose('right')}
+            />
+          </div>
+        ) : (
+          <div className="flex min-h-[280px] items-center justify-center">
+            <span className="font-marquee text-[12px] font-medium uppercase tracking-[.14em] text-muted-foreground">
+              Loading the demo…
+            </span>
+          </div>
+        )}
+      </MarqueeFrame>
       <div className="mt-5 flex items-center gap-[14px]">
         <span className="font-marquee text-[12px] font-medium text-marquee-tertiary">Haven't seen one?</span>
         <button

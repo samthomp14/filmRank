@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { Link } from 'react-router-dom'
 import type { Tables } from '../types/supabase'
+import MarqueeFrame from '../components/MarqueeFrame'
 
 type MovieRow = Tables<'movies'>
 
@@ -251,28 +252,26 @@ export default function Dashboard() {
 
         {/* Top Ranked spotlight */}
         {stats.topMovies.length > 0 && (
-          <div className="marquee-dotted-border mb-8 p-[14px]">
-            <div className="border border-border bg-card p-6">
-              <div className="mb-4 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">Top Ranked</div>
-              <div className="grid grid-cols-3 gap-4 sm:gap-6">
-                {stats.topMovies.map((movie, i) => (
-                  <Link key={movie.id} to={`/movie/${movie.id}`} className="group text-center">
-                    <Poster
-                      url={movie.url}
-                      title={movie.title}
-                      size={`w-full aspect-[2/3] transition-transform duration-200 group-hover:scale-105 ${i === 0 ? '' : 'opacity-90'}`}
-                    />
-                    <div className={`mt-3 font-marquee text-xs font-semibold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
-                      #{i + 1}
-                    </div>
-                    <div className="mt-1 truncate font-marquee text-sm font-semibold uppercase tracking-[.015em] text-foreground">
-                      {movie.title}
-                    </div>
-                  </Link>
-                ))}
-              </div>
+          <MarqueeFrame className="mb-8" contentClassName="p-6">
+            <div className="mb-4 font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-accent">Top Ranked</div>
+            <div className="grid grid-cols-3 gap-4 sm:gap-6">
+              {stats.topMovies.map((movie, i) => (
+                <Link key={movie.id} to={`/movie/${movie.id}`} className="group text-center">
+                  <Poster
+                    url={movie.url}
+                    title={movie.title}
+                    size={`w-full aspect-[2/3] transition-transform duration-200 group-hover:scale-105 ${i === 0 ? '' : 'opacity-90'}`}
+                  />
+                  <div className={`mt-3 font-marquee text-xs font-semibold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
+                    #{i + 1}
+                  </div>
+                  <div className="mt-1 truncate font-marquee text-sm font-semibold uppercase tracking-[.015em] text-foreground">
+                    {movie.title}
+                  </div>
+                </Link>
+              ))}
             </div>
-          </div>
+          </MarqueeFrame>
         )}
 
         {/* Recent Additions */}
