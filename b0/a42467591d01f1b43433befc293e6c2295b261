@@ -1,0 +1,28 @@
+filmrank/src/pages/Dashboard.tsx
+  s_a024cd28c7c25f::t_c76b2130d2fcfa 254-255
+  s_a024cd28c7c25f::t_ee5492a02bd842 55
+  s_a024cd28c7c25f::t_2888bae467eb3c 305,307,314
+  s_a024cd28c7c25f::t_cee62ea9efcace 327,329,336
+  s_a024cd28c7c25f::t_00e5b05b49c134 52-54,56-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b0a42467591d01f1b43433befc293e6c2295b261",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_a024cd28c7c25f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65527df9-632b-4833-af85-5ba265350de0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
