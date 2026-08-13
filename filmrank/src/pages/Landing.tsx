@@ -175,8 +175,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="marquee-scrim sticky top-0 z-[5] flex items-center justify-between gap-6 border-b border-marquee-hairline px-10 py-[18px] backdrop-blur">
-        <div className="flex items-center gap-[11px]">
-          <span className="block h-[11px] w-[11px] rounded-full bg-marquee-bulb shadow-[0_0_12px_2px_rgba(232,190,74,.7)]" />
+        <div className="marquee-logo-lockup flex items-center gap-[11px] rounded-full py-1 pr-3">
+          <span className="marquee-logo-bulb block h-[11px] w-[11px] rounded-full" />
           <span className="font-wordmark text-[19px] tracking-[.06em] text-foreground">FilmRank</span>
         </div>
         <div className="flex items-center gap-[22px]">

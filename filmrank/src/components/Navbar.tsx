@@ -31,8 +31,8 @@ export default function Navbar() {
   return (
     <header className="marquee-scrim sticky top-0 z-40 border-b border-marquee-hairline backdrop-blur">
       <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-[11px]">
-          <span className="block h-[11px] w-[11px] rounded-full bg-marquee-bulb shadow-[0_0_12px_2px_rgba(232,190,74,.7)]" />
+        <Link to="/" className="marquee-logo-lockup flex items-center gap-[11px] rounded-full py-1 pr-3">
+          <span className="marquee-logo-bulb block h-[11px] w-[11px] rounded-full" />
           <span className="font-wordmark text-[19px] tracking-[.06em] text-foreground">FilmRank</span>
         </Link>
 
