@@ -1,0 +1,24 @@
+filmrank/src/pages/Dashboard.tsx
+  s_a024cd28c7c25f::t_6f7919b14116b8 50,52-61,68,101,113,207-216,219-233,235-244,246-250,253,255-263,265,269-286,289-293,295-313,315-322,325,327,331
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f21115dffe74ea3e128e54def8315c3d0eb7ad68",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_a024cd28c7c25f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65527df9-632b-4833-af85-5ba265350de0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
