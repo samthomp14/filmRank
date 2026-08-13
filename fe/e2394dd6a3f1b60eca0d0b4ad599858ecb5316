@@ -1,0 +1,24 @@
+filmrank/src/components/ComparisonAnimation.tsx
+  s_a024cd28c7c25f::t_77a85d4b08e5e4 1-2,14-19,21-23,28-30,34-43,47-48,50-56,58-92,94-95,109-141,149-156,162-169,184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "fee2394dd6a3f1b60eca0d0b4ad599858ecb5316",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_a024cd28c7c25f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65527df9-632b-4833-af85-5ba265350de0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
