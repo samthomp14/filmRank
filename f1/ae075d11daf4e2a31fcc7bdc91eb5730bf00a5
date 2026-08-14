@@ -1,0 +1,39 @@
+filmrank/src/lib/movieUtils.ts
+  s_f73bb6539b40f0::t_c4f4916b1786a4 120-122,125,128
+  s_f73bb6539b40f0::t_3c76071de32e0c 87-119,123-124,126-127,129
+filmrank/src/pages/MyMovies.tsx
+  s_f73bb6539b40f0::t_e02035f482e2be 409-422,425-429
+  s_f73bb6539b40f0::t_c80a68e8347af1 5
+  s_f73bb6539b40f0::t_79f47055febabb 9-10
+  s_f73bb6539b40f0::t_6d0b098b84bd12 424
+  s_f73bb6539b40f0::t_90933f2efbfd05 931,933,935-937,939-952,954,956
+  s_f73bb6539b40f0::t_7b6586d5591f05 934,938
+  s_f73bb6539b40f0::t_6264f929b13aa3 955
+  s_f73bb6539b40f0::t_ca00283431761f 75
+  s_f73bb6539b40f0::t_c5bcafbb3fbde4 152-155
+  s_f73bb6539b40f0::t_511a075c80d7a4 381-384,391-393
+  s_f73bb6539b40f0::t_0417c6a3c877ed 1
+  s_f73bb6539b40f0::t_fa08fedde7690e 378-380,385-390,394-397
+  s_f73bb6539b40f0::t_45e7c6e137fa08 432-437
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f1ae075d11daf4e2a31fcc7bdc91eb5730bf00a5",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_f73bb6539b40f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a8ad6cce-e9e9-4fb6-9fd8-1dff0d00c485",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
