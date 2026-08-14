@@ -340,7 +340,7 @@ export default function Dashboard() {
         {/* View Rankings */}
         <div className="text-center">
           <Link
-            to="/ranking"
+            to="/profile"
             className="inline-block rounded bg-primary px-8 py-3 font-marquee text-sm font-semibold uppercase tracking-[.06em] text-primary-foreground shadow-[0_0_0_1px_rgba(232,190,74,.5),0_8px_20px_-8px_rgba(201,82,47,.7)] transition hover:brightness-110"
           >
             View Full Rankings

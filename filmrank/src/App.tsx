@@ -7,7 +7,6 @@ import AddMovie from "./pages/AddMovie";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Compare from "./pages/Compare";
-import Ranking from "./pages/Ranking";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import MyMovies from "./pages/MyMovies";
@@ -105,7 +104,6 @@ function App() {
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           <Route path="/add" element={<ProtectedRoute element={<AddMovie />} />} />
           <Route path="/compare" element={<ProtectedRoute element={<Compare />} />} />
-          <Route path="/ranking" element={<ProtectedRoute element={<Ranking />} />} />
           <Route path="/movie/:movieId" element={<ProtectedRoute element={<MovieInfo />} />} />
           <Route path="/person/:personId" element={<ProtectedRoute element={<PersonInfo />} />} />
           <Route path="/genre/:genreId" element={<ProtectedRoute element={<GenreInfo />} />} />
