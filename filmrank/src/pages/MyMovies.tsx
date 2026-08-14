@@ -388,8 +388,8 @@ export default function MyMovies() {
     };
 
     return (
-      <div onClick={handleCardClick} className="group relative block cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-primary">
-        <div className="poster-frame rounded p-[7px] transition-transform duration-200 ease-out group-hover:-translate-y-[3px]">
+      <div onClick={handleCardClick} className="relative block cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-primary">
+        <div className="group/poster poster-frame rounded p-[7px] transition-transform duration-200 ease-out hover:-translate-y-[3px]">
           <div className="relative aspect-[2/3] overflow-hidden rounded-sm">
             <img
               src={movie.url || FALLBACK_IMAGE}
@@ -400,15 +400,15 @@ export default function MyMovies() {
               }}
             />
             <div className="poster-glare pointer-events-none absolute inset-0" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/poster:opacity-100 transition-opacity duration-200 pointer-events-none" />
             <button
               type="button"
               onClick={() => setMovieToDelete(movie)}
               title="Remove from library"
               aria-label="Remove from library"
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-sm p-2 text-white opacity-0 transition-all duration-200 hover:text-destructive group-hover:opacity-100"
+              className="absolute top-2 right-2 z-10 text-white opacity-0 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] transition-all duration-200 hover:text-destructive group-hover/poster:opacity-100"
             >
-              <Eye className="h-4 w-4" strokeWidth={2} fill="currentColor" />
+              <Eye className="h-4 w-4" strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -954,7 +954,7 @@ export default function MyMovies() {
                       aria-label="Remove from library"
                       className="flex-shrink-0 rounded-full p-1.5 text-muted-foreground opacity-0 transition-all duration-150 hover:text-destructive group-hover:opacity-100 focus:opacity-100"
                     >
-                      <Eye className="h-4 w-4" strokeWidth={2} fill="currentColor" />
+                      <Eye className="h-4 w-4" strokeWidth={2} />
                     </button>
                   </Link>
                 ))}
