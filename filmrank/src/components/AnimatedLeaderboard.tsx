@@ -5,9 +5,10 @@ import MarqueeFrame from './MarqueeFrame'
 interface AnimatedLeaderboardProps {
   rows: RankedRow[]
   listLabel: string
+  onRowClick?: (row: RankedRow) => void
 }
 
-export default function AnimatedLeaderboard({ rows, listLabel }: AnimatedLeaderboardProps) {
+export default function AnimatedLeaderboard({ rows, listLabel, onRowClick }: AnimatedLeaderboardProps) {
   return (
     <MarqueeFrame contentClassName="rounded-[2px] border-0 bg-marquee-paper p-[18px_20px] shadow-[inset_0_0_0_1px_rgba(0,0,0,.18)]">
       <div className="mb-[10px] font-marquee text-[11px] font-medium uppercase tracking-[.2em] text-primary">
@@ -23,7 +24,8 @@ export default function AnimatedLeaderboard({ rows, listLabel }: AnimatedLeaderb
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ layout: { duration: 0.5, ease: 'easeOut' }, opacity: { duration: 0.3 } }}
-              className="grid grid-cols-[28px_1fr_34px_auto] items-center gap-3 border-t border-marquee-paper-divider py-[11px]"
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              className={`grid grid-cols-[28px_1fr_34px_auto] items-center gap-3 border-t border-marquee-paper-divider py-[11px] ${onRowClick ? 'cursor-pointer' : ''}`}
             >
               <span className="font-marquee text-[12px] font-medium text-primary">
                 {String(row.position).padStart(2, '0')}
