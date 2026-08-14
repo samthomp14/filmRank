@@ -1,11 +1,12 @@
-import { useEffect, useState, useRef} from 'react'
+import { useEffect, useMemo, useState, useRef} from 'react'
 import { supabase } from '../lib/supabaseClient'
 import RangeFilter from '../components/RangeFilter'
 import MultiSelectFilter from '../components/MultiSelectFilter'
-import { formatRuntime } from '../lib/movieUtils'
-import { formatIMDBRating } from '../lib/movieUtils'
+import { computeEloStats, eloToStars } from '../lib/movieUtils'
 import { Link, useNavigate } from 'react-router-dom'
 import type { Tables } from '../types/supabase';
+
+const FALLBACK_IMAGE = '/no_poster_placeholder.png'
 
 type MovieRow = Tables<'movies'>;
 interface MovieWithElo extends MovieRow {
@@ -71,7 +72,7 @@ export default function MyMovies() {
   const [filteredMovies, setFilteredMovies] = useState<MovieWithElo[]>([])
   const [movieToDelete, setMovieToDelete] = useState<MovieWithElo | null>(null)
   const [showFilters, setShowFilters] = useState(false)
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   
@@ -147,6 +148,10 @@ export default function MyMovies() {
 
   // Remove infinite scroll logic
   const bottomRef = useRef<HTMLDivElement | null>(null)
+
+  // Elo distribution across the user's whole library, so the star mapping
+  // stays stable regardless of active filters/sort
+  const eloStats = useMemo(() => computeEloStats(movies.map(m => m.elo_score)), [movies])
 
   useEffect(() => {
     // Extract filter options from movies data
@@ -370,9 +375,28 @@ export default function MyMovies() {
     else if (tag.key === 'countries') setFilters(prev => ({ ...prev, selectedCountries: [] }))
   }
 
+  // Renders a 0-5 star rating with a partial fill on the last star, via a
+  // clipped overlay of filled stars on top of empty ones.
+  const StarRating = ({ value, className = '' }: { value: number; className?: string }) => (
+    <span
+      className={`group relative inline-block tracking-[.05em] ${className}`}
+      aria-label={`${value.toFixed(1)} out of 5 stars`}
+    >
+      <span className="text-muted-foreground/30">★★★★★</span>
+      <span
+        className="absolute inset-0 overflow-hidden whitespace-nowrap text-accent"
+        style={{ width: `${Math.min(100, Math.max(0, (value / 5) * 100))}%` }}
+      >
+        ★★★★★
+      </span>
+      <span className="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded border border-border bg-card px-2 py-1 font-marquee text-[10px] font-medium uppercase tracking-[.1em] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+        {value.toFixed(1)} / 5
+      </span>
+    </span>
+  )
+
   // Grid view movie card component
   const GridMovieCard = ({ movie }: { movie: MovieWithElo }) => {
-    const FALLBACK_IMAGE = '/no_poster_placeholder.png'
     const navigate = useNavigate();
     if (!movie) return null; // null check for missing movie data
     const handleCardClick = (e: React.MouseEvent) => {
@@ -382,38 +406,35 @@ export default function MyMovies() {
     };
 
     return (
-      <div onClick={handleCardClick} className="relative group block focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg cursor-pointer">
-        <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out">
-          <img
-            src={movie.url || FALLBACK_IMAGE}
-            alt={movie.title}
-            className="w-full h-full object-cover bg-muted pointer-events-none"
-            onError={(e) => {
-              e.currentTarget.src = FALLBACK_IMAGE
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
-          {/* Delete button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setMovieToDelete(movie);
-            }}
-            className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background z-10 pointer-events-auto"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+      <div onClick={handleCardClick} className="group relative block cursor-pointer rounded focus:outline-none focus:ring-2 focus:ring-primary">
+        <div className="poster-frame rounded p-[7px] transition-transform duration-200 ease-out group-hover:-translate-y-[3px]">
+          <div className="relative aspect-[2/3] overflow-hidden rounded-sm">
+            <img
+              src={movie.url || FALLBACK_IMAGE}
+              alt={movie.title}
+              className="absolute inset-0 h-full w-full object-cover bg-muted pointer-events-none"
+              onError={(e) => {
+                e.currentTarget.src = FALLBACK_IMAGE
+              }}
+            />
+            <div className="poster-glare pointer-events-none absolute inset-0" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+          </div>
         </div>
-        {/* Title and year */}
-        <div className="mt-2">
-          <h3 className="font-semibold text-foreground text-sm leading-tight truncate" title={movie.title}>
+        {/* Title, year, and personal star rating */}
+        <div className="mt-3 px-1 text-center">
+          <h3
+            className="font-marquee text-[13px] font-semibold uppercase leading-tight tracking-[.04em] text-foreground truncate"
+            title={movie.title}
+          >
             {movie.title}
           </h3>
-          {movie.year && (
-            <p className="text-muted-foreground text-xs mt-1">{movie.year}</p>
-          )}
+          <div className="mt-1 flex items-center justify-center gap-2">
+            {movie.year && (
+              <span className="font-marquee text-[11px] font-medium tracking-[.1em] text-accent">{movie.year}</span>
+            )}
+            <StarRating value={eloToStars(movie.elo_score, eloStats)} className="text-[11px]" />
+          </div>
         </div>
       </div>
     )
@@ -907,50 +928,32 @@ export default function MyMovies() {
                 <div ref={bottomRef} />
               </div>
             ) : (
-              <div className="space-y-4 px-2 sm:px-0">
+              <div className="divide-y divide-marquee-hairline px-2 sm:px-0">
                 {sortedMovies.map((movie) => (
-                  <div key={movie.id} className="bg-card border border-border rounded-xl shadow hover:shadow-md transition duration-150 ease-in-out">
-                    <Link to={`/movie/${movie.id}`} className="block rounded-xl p-6 focus:outline-none focus:ring-2 focus:ring-primary" state={{ from: 'my-movies' }}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h2 className="text-xl font-semibold text-foreground mb-2">{movie.title}</h2>
-                          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                            {movie.year && (
-                              <span className="bg-muted px-2 py-1 rounded">{movie.year}</span>
-                            )}
-                            {movie.runtime && (
-                              <span className="bg-muted px-2 py-1 rounded">{formatRuntime(movie.runtime)}</span>
-                            )}
-                            {movie.rating && (
-                              <span className="bg-muted px-2 py-1 rounded">{movie.rating}</span>
-                            )}
-                            {movie.imdb_rating && (
-                              <span className="bg-muted px-2 py-1 rounded">{formatIMDBRating(movie.imdb_rating)}</span>
-                            )}
-                          </div>
-                          {movie.genre && (
-                            <p className="text-sm text-muted-foreground mt-1">{movie.genre}</p>
-                          )}
-                          {movie.director && (
-                            <p className="text-sm text-muted-foreground">Director: {movie.director}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center ml-4">
-                          <button
-                            onClick={e => {
-                              e.preventDefault();
-                              setMovieToDelete(movie);
-                            }}
-                            className="text-destructive hover:text-destructive/80 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background rounded-lg p-2"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
+                  <Link
+                    key={movie.id}
+                    to={`/movie/${movie.id}`}
+                    className="flex items-center gap-4 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                    state={{ from: 'my-movies' }}
+                  >
+                    <img
+                      src={movie.url || FALLBACK_IMAGE}
+                      alt={movie.title}
+                      className="w-12 aspect-[2/3] flex-shrink-0 rounded object-cover border border-border sm:w-14"
+                      onError={(e) => {
+                        e.currentTarget.src = FALLBACK_IMAGE
+                      }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-marquee text-[15px] font-semibold uppercase tracking-[.02em] text-foreground truncate">
+                        {movie.title}
+                      </h2>
+                      <div className="mt-1 truncate text-xs text-muted-foreground">
+                        {[movie.year, movie.genre, movie.director].filter(Boolean).join('   ·   ')}
                       </div>
-                    </Link>
-                  </div>
+                    </div>
+                    <StarRating value={eloToStars(movie.elo_score, eloStats)} className="flex-shrink-0 text-sm" />
+                  </Link>
                 ))}
                 <div ref={bottomRef} />
               </div>

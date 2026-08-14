@@ -84,4 +84,46 @@ export function formatYear(year: number | null): string {
 export function formatIMDBRating(rating: number | null): string {
   if (!rating) return 'No rating';
   return `${rating}/10`;
-} 
+}
+
+/**
+ * Standard normal CDF, via the Abramowitz & Stegun erf approximation.
+ */
+function normalCDF(z: number): number {
+  const sign = z < 0 ? -1 : 1;
+  const x = Math.abs(z) / Math.SQRT2;
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const t = 1 / (1 + p * x);
+  const erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * erf);
+}
+
+export interface EloStats {
+  mean: number;
+  stdDev: number;
+}
+
+/**
+ * Mean/stdDev of a set of Elo scores, for use with eloToStars below. Elo
+ * ratings from repeated pairwise comparisons naturally settle into a bell
+ * curve around the population mean, so a normal-distribution mapping is a
+ * better fit than a min/max stretch (which is skewed by outliers).
+ */
+export function computeEloStats(eloScores: number[]): EloStats {
+  if (eloScores.length === 0) return { mean: 1000, stdDev: 0 };
+  const mean = eloScores.reduce((sum, e) => sum + e, 0) / eloScores.length;
+  const variance = eloScores.reduce((sum, e) => sum + (e - mean) ** 2, 0) / eloScores.length;
+  return { mean, stdDev: Math.sqrt(variance) };
+}
+
+/**
+ * Maps an Elo score to a continuous 0-5 star rating based on where it falls
+ * in the user's own Elo distribution (via the normal CDF), rather than a
+ * fixed absolute scale.
+ */
+export function eloToStars(elo: number, stats: EloStats): number {
+  if (stats.stdDev === 0) return 2.5;
+  const z = (elo - stats.mean) / stats.stdDev;
+  const percentile = normalCDF(z);
+  return Math.min(5, Math.max(0, percentile * 5));
+}
