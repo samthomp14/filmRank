@@ -31,7 +31,12 @@ interface TmdbPerson {
   biography: string | null
   profile_path: string | null
   birthday: string | null
+  deathday: string | null
   place_of_birth: string | null
+  also_known_as: string[] | null
+  known_for_department: string | null
+  imdb_id: string | null
+  homepage: string | null
 }
 
 export default function PersonInfo() {
@@ -127,14 +132,49 @@ export default function PersonInfo() {
               />
             )}
             <div className="flex-1">
+              {tmdbPerson.known_for_department && (
+                <p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
+                  Known for {tmdbPerson.known_for_department}
+                </p>
+              )}
               {tmdbPerson.birthday && (
                 <p className="text-sm text-muted-foreground mb-2">
                   Born {tmdbPerson.birthday}
                   {tmdbPerson.place_of_birth ? ` — ${tmdbPerson.place_of_birth}` : ''}
+                  {tmdbPerson.deathday ? ` · Died ${tmdbPerson.deathday}` : ''}
+                </p>
+              )}
+              {tmdbPerson.also_known_as && tmdbPerson.also_known_as.length > 0 && (
+                <p className="text-sm text-muted-foreground mb-2">
+                  Also known as: {tmdbPerson.also_known_as.slice(0, 3).join(', ')}
                 </p>
               )}
               {tmdbPerson.biography && (
                 <p className="text-muted-foreground leading-relaxed">{tmdbPerson.biography}</p>
+              )}
+              {(tmdbPerson.imdb_id || tmdbPerson.homepage) && (
+                <p className="text-sm mt-3 flex gap-4">
+                  {tmdbPerson.imdb_id && (
+                    <a
+                      href={`https://www.imdb.com/name/${tmdbPerson.imdb_id}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent hover:underline"
+                    >
+                      IMDb
+                    </a>
+                  )}
+                  {tmdbPerson.homepage && (
+                    <a
+                      href={tmdbPerson.homepage}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent hover:underline"
+                    >
+                      Website
+                    </a>
+                  )}
+                </p>
               )}
             </div>
           </div>

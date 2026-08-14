@@ -69,9 +69,33 @@ export default async function handler(req, res) {
       },
     })
 
-    const { id, name, biography, profile_path, birthday, place_of_birth } = response.data
+    const {
+      id,
+      name,
+      biography,
+      profile_path,
+      birthday,
+      deathday,
+      place_of_birth,
+      also_known_as,
+      known_for_department,
+      imdb_id,
+      homepage,
+    } = response.data
 
-    res.json({ id, name, biography, profile_path, birthday, place_of_birth })
+    res.json({
+      id,
+      name,
+      biography,
+      profile_path,
+      birthday,
+      deathday,
+      place_of_birth,
+      also_known_as,
+      known_for_department,
+      imdb_id,
+      homepage,
+    })
   } catch (error) {
     console.error('TMDB API error:', error)
     if (axios.isAxiosError(error) && error.response?.status === 404) {
