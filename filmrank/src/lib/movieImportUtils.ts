@@ -3,6 +3,7 @@ import { parseOMDBResponse } from './movieUtils'
 import type { OMDBResponse } from './movieUtils'
 import type { TablesInsert } from '../types/supabase'
 import { syncMoviePeople } from './peopleUtils'
+import { syncMovieGenres } from './genresUtils'
 import JSZip from 'jszip'
 import Papa from 'papaparse'
 
@@ -259,7 +260,7 @@ export async function importMoviesFromFile(
       const { data: insertedMovies, error: insertError } = await supabase
         .from('movies')
         .insert(moviesToInsert)
-        .select('id, alt_title, director, metadata')
+        .select('id, alt_title, director, genre, metadata')
 
       if (insertError) throw insertError
 
@@ -270,15 +271,18 @@ export async function importMoviesFromFile(
         }
       })
 
-      // Parse director/writer/actors into the people tables
+      // Parse director/writer/actors into the people tables, and genre into the genres table
       if (insertedMovies && insertedMovies.length > 0) {
         await Promise.all(insertedMovies.map(movie => {
           const metadata = movie.metadata as Record<string, unknown> | null
-          return syncMoviePeople(movie.id, {
-            Director: movie.director,
-            Writer: typeof metadata?.Writer === 'string' ? metadata.Writer : null,
-            Actors: typeof metadata?.Actors === 'string' ? metadata.Actors : null,
-          })
+          return Promise.all([
+            syncMoviePeople(movie.id, {
+              Director: movie.director,
+              Writer: typeof metadata?.Writer === 'string' ? metadata.Writer : null,
+              Actors: typeof metadata?.Actors === 'string' ? metadata.Actors : null,
+            }),
+            syncMovieGenres(movie.id, movie.genre),
+          ])
         }))
       }
     }

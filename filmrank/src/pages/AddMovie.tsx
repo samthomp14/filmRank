@@ -7,6 +7,7 @@ import axios from 'axios';
 import { parseOMDBResponse } from '../lib/movieUtils';
 import type { OMDBResponse } from '../lib/movieUtils';
 import { syncMoviePeople } from '../lib/peopleUtils';
+import { syncMovieGenres } from '../lib/genresUtils';
 
 export default function AddMovie() {
   const [userLibraryIds, setUserLibraryIds] = useState<string[]>([]);
@@ -203,6 +204,7 @@ export default function AddMovie() {
         if (error) return;
         movieId = movie.id;
         await syncMoviePeople(movieId, omdbModal.omdbData);
+        await syncMovieGenres(movieId, omdbModal.omdbData.Genre);
       }
       // Add to user_movies
       await supabase.from('user_movies').insert({

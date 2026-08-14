@@ -37,6 +37,35 @@ function CreditLinks({ people }: { people: CreditPerson[] }) {
   )
 }
 
+interface CreditGenre {
+  id: string
+  name: string
+}
+
+interface GenreRow {
+  genres: CreditGenre | CreditGenre[] | null
+}
+
+function unwrapGenre(row: GenreRow): CreditGenre | null {
+  const genre = Array.isArray(row.genres) ? row.genres[0] : row.genres
+  return genre ?? null
+}
+
+function GenreLinks({ genres }: { genres: CreditGenre[] }) {
+  return (
+    <>
+      {genres.map((genre, i) => (
+        <span key={genre.id}>
+          <Link to={`/genre/${genre.id}`} className="hover:text-accent transition-colors duration-200">
+            {genre.name}
+          </Link>
+          {i < genres.length - 1 ? ', ' : ''}
+        </span>
+      ))}
+    </>
+  )
+}
+
 function getOMDBField(meta: unknown, field: string): string | undefined {
   if (
     typeof meta === 'object' &&
@@ -67,6 +96,7 @@ function MovieInfo() {
   const navigate = useNavigate()
   const [movie, setMovie] = useState<Movie | null>(null)
   const [credits, setCredits] = useState<Record<string, CreditPerson[]>>({})
+  const [genres, setGenres] = useState<CreditGenre[]>([])
   const [personalStars, setPersonalStars] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -74,7 +104,7 @@ function MovieInfo() {
     const fetchMovie = async () => {
       if (!movieId) return
 
-      const [{ data: { user } }, { data, error }, { data: creditRows, error: creditsError }] = await Promise.all([
+      const [{ data: { user } }, { data, error }, { data: creditRows, error: creditsError }, { data: genreRows, error: genresError }] = await Promise.all([
         supabase.auth.getUser(),
         supabase
           .from('movies')
@@ -84,6 +114,10 @@ function MovieInfo() {
         supabase
           .from('movie_people')
           .select('role, people:people!movie_people_person_id_fkey (id, name)')
+          .eq('movie_id', movieId),
+        supabase
+          .from('movie_genres')
+          .select('genres:genres!movie_genres_genre_id_fkey (id, name)')
           .eq('movie_id', movieId),
       ])
 
@@ -103,6 +137,14 @@ function MovieInfo() {
         grouped[row.role].push(person)
       }
       setCredits(grouped)
+
+      if (genresError) console.error('Failed to fetch genres:', genresError)
+      const genreList: CreditGenre[] = []
+      for (const row of (genreRows as GenreRow[] | null) || []) {
+        const genre = unwrapGenre(row)
+        if (genre) genreList.push(genre)
+      }
+      setGenres(genreList)
 
       if (user) {
         const { data: userMovies, error: userMoviesError } = await supabase
@@ -264,7 +306,11 @@ function MovieInfo() {
                   {credits.writer?.length ? <CreditLinks people={credits.writer} /> : getOMDBField(movie.metadata, 'Writer')}
                 </DetailRow>
               )}
-              {movie.genre && <DetailRow label="Genre">{movie.genre}</DetailRow>}
+              {(genres.length || movie.genre) && (
+                <DetailRow label="Genre">
+                  {genres.length ? <GenreLinks genres={genres} /> : movie.genre}
+                </DetailRow>
+              )}
               {getOMDBField(movie.metadata, 'Released') && (
                 <DetailRow label="Release Date">{getOMDBField(movie.metadata, 'Released')}</DetailRow>
               )}

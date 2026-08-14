@@ -78,6 +78,61 @@ export type Database = {
           },
         ]
       }
+      genres: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      movie_genres: {
+        Row: {
+          genre_id: string
+          movie_id: string
+        }
+        Insert: {
+          genre_id: string
+          movie_id: string
+        }
+        Update: {
+          genre_id?: string
+          movie_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_genres_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "genres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_genres_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_genres_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies_not_in_user_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movie_people: {
         Row: {
           billing_order: number | null
@@ -322,6 +377,10 @@ export type Database = {
           title: string
           url: string
         }[]
+      }
+      sync_movie_genres: {
+        Args: { p_genre: string; p_movie_id: string }
+        Returns: undefined
       }
       sync_movie_people: {
         Args: {
