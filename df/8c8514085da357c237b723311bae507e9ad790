@@ -1,0 +1,28 @@
+filmrank/src/pages/MyMovies.tsx
+  s_cc985e4bf8b1ca::t_4f4bbe65ce3fa9 972,974,987
+  s_cc985e4bf8b1ca::t_fc5428916636fa 8
+  s_cc985e4bf8b1ca::t_cb3bba44e964ba 946-958
+  s_cc985e4bf8b1ca::t_4c504f87fc58ba 404-412
+  s_cc985e4bf8b1ca::t_0d66b8a49a3dc1 927
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "df8c8514085da357c237b723311bae507e9ad790",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_cc985e4bf8b1ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c15660f-ca73-4670-9bbb-d1a0ee3995cf",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
