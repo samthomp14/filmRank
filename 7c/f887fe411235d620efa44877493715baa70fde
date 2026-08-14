@@ -1,0 +1,72 @@
+filmrank/supabase/migrations/20260814054552_add_tmdb_columns_and_catalog_sync_state.sql
+  s_b5d452e5cb6187::t_b4a32ba8a8343a 1-31
+filmrank/src/components/MovieGallery.tsx
+  s_b5d452e5cb6187::t_9c92c078620926 152-157
+filmrank/src/pages/MovieInfo.tsx
+  s_b5d452e5cb6187::t_9634dd9f528d24 111
+filmrank/src/pages/PersonInfo.tsx
+  s_b5d452e5cb6187::t_548b393e0d6549 30-36,42,49,73-89
+  s_b5d452e5cb6187::t_b9d64652274d5b 120-142
+filmrank/supabase/functions/catalog-sync/index.ts
+  s_b5d452e5cb6187::t_bf99e069a1968c 101-102
+  s_b5d452e5cb6187::t_a95aa61f8ef363 9
+  s_b5d452e5cb6187::t_0a5ffcbfc30cf6 218
+  s_b5d452e5cb6187::t_7c7188dee53e97 118
+  s_b5d452e5cb6187::t_b4940e53fc101c 1-8,10-56,59-62,69-100,103-117,119-206,211-217,219-227
+  s_b5d452e5cb6187::t_4ea23af41590e9 207-210
+  s_b5d452e5cb6187::t_3037bbafc75c25 57-58,63-68
+filmrank/src/pages/AddMovie.tsx
+  s_b5d452e5cb6187::t_12f51ef0056f1a 60-64
+filmrank/api/tmdb.mjs
+  s_b5d452e5cb6187::t_1af648a13d27ff 1-85
+filmrank/supabase/migrations/20260814060000_schedule_catalog_sync.sql
+  s_b5d452e5cb6187::t_0cd28d742db516 1-26
+filmrank/src/components/Layout.tsx
+  s_b5d452e5cb6187::t_d9f1de49233983 13-24
+filmrank/vite.config.ts
+  s_2716d546c3be6c::t_3ba4ced5a78ebf 1,4,7-25
+filmrank/src/types/supabase.ts
+  s_b5d452e5cb6187::t_adddf33fde2e74 17-61,238,255,272,278-292,298,304,310,447,450-456,460-464,466-467
+filmrank/vite-plugin-local-api.ts
+  s_b5d452e5cb6187::t_024b4178a50407 46-47,51,59
+  s_2716d546c3be6c::t_cb53eccaa469db 1-4,6-45,48-50,57-58,60-88
+  s_b5d452e5cb6187::t_823a29c6384b1f 5
+  s_b5d452e5cb6187::t_cc9de0f942c257 52-56
+filmrank/api/omdb.mjs
+  s_b5d452e5cb6187::t_34e0d65aed74a0 91-96
+.gitignore
+  s_b5d452e5cb6187::t_53a0ca680ceaae 34
+filmrank/supabase/migrations/20260814054545_add_omdb_usage_tracking.sql
+  s_b5d452e5cb6187::t_098ef629f56d39 1-23
+filmrank/vercel.json
+  s_b5d452e5cb6187::t_09f4ce471016c5 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7cf887fe411235d620efa44877493715baa70fde",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_2716d546c3be6c": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3e532787-c34a-476c-9b90-fd91ac0663c0",
+        "model": "grok-4.5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    },
+    "s_b5d452e5cb6187": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cb7c23c-9959-4666-8ef8-a0a33b16247b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
