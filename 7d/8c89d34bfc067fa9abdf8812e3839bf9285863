@@ -1,0 +1,32 @@
+filmrank/src/components/SearchBar.tsx
+  s_cc985e4bf8b1ca::t_88dec0af52ba21 1-19,21-68,70-155
+  s_cc985e4bf8b1ca::t_ba337c32e595cc 20
+  s_cc985e4bf8b1ca::t_aa338cd60152f7 69
+filmrank/src/types/supabase.ts
+  s_cc985e4bf8b1ca::t_3006e9c9c2662b 381-388
+filmrank/src/components/Navbar.tsx
+  s_cc985e4bf8b1ca::t_ccb1e7a5ac3ade 5
+  s_cc985e4bf8b1ca::t_6ed9322ff47218 49-55
+  s_cc985e4bf8b1ca::t_42cc7dec3b8747 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7d8c89d34bfc067fa9abdf8812e3839bf9285863",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_cc985e4bf8b1ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c15660f-ca73-4670-9bbb-d1a0ee3995cf",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
