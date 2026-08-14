@@ -1,0 +1,19 @@
+scripts/backfill-tmdb-ids.mjs
+  s_17b45347e5405e::t_be0ec86bde0ed1 1-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "4a79989f10414b6a9ab26602d9ad4494b37831c5",
+  "prompts": {},
+  "sessions": {
+    "s_17b45347e5405e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "628795e8-0726-434e-8e9f-fb4555465611",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
