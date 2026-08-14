@@ -137,7 +137,7 @@ function Compare() {
   }
 
   return (
-    <div {...handlers} className="flex flex-col justify-center items-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
+    <div {...handlers} className="flex flex-col justify-center items-center min-h-[80vh] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
       <div className="max-w-4xl w-full">
         {/* Header Section */}
         <div className="text-center mb-16 relative">
