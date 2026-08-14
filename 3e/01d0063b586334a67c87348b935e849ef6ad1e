@@ -1,0 +1,23 @@
+filmrank/api/tmdb.mjs
+  s_667ea26be64db4::t_e17d3be0b1bffa 72-84,86-98
+filmrank/src/pages/PersonInfo.tsx
+  s_667ea26be64db4::t_38064db4a44b90 135-139,144-148,155-178
+  s_667ea26be64db4::t_dc2d8d82eb07bb 149
+  s_667ea26be64db4::t_0f327217867a50 34,36-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3e01d0063b586334a67c87348b935e849ef6ad1e",
+  "prompts": {},
+  "sessions": {
+    "s_667ea26be64db4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6923dcb-611e-44e8-b1fa-ecd969e792b5",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
