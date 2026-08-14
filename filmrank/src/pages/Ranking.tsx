@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import type { Tables } from '../types/supabase';
+import AnimatedLeaderboard from '../components/AnimatedLeaderboard'
+import type { RankedRow } from '../lib/demoTypes'
 
 type MovieRow = Tables<'movies'>;
 interface MovieWithJoin extends MovieRow {
@@ -36,6 +38,7 @@ function Ranking() {
           movies:movies!user_movies_movie_id_fkey (
             id,
             title,
+            year,
             url
           )
         `)
@@ -78,33 +81,22 @@ function Ranking() {
     )
   }
 
+  const rows: RankedRow[] = movies.map((movie, idx) => ({
+    position: idx + 1,
+    id: movie.id,
+    title: movie.title,
+    year: movie.year,
+    move: 0,
+  }))
+
   return (
-    <div className="py-12 px-2 max-w-6xl w-full mx-auto">
+    <div className="py-12 px-2 max-w-3xl w-full mx-auto">
       <h1 className="font-marquee text-3xl font-semibold uppercase tracking-[.02em] text-foreground mb-8 text-center">My Top 10 Films</h1>
-      <div className="space-y-4">
-        {movies.map((movie, idx) => (
-          <div
-            key={movie.id}
-            className="w-full bg-card border border-border rounded-lg shadow p-3 sm:p-6 hover:bg-secondary transition duration-150 ease-in-out cursor-pointer"
-            onClick={() => navigate(`/movie/${movie.id}`)}
-          >
-            <div className="flex flex-row items-center justify-between gap-3 sm:gap-6">
-              <span className="text-xl sm:text-3xl font-bold text-primary min-w-[36px] sm:min-w-[60px]">#{idx + 1}</span>
-              <h2 className="flex-1 text-base sm:text-2xl font-semibold text-foreground whitespace-normal break-words px-2">{movie.title}</h2>
-              {movie.poster_url && (
-                <img
-                  src={movie.poster_url}
-                  alt={movie.title}
-                  className="w-16 h-24 sm:w-24 sm:h-36 object-cover rounded-lg shadow-md flex-shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <AnimatedLeaderboard
+        rows={rows}
+        listLabel="My Rankings"
+        onRowClick={(row) => navigate(`/movie/${row.id}`)}
+      />
     </div>
   )
 }
