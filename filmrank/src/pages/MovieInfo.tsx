@@ -1,10 +1,40 @@
 import { useEffect, useState } from 'react'
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { formatRuntime, formatYear, formatIMDBRating } from '../lib/movieUtils'
 import type { Tables } from '../types/supabase';
 
 type Movie = Tables<'movies'>;
+
+interface CreditPerson {
+  id: string
+  name: string
+}
+
+interface CreditRow {
+  role: string
+  people: CreditPerson | CreditPerson[] | null
+}
+
+function unwrapPerson(row: CreditRow): CreditPerson | null {
+  const person = Array.isArray(row.people) ? row.people[0] : row.people
+  return person ?? null
+}
+
+function CreditLinks({ people }: { people: CreditPerson[] }) {
+  return (
+    <>
+      {people.map((person, i) => (
+        <span key={person.id}>
+          <Link to={`/person/${person.id}`} className="hover:text-primary transition-colors duration-200">
+            {person.name}
+          </Link>
+          {i < people.length - 1 ? ', ' : ''}
+        </span>
+      ))}
+    </>
+  )
+}
 
 function getOMDBField(meta: unknown, field: string): string | undefined {
   if (
@@ -24,23 +54,41 @@ function MovieInfo() {
   const navigate = useNavigate()
   const from = location.state?.from
   const [movie, setMovie] = useState<Movie | null>(null)
+  const [credits, setCredits] = useState<Record<string, CreditPerson[]>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchMovie = async () => {
       if (!movieId) return
 
-      const { data, error } = await supabase
-        .from('movies')
-        .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, imdb_id, metadata')
-        .eq('id', movieId)
-        .single()
+      const [{ data, error }, { data: creditRows, error: creditsError }] = await Promise.all([
+        supabase
+          .from('movies')
+          .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, imdb_id, metadata')
+          .eq('id', movieId)
+          .single(),
+        supabase
+          .from('movie_people')
+          .select('role, people:people!movie_people_person_id_fkey (id, name)')
+          .eq('movie_id', movieId),
+      ])
 
       if (error) {
         console.error('Failed to fetch movie:', error)
       } else {
         setMovie({ alt_title: null, ...data });
       }
+
+      if (creditsError) console.error('Failed to fetch credits:', creditsError)
+
+      const grouped: Record<string, CreditPerson[]> = {}
+      for (const row of (creditRows as CreditRow[] | null) || []) {
+        const person = unwrapPerson(row)
+        if (!person) continue
+        if (!grouped[row.role]) grouped[row.role] = []
+        grouped[row.role].push(person)
+      }
+      setCredits(grouped)
 
       setLoading(false)
     }
@@ -189,17 +237,21 @@ function MovieInfo() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Left Column */}
                       <div className="space-y-4">
-                        {movie.director && (
+                        {(credits.director?.length || movie.director) && (
                           <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
                             <div className="text-sm font-medium text-muted-foreground mb-1">Director</div>
-                            <div className="text-foreground font-medium">{movie.director}</div>
+                            <div className="text-foreground font-medium">
+                              {credits.director?.length ? <CreditLinks people={credits.director} /> : movie.director}
+                            </div>
                           </div>
                         )}
-                        
-                        {getOMDBField(movie.metadata, 'Writer') && (
+
+                        {(credits.writer?.length || getOMDBField(movie.metadata, 'Writer')) && (
                           <div className="bg-card rounded-lg p-4 border border-border shadow-sm">
                             <div className="text-sm font-medium text-muted-foreground mb-1">Writer</div>
-                            <div className="text-foreground font-medium">{getOMDBField(movie.metadata, 'Writer')}</div>
+                            <div className="text-foreground font-medium">
+                              {credits.writer?.length ? <CreditLinks people={credits.writer} /> : getOMDBField(movie.metadata, 'Writer')}
+                            </div>
                           </div>
                         )}
                         
@@ -244,10 +296,12 @@ function MovieInfo() {
                     </div>
 
                     {/* Cast */}
-                    {getOMDBField(movie.metadata, 'Actors') && (
+                    {(credits.actor?.length || getOMDBField(movie.metadata, 'Actors')) && (
                       <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
                         <h3 className="text-lg font-semibold text-foreground mb-3">Cast</h3>
-                        <p className="text-muted-foreground">{getOMDBField(movie.metadata, 'Actors')}</p>
+                        <p className="text-muted-foreground">
+                          {credits.actor?.length ? <CreditLinks people={credits.actor} /> : getOMDBField(movie.metadata, 'Actors')}
+                        </p>
                       </div>
                     )}
                   </div>

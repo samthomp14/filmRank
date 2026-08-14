@@ -2,6 +2,7 @@ import { supabase } from './supabaseClient'
 import { parseOMDBResponse } from './movieUtils'
 import type { OMDBResponse } from './movieUtils'
 import type { TablesInsert } from '../types/supabase'
+import { syncMoviePeople } from './peopleUtils'
 import JSZip from 'jszip'
 import Papa from 'papaparse'
 
@@ -258,17 +259,9 @@ export async function importMoviesFromFile(
       const { data: insertedMovies, error: insertError } = await supabase
         .from('movies')
         .insert(moviesToInsert)
-        .select('id, alt_title')
-      
-      if (insertError) throw insertError
+        .select('id, alt_title, director, metadata')
 
-      // Map inserted movies back to their titles
-      const insertedMoviesMap = new Map<string, string>()
-      insertedMovies?.forEach(movie => {
-        if (movie.alt_title) {
-          insertedMoviesMap.set(movie.alt_title, movie.id)
-        }
-      })
+      if (insertError) throw insertError
 
       // Add newly inserted movies to user_movies
       insertedMovies?.forEach(movie => {
@@ -276,6 +269,18 @@ export async function importMoviesFromFile(
           userMoviesToInsert.push({ movie_id: movie.id })
         }
       })
+
+      // Parse director/writer/actors into the people tables
+      if (insertedMovies && insertedMovies.length > 0) {
+        await Promise.all(insertedMovies.map(movie => {
+          const metadata = movie.metadata as Record<string, unknown> | null
+          return syncMoviePeople(movie.id, {
+            Director: movie.director,
+            Writer: typeof metadata?.Writer === 'string' ? metadata.Writer : null,
+            Actors: typeof metadata?.Actors === 'string' ? metadata.Actors : null,
+          })
+        }))
+      }
     }
 
     // OPTIMIZATION 5: Batch insert user_movies
