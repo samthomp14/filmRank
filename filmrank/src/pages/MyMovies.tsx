@@ -954,7 +954,7 @@ export default function MyMovies() {
                       aria-label="Remove from library"
                       className="flex-shrink-0 rounded-full p-1.5 text-muted-foreground opacity-0 transition-all duration-150 hover:text-destructive group-hover:opacity-100 focus:opacity-100"
                     >
-                      <Eye className="h-4 w-4" strokeWidth={2} />
+                      <Eye className="h-4 w-4" strokeWidth={2} fill="currentColor" />
                     </button>
                   </Link>
                 ))}
