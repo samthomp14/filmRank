@@ -29,6 +29,6 @@ dist-ssr
 .env*.local
 
 .cursor
-supabase
 TODO.md
 .env*
+supabase/.temp

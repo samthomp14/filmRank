@@ -10,6 +10,18 @@ export default function Layout() {
         <Outlet />
       </main>
       <div className="bulb-strip-static h-4" />
+      <footer className="py-4 px-4 text-center text-xs text-muted-foreground">
+        This product uses the{' '}
+        <a
+          href="https://www.themoviedb.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-foreground"
+        >
+          TMDB
+        </a>{' '}
+        API but is not endorsed or certified by TMDB.
+      </footer>
     </div>
   )
 } 

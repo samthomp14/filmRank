@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalog_sync_log: {
+        Row: {
+          id: number
+          movies_inserted: number
+          notes: string | null
+          omdb_calls_used: number
+          run_at: string
+          tmdb_pages_scanned: number
+        }
+        Insert: {
+          id?: number
+          movies_inserted: number
+          notes?: string | null
+          omdb_calls_used: number
+          run_at?: string
+          tmdb_pages_scanned: number
+        }
+        Update: {
+          id?: number
+          movies_inserted?: number
+          notes?: string | null
+          omdb_calls_used?: number
+          run_at?: string
+          tmdb_pages_scanned?: number
+        }
+        Relationships: []
+      }
+      catalog_sync_state: {
+        Row: {
+          id: number
+          tmdb_page: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          tmdb_page?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          tmdb_page?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comparisons: {
         Row: {
           created_at: string
@@ -190,6 +235,7 @@ export type Database = {
           rating: string | null
           runtime: number | null
           title: string
+          tmdb_id: number | null
           url: string | null
           year: number | null
         }
@@ -206,6 +252,7 @@ export type Database = {
           rating?: string | null
           runtime?: number | null
           title: string
+          tmdb_id?: number | null
           url?: string | null
           year?: number | null
         }
@@ -222,8 +269,24 @@ export type Database = {
           rating?: string | null
           runtime?: number | null
           title?: string
+          tmdb_id?: number | null
           url?: string | null
           year?: number | null
+        }
+        Relationships: []
+      }
+      omdb_request_log: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
         }
         Relationships: []
       }
@@ -232,16 +295,19 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          tmdb_id: number | null
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          tmdb_id?: number | null
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          tmdb_id?: number | null
         }
         Relationships: []
       }
@@ -378,14 +444,27 @@ export type Database = {
           url: string
         }[]
       }
+      log_omdb_request: { Args: never; Returns: undefined }
       search_movies: {
         Args: { limit_count?: number; q: string }
-        Returns: { id: string; rank: number; title: string; url: string | null; year: number | null }[]
+        Returns: {
+          id: string
+          rank: number
+          title: string
+          url: string
+          year: number
+        }[]
       }
       search_people: {
         Args: { limit_count?: number; q: string }
-        Returns: { id: string; name: string; rank: number }[]
+        Returns: {
+          id: string
+          name: string
+          rank: number
+        }[]
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       sync_movie_genres: {
         Args: { p_genre: string; p_movie_id: string }
         Returns: undefined

@@ -88,6 +88,12 @@ export default async function handler(req, res) {
       params.y = year
     }
     
+    // Log the request against the shared daily quota before checking the result,
+    // so failed/errored lookups still count (OMDb counts every request either way).
+    supabase.rpc('log_omdb_request').then(({ error: logError }) => {
+      if (logError) console.error('Failed to log OMDb request:', logError)
+    })
+
     const response = await axios.get('http://www.omdbapi.com/', {
       params
     })

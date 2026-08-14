@@ -108,7 +108,7 @@ function MovieInfo() {
         supabase.auth.getUser(),
         supabase
           .from('movies')
-          .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, imdb_id, metadata')
+          .select('id, title, url, year, runtime, rating, genre, director, language, country, imdb_rating, imdb_id, tmdb_id, metadata')
           .eq('id', movieId)
           .single(),
         supabase

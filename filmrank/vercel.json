@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "vite",
   "framework": "vite",
   "rewrites": [
     { "source": "/((?!api|_next|static|[\\w-]+\\.\\w+).*)", "destination": "/" }

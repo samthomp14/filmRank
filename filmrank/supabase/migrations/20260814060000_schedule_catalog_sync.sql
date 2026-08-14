@@ -1,0 +1,26 @@
+-- pg_cron/pg_net extensions are enabled by the earlier `enable_pg_cron_catalog_sync`
+-- migration. This part needs the project's service-role key to authenticate pg_net's
+-- call to the catalog-sync Edge Function, so it's kept out of committed migration
+-- history and run once by hand from the Supabase SQL Editor (see README note below).
+--
+-- 1. Store the service-role key in Vault (replace the placeholder, run once):
+--    select vault.create_secret('<service-role-key>', 'catalog_sync_service_key');
+--
+-- 2. Schedule the hourly run:
+--    select cron.schedule(
+--      'catalog-sync-hourly',
+--      '0 * * * *',
+--      $$
+--      select net.http_post(
+--        url := 'https://rsdewjarkzhiqwfctuhu.functions.supabase.co/catalog-sync',
+--        headers := jsonb_build_object(
+--          'Authorization', 'Bearer ' || (
+--            select decrypted_secret from vault.decrypted_secrets
+--            where name = 'catalog_sync_service_key'
+--          ),
+--          'Content-Type', 'application/json'
+--        ),
+--        body := '{}'::jsonb
+--      );
+--      $$
+--    );

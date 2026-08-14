@@ -149,6 +149,12 @@ const MovieGallery: React.FC<MovieGalleryProps> = ({ userLibraryIds, onAdd, hide
       <div className="w-full max-w-5xl">
         {error ? (
           <div className="text-destructive text-center py-12">{error}</div>
+        ) : !isLoading && filteredMovies.length === 0 ? (
+          <div className="text-muted-foreground text-center py-12">
+            {debouncedSearch.trim()
+              ? 'Not in the catalog yet — we add new titles daily, check back soon.'
+              : 'No movies in the catalog yet.'}
+          </div>
         ) : (
           <div ref={gridRef} className="relative grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-x-3 gap-y-4 mb-6 min-h-[340px]">
             {filteredMovies.map(movie => {
