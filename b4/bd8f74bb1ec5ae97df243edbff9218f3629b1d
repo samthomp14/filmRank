@@ -1,0 +1,45 @@
+filmrank/src/pages/AddMovie.tsx
+  s_cc985e4bf8b1ca::t_c4c2e61842b705 10
+  s_cc985e4bf8b1ca::t_89953f970d5726 207
+filmrank/src/pages/GenreInfo.tsx
+  s_cc985e4bf8b1ca::t_1eb0d90e30ed81 1-106
+filmrank/src/lib/movieImportUtils.ts
+  s_cc985e4bf8b1ca::t_2cf5a955b5074a 6
+  s_cc985e4bf8b1ca::t_f5d070e2925e74 263,274,278-285
+filmrank/src/App.tsx
+  s_cc985e4bf8b1ca::t_3de622d006a4ab 111
+  s_cc985e4bf8b1ca::t_6556595521c185 16
+filmrank/src/pages/MovieInfo.tsx
+  s_cc985e4bf8b1ca::t_d8e283fdcbfe76 107,118-120
+  s_cc985e4bf8b1ca::t_2d12113036569e 99
+  s_cc985e4bf8b1ca::t_fdf3ee46fb9651 309-313
+  s_cc985e4bf8b1ca::t_b8cc9bce60619b 141-148
+  s_cc985e4bf8b1ca::t_e47bb04f3ae575 40-68
+  s_cc985e4bf8b1ca::t_2651f1324a0d11 121
+filmrank/src/lib/genresUtils.ts
+  s_cc985e4bf8b1ca::t_f2dc02ff0de614 1-13
+filmrank/src/types/supabase.ts
+  s_cc985e4bf8b1ca::t_a0c619b58eac7c 81-135
+  s_cc985e4bf8b1ca::t_b4586e5d911fb3 381-384
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b4bd8f74bb1ec5ae97df243edbff9218f3629b1d",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_cc985e4bf8b1ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c15660f-ca73-4670-9bbb-d1a0ee3995cf",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
