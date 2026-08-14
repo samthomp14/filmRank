@@ -114,6 +114,53 @@ img {
   }
 }
 
+.cursor-spotlight-beam {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.cursor-spotlight-source {
+  position: fixed;
+  top: -70px;
+  right: -70px;
+  width: 180px;
+  height: 180px;
+  border-radius: 9999px;
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  background: radial-gradient(circle, hsl(var(--accent) / 0.4), transparent 70%);
+  filter: blur(6px);
+}
+
+.cursor-spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(
+    circle 70px at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    hsl(var(--accent) / 0.06),
+    hsl(var(--accent) / 0.1) 55%,
+    hsl(var(--accent) / 0.22) 88%,
+    hsl(var(--accent) / 0.22) 94%,
+    transparent 100%
+  );
+}
+
+.dark .cursor-spotlight-beam,
+.dark .cursor-spotlight-source,
+.dark .cursor-spotlight {
+  mix-blend-mode: plus-lighter;
+}
+
 ::selection {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));

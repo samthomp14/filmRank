@@ -1,9 +1,11 @@
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
+import CursorSpotlight from './CursorSpotlight'
 
 export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <CursorSpotlight />
       <Navbar />
       <div className="bulb-strip h-4" />
       <main className="flex-grow flex flex-col">
