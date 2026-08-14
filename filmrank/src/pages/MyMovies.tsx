@@ -5,6 +5,7 @@ import MultiSelectFilter from '../components/MultiSelectFilter'
 import { computeEloStats, eloToStars } from '../lib/movieUtils'
 import StarRating from '../components/StarRating'
 import { Link, useNavigate } from 'react-router-dom'
+import { Eye } from 'lucide-react'
 import type { Tables } from '../types/supabase';
 
 const FALLBACK_IMAGE = '/no_poster_placeholder.png'
@@ -400,6 +401,15 @@ export default function MyMovies() {
             />
             <div className="poster-glare pointer-events-none absolute inset-0" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+            <button
+              type="button"
+              onClick={() => setMovieToDelete(movie)}
+              title="Remove from library"
+              aria-label="Remove from library"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-sm p-2 text-white opacity-0 transition-all duration-200 hover:text-destructive group-hover:opacity-100"
+            >
+              <Eye className="h-4 w-4" strokeWidth={2} fill="currentColor" />
+            </button>
           </div>
         </div>
         {/* Title, year, and personal star rating */}
@@ -914,7 +924,7 @@ export default function MyMovies() {
                   <Link
                     key={movie.id}
                     to={`/movie/${movie.id}`}
-                    className="flex items-center gap-4 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="group flex items-center gap-4 rounded-md px-2 py-3 transition-colors duration-150 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <img
                       src={movie.url || FALLBACK_IMAGE}
@@ -933,6 +943,19 @@ export default function MyMovies() {
                       </div>
                     </div>
                     <StarRating value={eloToStars(movie.elo_score, eloStats)} className="flex-shrink-0 text-sm" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setMovieToDelete(movie)
+                      }}
+                      title="Remove from library"
+                      aria-label="Remove from library"
+                      className="flex-shrink-0 rounded-full p-1.5 text-muted-foreground opacity-0 transition-all duration-150 hover:text-destructive group-hover:opacity-100 focus:opacity-100"
+                    >
+                      <Eye className="h-4 w-4" strokeWidth={2} />
+                    </button>
                   </Link>
                 ))}
                 <div ref={bottomRef} />
@@ -946,9 +969,9 @@ export default function MyMovies() {
       {movieToDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-medium text-foreground mb-4">Delete Movie</h3>
+            <h3 className="text-lg font-medium text-foreground mb-4">Remove from Library</h3>
             <p className="text-muted-foreground mb-6">
-              Are you sure you want to delete "{movieToDelete.title}"? This action cannot be undone.
+              Remove "{movieToDelete.title}" from your library? Your rating and comparisons for it will be lost.
             </p>
             <div className="flex justify-end space-x-4">
               <button
@@ -961,7 +984,7 @@ export default function MyMovies() {
                 onClick={() => handleDelete(movieToDelete)}
                 className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive rounded-lg hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background"
               >
-                Delete
+                Remove
               </button>
             </div>
           </div>
