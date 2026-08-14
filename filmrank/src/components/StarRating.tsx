@@ -11,7 +11,7 @@ interface StarRatingProps {
 export default function StarRating({ value, className = '' }: StarRatingProps) {
   return (
     <span
-      className={`group relative inline-block tracking-[.05em] ${className}`}
+      className={`group/rating relative inline-block tracking-[.05em] ${className}`}
       aria-label={`${value.toFixed(1)} out of 5 stars`}
     >
       <span className="text-muted-foreground/30">★★★★★</span>
@@ -21,7 +21,7 @@ export default function StarRating({ value, className = '' }: StarRatingProps) {
       >
         ★★★★★
       </span>
-      <span className="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded border border-border bg-card px-2 py-1 font-marquee text-[10px] font-medium uppercase tracking-[.1em] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+      <span className="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded border border-border bg-card px-2 py-1 font-marquee text-[10px] font-medium uppercase tracking-[.1em] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover/rating:opacity-100">
         {value.toFixed(1)} / 5
       </span>
     </span>
