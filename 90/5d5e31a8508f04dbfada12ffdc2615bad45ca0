@@ -1,0 +1,21 @@
+scripts/dedupe-movies.mjs
+  s_17b45347e5405e::t_0fbdc6e44ba25f 1-74,86,88-134,137,141-154
+  s_17b45347e5405e::t_d26007cc60a3dd 135-136,138-140
+  s_17b45347e5405e::t_6ca418a025862b 75-85,87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "905d5e31a8508f04dbfada12ffdc2615bad45ca0",
+  "prompts": {},
+  "sessions": {
+    "s_17b45347e5405e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "628795e8-0726-434e-8e9f-fb4555465611",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
