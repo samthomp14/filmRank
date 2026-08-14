@@ -378,6 +378,14 @@ export type Database = {
           url: string
         }[]
       }
+      search_movies: {
+        Args: { limit_count?: number; q: string }
+        Returns: { id: string; rank: number; title: string; url: string | null; year: number | null }[]
+      }
+      search_people: {
+        Args: { limit_count?: number; q: string }
+        Returns: { id: string; name: string; rank: number }[]
+      }
       sync_movie_genres: {
         Args: { p_genre: string; p_movie_id: string }
         Returns: undefined
