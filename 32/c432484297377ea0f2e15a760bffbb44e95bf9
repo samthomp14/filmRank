@@ -1,0 +1,35 @@
+filmrank/src/components/AnimatedLeaderboard.tsx
+  s_f73bb6539b40f0::t_2cacc7e1eacc4d 8,11
+  s_f73bb6539b40f0::t_e6eb3c79f49818 27-28
+filmrank/src/pages/Login.tsx
+  s_f73bb6539b40f0::t_ac5a7434e7fe39 79-96
+  s_f73bb6539b40f0::t_2d7278aaa7e9fc 27-35
+filmrank/src/pages/Signup.tsx
+  s_f73bb6539b40f0::t_7d094e68b4f888 27-35
+  s_f73bb6539b40f0::t_76ff67aad45199 79-96
+filmrank/src/pages/Ranking.tsx
+  s_f73bb6539b40f0::t_b1ba3cc66501b7 6-7,41
+  s_f73bb6539b40f0::t_f9ba6cd31397fe 84-91,93
+  s_f73bb6539b40f0::t_d93d75ed08c116 95-99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "32c432484297377ea0f2e15a760bffbb44e95bf9",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_f73bb6539b40f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a8ad6cce-e9e9-4fb6-9fd8-1dff0d00c485",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
