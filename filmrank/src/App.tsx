@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import MyMovies from "./pages/MyMovies";
 import MovieInfo from "./pages/MovieInfo";
+import PersonInfo from "./pages/PersonInfo";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import Onboarding from "./pages/Onboarding";
@@ -105,6 +106,7 @@ function App() {
           <Route path="/compare" element={<ProtectedRoute element={<Compare />} />} />
           <Route path="/ranking" element={<ProtectedRoute element={<Ranking />} />} />
           <Route path="/movie/:movieId" element={<ProtectedRoute element={<MovieInfo />} />} />
+          <Route path="/person/:personId" element={<ProtectedRoute element={<PersonInfo />} />} />
           <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
           <Route path="/my-movies" element={<ProtectedRoute element={<MyMovies />} />} />
         </Route>
