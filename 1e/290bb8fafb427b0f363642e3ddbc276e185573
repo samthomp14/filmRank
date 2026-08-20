@@ -1,0 +1,84 @@
+filmrank/supabase/migrations/20260820015953_add_avatars_storage_bucket.sql
+  s_59d8f819b8b468::t_8718f1421e2850 1-19
+filmrank/src/lib/avatarUtils.ts
+  s_59d8f819b8b468::t_72f0d3f8877d2f 1-85
+filmrank/src/pages/Settings.tsx
+  s_59d8f819b8b468::t_5a510f11ce55af 1,12,15,18,50-59,61-63,65-67,69-74,79,81,201-260
+  s_59d8f819b8b468::t_a7196b21ac1b04 21
+  s_59d8f819b8b468::t_17789fc82dcaa6 22-27
+  s_59d8f819b8b468::t_0f940fb492b5f3 573
+  s_59d8f819b8b468::t_eede43aff4fcd5 624-626,633-660,667-685
+  s_59d8f819b8b468::t_cdb7544b5bec60 627-632
+  s_59d8f819b8b468::t_2e910a5b7773dd 333
+  s_59d8f819b8b468::t_1a18ec6e164998 515-518,525-552,554-569
+  s_59d8f819b8b468::t_806b5c4fa836fd 553
+  s_59d8f819b8b468::t_7012fd31264b3c 661-666
+  s_59d8f819b8b468::t_d46d00634327da 143-145,147
+  s_59d8f819b8b468::t_1dd503b603e8fa 689-696
+  s_59d8f819b8b468::t_9b8d2d8a90a6ee 2,20,30,34-35,264-265,268,273,278,284,286,316,328-332,334-378,380-387,389-390,443,445-474,476-485,487-493,502-510,513-514,570-572,592,605-612,614-621,623,686-687
+  s_59d8f819b8b468::t_e15e6023cbeb5c 410,416
+  s_81f2cab8149b2f::t_f949202b3ccdb4 13-14,19,29,31-33,36,47,261-263,266-267,269-272,274-277,279-283,285,287-315,317-327,593-604,613,622,688,697-699
+  s_59d8f819b8b468::t_5a648048698e0a 444
+  s_59d8f819b8b468::t_dfad8600f2e9c9 574-590
+  s_59d8f819b8b468::t_9419b3bb47e0c2 494-501
+  s_59d8f819b8b468::t_e6054645ab6f4e 16-17,37-46,48-49,60,64,68,75-78,80,82-142,146,148-200
+  s_59d8f819b8b468::t_c31bda7b9c25d4 391-409,411-415,417-423,432-442
+  s_59d8f819b8b468::t_6d932c79cbd391 28
+  s_59d8f819b8b468::t_3867a5542c0150 3-11
+  s_59d8f819b8b468::t_bcf9c2f334469c 475,486
+  s_59d8f819b8b468::t_d2f8d7f129e6e3 379,388,511-512,591
+  s_59d8f819b8b468::t_27c65ece10fd08 424-431
+  s_59d8f819b8b468::t_168e616ac357bb 519-524
+filmrank/package.json
+  s_59d8f819b8b468::t_2f05539c6478a3 27
+filmrank/src/pages/Profile.tsx
+  s_81f2cab8149b2f::t_190dfdd642e084 210
+  s_81f2cab8149b2f::t_faee47dabfed96 145-153
+  s_59d8f819b8b468::t_b909eaa6d1fdef 49,57
+  s_81f2cab8149b2f::t_b1a3b9adbfd9ca 3
+  s_59d8f819b8b468::t_dcbd5bec2f6b99 6,15
+  s_59d8f819b8b468::t_2dee8bacefc64a 154-164
+  s_81f2cab8149b2f::t_75b2ac860b76bb 214-223,230
+filmrank/src/components/AvatarCropModal.tsx
+  s_59d8f819b8b468::t_fdec9b188c5ee8 1-77
+filmrank/src/App.tsx
+  s_81f2cab8149b2f::t_3313c4f1001516 12
+  s_81f2cab8149b2f::t_484f5f943ece39 112
+filmrank/src/pages/Onboarding.tsx
+  s_59d8f819b8b468::t_0f277daf028ada 6
+filmrank/src/lib/genresUtils.ts
+  s_59d8f819b8b468::t_dba7d4824ff14c 3-14
+filmrank/src/components/RatingDistribution.tsx
+  s_81f2cab8149b2f::t_179e7998752b9c 72,74
+  s_81f2cab8149b2f::t_fa83b71826662e 2-17
+filmrank/package-lock.json
+  s_59d8f819b8b468::t_32fe5de9c04bdf 25,4420-4425,4861-4873,8819-8823,9087-9094
+.gitignore
+  s_59d8f819b8b468::t_50e5d8e7ff509d 34
+filmrank/tsconfig.app.json
+  s_59d8f819b8b468::t_5a7b20e0b4f903 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1e290bb8fafb427b0f363642e3ddbc276e185573",
+  "prompts": {},
+  "sessions": {
+    "s_59d8f819b8b468": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5d752662-f97a-4fa4-9d07-cf399bc113cf",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    },
+    "s_81f2cab8149b2f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "659f753a-fd7a-4a71-90d1-99bb983230b0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
