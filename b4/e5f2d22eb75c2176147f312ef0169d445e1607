@@ -1,0 +1,19 @@
+filmrank/RATING_PLACEMENT_PLAN.md
+  s_6818433db2bb7b::t_94e1efcc47daf6 1-140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b4e5f2d22eb75c2176147f312ef0169d445e1607",
+  "prompts": {},
+  "sessions": {
+    "s_6818433db2bb7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ecbb94-8dda-44f4-8c43-5d6e3d6b16fc",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
