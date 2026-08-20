@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import { parseOMDBResponse } from './movieUtils'
+import { parseOMDBResponse, computeEloStats, starsToElo, type EloStats } from './movieUtils'
 import type { OMDBResponse } from './movieUtils'
 import type { TablesInsert } from '../types/supabase'
 import { syncMoviePeople } from './peopleUtils'
@@ -33,6 +33,19 @@ interface MovieRow {
   'Letterboxd URI': string
 }
 
+interface RatingRow {
+  Date: string
+  Name: string
+  Year: string
+  'Letterboxd URI': string
+  Rating: string
+}
+
+// Cold-start prior for users who don't yet have enough calibrated comparisons
+// to derive a meaningful elo distribution from their own library.
+const DEFAULT_ELO_STATS: EloStats = { mean: 1000, stdDev: 200 }
+const MIN_CALIBRATED_MOVIES_FOR_STATS = 5
+
 /**
  * Optimized movie import function that processes movies in batches
  * with progress updates and rate limiting for OMDb API calls
@@ -57,6 +70,7 @@ export async function importMoviesFromFile(
 
     // Parse file content
     let csvText = ''
+    let ratingsCsvText = ''
     if (file.name.endsWith('.zip')) {
       const zip = await JSZip.loadAsync(file)
       const watchedFile = zip.file(/watched\.csv$/i)[0]
@@ -64,10 +78,40 @@ export async function importMoviesFromFile(
         throw new Error('watched.csv not found in ZIP. Please upload the Letterboxd export ZIP or the watched.csv file.')
       }
       csvText = await watchedFile.async('text')
+      // ratings.csv is optional — only present in a full Letterboxd export.
+      // When present, it lets us seed each movie's elo near where the user's
+      // own star rating suggests it belongs, instead of a flat default.
+      const ratingsFile = zip.file(/ratings\.csv$/i)[0]
+      if (ratingsFile) {
+        ratingsCsvText = await ratingsFile.async('text')
+      }
     } else if (file.name.endsWith('.csv')) {
       csvText = await file.text()
     } else {
       throw new Error('Unsupported file type. Please upload a Letterboxd ZIP export or a watched.csv file.')
+    }
+
+    // Build a lookup of Letterboxd star ratings, keyed by URI (reliable) and
+    // by title|year (fallback), for seeding elo_score below.
+    const ratingsByUri = new Map<string, number>()
+    const ratingsByTitleYear = new Map<string, number>()
+    if (ratingsCsvText) {
+      const ratingsResult = Papa.parse<RatingRow>(ratingsCsvText, {
+        header: true,
+        skipEmptyLines: true
+      })
+      for (const row of ratingsResult.data) {
+        const rating = parseFloat(row.Rating)
+        if (isNaN(rating)) continue
+        if (row['Letterboxd URI']) ratingsByUri.set(row['Letterboxd URI'], rating)
+        const key = `${row.Name}|${row.Year || ''}`
+        ratingsByTitleYear.set(key, rating)
+      }
+    }
+
+    const lookupRating = (uri: string | undefined, title: string, year: string | undefined): number | undefined => {
+      if (uri && ratingsByUri.has(uri)) return ratingsByUri.get(uri)
+      return ratingsByTitleYear.get(`${title}|${year || ''}`)
     }
 
     // Parse CSV data with PapaParse
@@ -91,8 +135,9 @@ export async function importMoviesFromFile(
     const movieData = result.data.map((row: MovieRow) => {
       const title = row.Name
       const year = row.Year
-      return { title, year }
-    }).filter((movie: { title?: string; year?: string }) => movie.title && movie.title.length > 0)
+      const uri = row['Letterboxd URI']
+      return { title, year, uri }
+    }).filter((movie: { title?: string; year?: string; uri?: string }) => movie.title && movie.title.length > 0)
 
     if (movieData.length === 0) {
       throw new Error('No valid movies found in the file')
@@ -145,12 +190,23 @@ export async function importMoviesFromFile(
     updateProgress({ status: 'loading', message: 'Checking your existing library...' })
     const { data: userExistingMovies, error: userMoviesError } = await supabase
       .from('user_movies')
-      .select('movie_id')
+      .select('movie_id, elo_score, match_count')
       .eq('user_id', userId)
-    
+
     if (userMoviesError) throw userMoviesError
-    
+
     const userMovieIds = new Set(userExistingMovies?.map(um => um.movie_id) || [])
+
+    // Elo distribution to seed imported movies into. Only movies that have
+    // actually been compared (match_count > 0) count, so a previous
+    // uncalibrated import batch doesn't skew the prior for this one. Falls
+    // back to a fixed cold-start distribution for new/mostly-empty libraries.
+    const calibratedScores = (userExistingMovies || [])
+      .filter(um => (um.match_count || 0) > 0 && um.elo_score !== null)
+      .map(um => um.elo_score as number)
+    const eloStats: EloStats = calibratedScores.length >= MIN_CALIBRATED_MOVIES_FOR_STATS
+      ? computeEloStats(calibratedScores)
+      : DEFAULT_ELO_STATS
 
     // OPTIMIZATION 3: Process movies in batches with progress updates
     const batches = []
@@ -159,7 +215,10 @@ export async function importMoviesFromFile(
     }
 
     const moviesToInsert: TablesInsert<'movies'>[] = []
-    const userMoviesToInsert: { movie_id: string }[] = []
+    // Parallel to moviesToInsert — carries the source row's title/year/uri so
+    // we can look up its seeded rating once we know the inserted movie's id.
+    const moviesToInsertMeta: { title: string; year?: string; uri?: string }[] = []
+    const userMoviesToInsert: { movie_id: string; elo_score?: number }[] = []
 
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex]
@@ -171,19 +230,19 @@ export async function importMoviesFromFile(
       })
 
       // Process batch with rate limiting for OMDb API calls
-      const batchPromises = batch.map(async (movie: { title?: string; year?: string }, index: number) => {
+      const batchPromises = batch.map(async (movie: { title?: string; year?: string; uri?: string }, index: number) => {
         // Add small delay between OMDb API calls to respect rate limits
         if (index > 0) {
           await new Promise(resolve => setTimeout(resolve, apiDelay))
         }
 
         try {
-          const { title, year } = movie
+          const { title, year, uri } = movie
           if (!title) {
             failed++
             return { title: '', year, failed: true }
           }
-          
+
           const key = `${title}|${year || ''}`
           let movieId: string | null = null
 
@@ -209,13 +268,14 @@ export async function importMoviesFromFile(
               response = await fetch(`/api/omdb?${params.toString()}`);
             }
             const omdb: OMDBResponse = await response.json()
-            
+
             if (omdb.Response === 'True') {
               // Parse OMDB response and prepare data for insertion
               const movieInsertData: TablesInsert<'movies'> = parseOMDBResponse(omdb)
               // Set alt_title to the Letterboxd title
               movieInsertData.alt_title = title
               moviesToInsert.push(movieInsertData)
+              moviesToInsertMeta.push({ title, year, uri })
               // We'll get the ID after batch insert
               return { title, year, needsInsert: true, movieData: movieInsertData }
             } else {
@@ -233,7 +293,9 @@ export async function importMoviesFromFile(
 
           // Add to user_movies batch
           if (movieId) {
-            userMoviesToInsert.push({ movie_id: movieId })
+            const rating = lookupRating(uri, title, year)
+            const elo_score = rating !== undefined ? Math.round(starsToElo(rating, eloStats)) : undefined
+            userMoviesToInsert.push({ movie_id: movieId, ...(elo_score !== undefined ? { elo_score } : {}) })
             added++
             return { title, year, movieId, added: true }
           } else {
@@ -264,10 +326,15 @@ export async function importMoviesFromFile(
 
       if (insertError) throw insertError
 
-      // Add newly inserted movies to user_movies
-      insertedMovies?.forEach(movie => {
+      // Add newly inserted movies to user_movies. Supabase preserves insert
+      // order in the returned rows, so index into moviesToInsertMeta (pushed
+      // in lockstep with moviesToInsert above) to recover each row's rating.
+      insertedMovies?.forEach((movie, idx) => {
         if (!userMovieIds.has(movie.id)) {
-          userMoviesToInsert.push({ movie_id: movie.id })
+          const meta = moviesToInsertMeta[idx]
+          const rating = meta ? lookupRating(meta.uri, meta.title, meta.year) : undefined
+          const elo_score = rating !== undefined ? Math.round(starsToElo(rating, eloStats)) : undefined
+          userMoviesToInsert.push({ movie_id: movie.id, ...(elo_score !== undefined ? { elo_score } : {}) })
         }
       })
 

@@ -127,3 +127,22 @@ export function eloToStars(elo: number, stats: EloStats): number {
   const percentile = normalCDF(z);
   return Math.min(5, Math.max(0, percentile * 5));
 }
+
+/**
+ * Inverse of eloToStars: given a star rating, find the elo score that would
+ * map back to it under the given distribution. normalCDF is monotonic, so we
+ * bisect on z instead of needing a separate inverse-erf approximation.
+ * Percentile is clamped away from 0/1 so a 5-star or 0.5-star rating doesn't
+ * map to +/-infinity.
+ */
+export function starsToElo(stars: number, stats: EloStats): number {
+  if (stats.stdDev === 0) return stats.mean;
+  const targetPercentile = Math.min(0.98, Math.max(0.02, stars / 5));
+  let lo = -4, hi = 4;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (normalCDF(mid) < targetPercentile) lo = mid; else hi = mid;
+  }
+  const z = (lo + hi) / 2;
+  return stats.mean + z * stats.stdDev;
+}

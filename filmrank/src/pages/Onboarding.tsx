@@ -5,6 +5,8 @@ import type { Tables } from '../types/supabase';
 import { importMoviesFromFile, formatImportResult, type ImportStatus } from '../lib/movieImportUtils';
 import { GENRE_OPTIONS } from '../lib/genresUtils';
 import MovieGallery from '../components/MovieGallery';
+import PlacementModal from '../components/PlacementModal';
+import { usePlacementQueue } from '../hooks/usePlacementQueue';
 
 function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext }: any) {
   const handleGenreToggle = (genre: string) => {
@@ -222,6 +224,8 @@ function ImportStep({ onImportComplete, onManual, onBack, name, selectedGenres }
 function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
   const [userLibraryIds, setUserLibraryIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { current: placingMovie, enqueue, dequeue } = usePlacementQueue();
 
   useEffect(() => {
     const fetchUserLibrary = async () => {
@@ -232,6 +236,7 @@ function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
         setIsSaving(false);
         return;
       }
+      setUserId(user.id);
       const { data, error } = await supabase
         .from('user_movies')
         .select('movie_id');
@@ -260,6 +265,7 @@ function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
       });
     if (error) throw error;
     setUserLibraryIds(ids => [...ids, movie.id]);
+    enqueue(movie);
   };
 
   // Finish handler
@@ -311,6 +317,9 @@ function ManualSelectStep({ onBack, onFinish, name, selectedGenres }: any) {
         )}
         <button type="button" className="px-6 py-2 rounded bg-primary hover:bg-primary/90 text-primary-foreground font-medium ml-auto" onClick={handleFinish} disabled={isSaving}>Finish</button>
       </div>
+      {placingMovie && userId && (
+        <PlacementModal newMovie={placingMovie} userId={userId} onComplete={dequeue} />
+      )}
     </div>
   );
 }
