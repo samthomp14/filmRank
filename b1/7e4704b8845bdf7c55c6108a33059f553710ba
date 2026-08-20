@@ -1,0 +1,21 @@
+filmrank/supabase/migrations/20260820033215_weight_get_two_random_movies_by_match_count.sql
+  s_6818433db2bb7b::t_8a30f30083a048 1-42
+filmrank/supabase/migrations/20260820033214_baseline_compare_movies_and_get_two_random_movies.sql
+  s_6818433db2bb7b::t_a673adfcf5c5b2 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b17e4704b8845bdf7c55c6108a33059f553710ba",
+  "prompts": {},
+  "sessions": {
+    "s_6818433db2bb7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ecbb94-8dda-44f4-8c43-5d6e3d6b16fc",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
