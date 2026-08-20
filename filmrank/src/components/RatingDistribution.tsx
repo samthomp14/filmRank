@@ -1,4 +1,20 @@
 import { useMemo } from 'react'
+import { StarIcon as StarSolid } from '@heroicons/react/24/solid'
+import { StarIcon as StarOutline } from '@heroicons/react/24/outline'
+
+function StarRow({ filled }: { filled: number }) {
+  return (
+    <span className="flex items-center gap-[1px]" role="img" aria-label={`${filled} out of 5 stars`}>
+      {Array.from({ length: 5 }).map((_, i) =>
+        i < filled ? (
+          <StarSolid key={i} className="h-3 w-3 text-accent" />
+        ) : (
+          <StarOutline key={i} className="h-3 w-3 text-muted-foreground" />
+        )
+      )}
+    </span>
+  )
+}
 
 interface RatingDistributionProps {
   /** Continuous 0-5 star values, one per rated movie (see eloToStars). */
@@ -53,9 +69,9 @@ export default function RatingDistribution({ stars }: RatingDistributionProps) {
           )
         })}
       </div>
-      <div className="mt-2 flex justify-between border-t border-border pt-1 font-marquee text-[10px] uppercase tracking-[.15em] text-muted-foreground">
+      <div className="mt-2 flex justify-between border-t border-border pt-1.5">
         {[0, 1, 2, 3, 4, 5].map((n) => (
-          <span key={n}>{n}★</span>
+          <StarRow key={n} filled={n} />
         ))}
       </div>
     </div>

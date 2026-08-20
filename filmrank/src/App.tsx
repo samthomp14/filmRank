@@ -9,6 +9,7 @@ import Signup from "./pages/Signup";
 import Compare from "./pages/Compare";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import MyMovies from "./pages/MyMovies";
 import MovieInfo from "./pages/MovieInfo";
 import PersonInfo from "./pages/PersonInfo";
@@ -108,6 +109,7 @@ function App() {
           <Route path="/person/:personId" element={<ProtectedRoute element={<PersonInfo />} />} />
           <Route path="/genre/:genreId" element={<ProtectedRoute element={<GenreInfo />} />} />
           <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
+          <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
           <Route path="/my-movies" element={<ProtectedRoute element={<MyMovies />} />} />
         </Route>
       </Routes>

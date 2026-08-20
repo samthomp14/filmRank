@@ -24,6 +24,7 @@
     "papaparse": "^5.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-easy-crop": "^6.2.3",
     "react-router-dom": "^7.6.2",
     "react-swipeable": "^7.0.2",
     "tailwind-merge": "^3.3.1",

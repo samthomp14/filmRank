@@ -31,4 +31,4 @@ dist-ssr
 .cursor
 TODO.md
 .env*
-supabase/.temp
+**/supabase/.temp/

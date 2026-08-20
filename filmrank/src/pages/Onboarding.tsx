@@ -3,18 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import type { Tables } from '../types/supabase';
 import { importMoviesFromFile, formatImportResult, type ImportStatus } from '../lib/movieImportUtils';
+import { GENRE_OPTIONS } from '../lib/genresUtils';
 import MovieGallery from '../components/MovieGallery';
-
-const GENRE_OPTIONS = [
-  'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror',
-  'Romance', 'Thriller', 'Fantasy', 'Animation', 'Documentary',
-  'Adventure', 'Mystery', 'Crime', 'Family', 'Musical',
-  'Western', 'War', 'Biography', 'History', 'Sport',
-  'Superhero', 'Noir', 'Short', 'Experimental', 'Reality',
-  'News', 'Film-Noir', 'Children',
-  'Adult', 'Disaster', 'Epic', 'Political', 'Psychological',
-  'Road', 'Satire', 'Slasher', 'Spy', 'Suspense'
-];
 
 function ProfileStep({ name, setName, selectedGenres, setSelectedGenres, onNext }: any) {
   const handleGenreToggle = (genre: string) => {
