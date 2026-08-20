@@ -59,7 +59,6 @@ export default function Navbar() {
             <>
               <Link to="/compare" className={navLinkClass}>Compare</Link>
               <Link to="/add" className={navLinkClass}>Add Movie</Link>
-              <Link to="/ranking" className={navLinkClass}>Rankings</Link>
               <Link to="/my-movies" className={navLinkClass}>Library</Link>
               <Link to="/profile" className={navLinkClass}>Profile</Link>
               <button onClick={handleSignOut} className={navLinkClass}>Sign Out</button>
@@ -87,7 +86,6 @@ export default function Navbar() {
                 <SearchBar className="mb-2" onNavigate={() => setMenuOpen(false)} />
                 <Link to="/compare" className={navLinkClass} onClick={() => setMenuOpen(false)}>Compare</Link>
                 <Link to="/add" className={navLinkClass} onClick={() => setMenuOpen(false)}>Add Movie</Link>
-                <Link to="/ranking" className={navLinkClass} onClick={() => setMenuOpen(false)}>Rankings</Link>
                 <Link to="/my-movies" className={navLinkClass} onClick={() => setMenuOpen(false)}>Library</Link>
                 <Link to="/profile" className={navLinkClass} onClick={() => setMenuOpen(false)}>Profile</Link>
                 <button
