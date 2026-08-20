@@ -2,11 +2,15 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import MovieGallery from '../components/MovieGallery'
+import PlacementModal from '../components/PlacementModal'
+import { usePlacementQueue } from '../hooks/usePlacementQueue'
 import type { Tables } from '../types/supabase';
 
 export default function AddMovie() {
   const [userLibraryIds, setUserLibraryIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { current: placingMovie, enqueue, dequeue } = usePlacementQueue();
 
   // Fetch user's library movie IDs
   useEffect(() => {
@@ -18,6 +22,7 @@ export default function AddMovie() {
         setLoading(false);
         return;
       }
+      setUserId(user.id);
       const { data, error } = await supabase
         .from('user_movies')
         .select('movie_id');
@@ -47,6 +52,7 @@ export default function AddMovie() {
       });
     if (error) throw error;
     setUserLibraryIds(ids => [...ids, movie.id]);
+    enqueue(movie);
   };
 
   return (
@@ -65,6 +71,9 @@ export default function AddMovie() {
           )}
         </div>
       </div>
+      {placingMovie && userId && (
+        <PlacementModal newMovie={placingMovie} userId={userId} onComplete={dequeue} />
+      )}
     </div>
   );
 }
