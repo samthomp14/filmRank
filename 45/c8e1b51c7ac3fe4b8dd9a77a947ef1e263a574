@@ -1,0 +1,39 @@
+filmrank/src/pages/AddMovie.tsx
+  s_6818433db2bb7b::t_1a6bb8420be494 5-6,12-13,25,55,74-76
+filmrank/src/hooks/usePlacementQueue.ts
+  s_6818433db2bb7b::t_bf4fdbf33aab70 1-21
+filmrank/src/components/PlacementModal.tsx
+  s_6818433db2bb7b::t_c0235694763617 1-61,69-204
+  s_6818433db2bb7b::t_874a8863952d32 62-68
+filmrank/src/lib/movieImportUtils.ts
+  s_6818433db2bb7b::t_1b9877b6f5b535 73,81-87,94-115
+  s_6818433db2bb7b::t_ab0f90f72ac46c 138-140
+  s_6818433db2bb7b::t_7fa56d4ea883e4 36-48
+  s_6818433db2bb7b::t_99faddd033b2b9 233,240,245,271,278,296-298
+  s_6818433db2bb7b::t_703c53067e3746 2
+  s_6818433db2bb7b::t_2400dd9006e66e 193,195,197,200-210,218-221
+  s_6818433db2bb7b::t_8095a8621c562e 329-332,334-337
+  s_6818433db2bb7b::t_154c1086866e8f 116
+filmrank/src/pages/Onboarding.tsx
+  s_6818433db2bb7b::t_f6550b130967d5 320-322
+  s_6818433db2bb7b::t_f6191a911d6efa 8-9
+  s_6818433db2bb7b::t_b2f60143cc5bae 227-228,239,268
+filmrank/src/lib/movieUtils.ts
+  s_6818433db2bb7b::t_974d809997c6ae 130-148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "45c8e1b51c7ac3fe4b8dd9a77a947ef1e263a574",
+  "prompts": {},
+  "sessions": {
+    "s_6818433db2bb7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ecbb94-8dda-44f4-8c43-5d6e3d6b16fc",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
