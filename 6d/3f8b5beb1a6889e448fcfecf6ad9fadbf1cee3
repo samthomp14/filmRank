@@ -1,0 +1,24 @@
+filmrank/supabase/migrations/20260909010000_fix_bt_where_less_update.sql
+  s_977d6b1fb95b43::t_ceb78a38769079 1-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "6d3f8b5beb1a6889e448fcfecf6ad9fadbf1cee3",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_977d6b1fb95b43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbce3210-adf4-4821-9691-7dec1b4d4917",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
