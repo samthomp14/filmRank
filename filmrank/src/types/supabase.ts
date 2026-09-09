@@ -313,6 +313,8 @@ export type Database = {
       }
       user_movies: {
         Row: {
+          bt_computed_at: string | null
+          bt_score: number | null
           created_at: string | null
           elo_score: number | null
           match_count: number | null
@@ -320,6 +322,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bt_computed_at?: string | null
+          bt_score?: number | null
           created_at?: string | null
           elo_score?: number | null
           match_count?: number | null
@@ -327,6 +331,8 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          bt_computed_at?: string | null
+          bt_score?: number | null
           created_at?: string | null
           elo_score?: number | null
           match_count?: number | null
@@ -444,7 +450,14 @@ export type Database = {
           url: string
         }[]
       }
+      _recompute_bt_for_user: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      apply_bt_rankings_for_opted_in_users: { Args: never; Returns: undefined }
+      apply_bt_rankings_now: { Args: never; Returns: undefined }
       log_omdb_request: { Args: never; Returns: undefined }
+      recompute_bt_rankings: { Args: never; Returns: undefined }
       search_movies: {
         Args: { limit_count?: number; q: string }
         Returns: {

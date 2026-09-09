@@ -7,6 +7,7 @@ import {
   TagIcon,
   ArrowUpTrayIcon,
   ArrowDownTrayIcon,
+  ArrowPathIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
 import type { Area } from 'react-easy-crop'
@@ -44,6 +45,9 @@ export default function Settings() {
   const [savedGenres, setSavedGenres] = useState<string[]>([])
   const [genresStatus, setGenresStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
 
+  const [autoApplyBt, setAutoApplyBt] = useState(false)
+  const [autoApplyBtStatus, setAutoApplyBtStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
+
   const [importStatus, setImportStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
   const [exportStatus, setExportStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
   const [resetStatus, setResetStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
@@ -76,6 +80,9 @@ export default function Settings() {
       const genres = (userRow?.preferences as { genres?: string[] } | null)?.genres ?? []
       setSelectedGenres(genres)
       setSavedGenres(genres)
+
+      const preferences = userRow?.preferences as { auto_apply_bt_ranking?: boolean } | null
+      setAutoApplyBt(Boolean(preferences?.auto_apply_bt_ranking))
     }
     loadAccount()
   }, [])
@@ -127,6 +134,44 @@ export default function Settings() {
       setGenresStatus({ status: 'success', message: 'Genre preferences saved' })
     } catch (err) {
       setGenresStatus({ status: 'error', message: err instanceof Error ? err.message : 'Failed to save preferences' })
+    }
+  }
+
+  // Turning this on doesn't just flip a column read elsewhere -- it applies
+  // immediately (apply_bt_rankings_now overwrites elo_score with the
+  // Bradley-Terry fit for this user right away) so the toggle has a visible
+  // effect instead of waiting for the nightly cron run that keeps it applied
+  // going forward. Turning it off just excludes the account from that
+  // nightly run; it doesn't revert already-applied scores.
+  const handleToggleAutoApplyBt = async () => {
+    if (!userId || autoApplyBtStatus.status === 'loading') return
+    const next = !autoApplyBt
+    setAutoApplyBt(next)
+    setAutoApplyBtStatus({ status: 'loading', message: next ? 'Applying accurate ranking...' : 'Saving...' })
+    try {
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('preferences')
+        .eq('id', userId)
+        .single()
+      const existingPreferences = (userRow?.preferences as Record<string, unknown> | null) ?? {}
+
+      const { error } = await supabase
+        .from('users')
+        .update({ preferences: { ...existingPreferences, auto_apply_bt_ranking: next } })
+        .eq('id', userId)
+      if (error) throw error
+
+      if (next) {
+        const { error: rpcError } = await supabase.rpc('apply_bt_rankings_now')
+        if (rpcError) throw rpcError
+        setAutoApplyBtStatus({ status: 'success', message: 'Applied — your ranking now reflects your full comparison history, and will refresh automatically every night.' })
+      } else {
+        setAutoApplyBtStatus({ status: 'success', message: 'Turned off. Your ranking stays as it is; it will no longer refresh automatically.' })
+      }
+    } catch (err) {
+      setAutoApplyBt(!next)
+      setAutoApplyBtStatus({ status: 'error', message: err instanceof Error ? err.message : 'Failed to update setting' })
     }
   }
 
@@ -562,6 +607,45 @@ export default function Settings() {
                 }`}>
                   {genresStatus.message}
                 </span>
+              )}
+            </div>
+
+            <div className="pt-4 mt-1 border-t border-border">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <ArrowPathIcon className={rowIconClass} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Accurate Ranking</p>
+                    <p className="text-xs text-muted-foreground max-w-sm">
+                      Refits your whole library from every comparison you've ever made (not just the running per-swipe ELO estimate), and applies it as your real ranking — checked and reapplied every night.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={autoApplyBt}
+                  onClick={handleToggleAutoApplyBt}
+                  disabled={autoApplyBtStatus.status === 'loading'}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 ${
+                    autoApplyBt ? 'bg-primary' : 'bg-muted'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
+                      autoApplyBt ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {autoApplyBtStatus.status !== 'idle' && (
+                <div className={`mt-2 text-sm ${
+                  autoApplyBtStatus.status === 'success' ? 'text-success' :
+                  autoApplyBtStatus.status === 'error' ? 'text-destructive' :
+                  'text-primary'
+                }`}>
+                  {autoApplyBtStatus.message}
+                </div>
               )}
             </div>
           </div>

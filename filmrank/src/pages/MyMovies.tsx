@@ -13,6 +13,7 @@ const FALLBACK_IMAGE = '/no_poster_placeholder.png'
 type MovieRow = Tables<'movies'>;
 interface MovieWithElo extends MovieRow {
   elo_score: number;
+  bt_score: number | null;
 }
 
 interface FilterState {
@@ -115,38 +116,58 @@ export default function MyMovies() {
 
   // Change sortOption to only track field and direction
   const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ field: 'title', direction: 'asc' })
+  const [isRecomputing, setIsRecomputing] = useState(false)
+
+  const fetchMovies = async (isMounted: () => boolean = () => true) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error('No user found');
+      const { data, error: moviesError } = await supabase
+        .from('user_movies')
+        .select(`elo_score, bt_score, movies:movies!user_movies_movie_id_fkey (
+          id, title, year, runtime, rating, genre, director, language, country, imdb_rating, url
+        )`)
+        .eq('user_id', user.id);
+      if (moviesError) throw moviesError;
+      const movies: MovieWithElo[] = (data || []).map((m: any) => ({
+        ...m.movies,
+        elo_score: m.elo_score,
+        bt_score: m.bt_score,
+      }));
+      if (isMounted()) setMovies(movies);
+    } catch (err: any) {
+      if (isMounted()) setError(err instanceof Error ? err : new Error('Failed to fetch movies'));
+    } finally {
+      if (isMounted()) setIsLoading(false);
+    }
+  }
 
   // Fetch all user movies on mount
   useEffect(() => {
     let isMounted = true;
-    async function fetchMovies() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError) throw userError;
-        if (!user) throw new Error('No user found');
-        const { data, error: moviesError } = await supabase
-          .from('user_movies')
-          .select(`elo_score, movies:movies!user_movies_movie_id_fkey (
-            id, title, year, runtime, rating, genre, director, language, country, imdb_rating, url
-          )`)
-          .eq('user_id', user.id);
-        if (moviesError) throw moviesError;
-        const movies: MovieWithElo[] = (data || []).map((m: any) => ({
-          ...m.movies,
-          elo_score: m.elo_score,
-        }));
-        if (isMounted) setMovies(movies);
-      } catch (err: any) {
-        if (isMounted) setError(err instanceof Error ? err : new Error('Failed to fetch movies'));
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-    fetchMovies();
+    fetchMovies(() => isMounted);
     return () => { isMounted = false; };
   }, []);
+
+  // Batch-refits every movie's Bradley-Terry strength from the full
+  // comparisons history (see recompute_bt_rankings migration), then reloads
+  // so the new bt_score values are reflected.
+  const handleRecomputeRankings = async () => {
+    if (isRecomputing) return
+    setIsRecomputing(true)
+    try {
+      const { error: rpcError } = await supabase.rpc('recompute_bt_rankings')
+      if (rpcError) throw rpcError
+      await fetchMovies()
+    } catch (err: any) {
+      setError(err instanceof Error ? err : new Error('Failed to recalculate rankings'))
+    } finally {
+      setIsRecomputing(false)
+    }
+  }
 
   // Remove infinite scroll logic
   const bottomRef = useRef<HTMLDivElement | null>(null)
@@ -666,6 +687,7 @@ export default function MyMovies() {
                       <option value="imdb_rating">IMDB Rating</option>
                       <option value="runtime">Runtime</option>
                       <option value="elo_score">ELO Score</option>
+                      <option value="bt_score">Accurate Rank (Bradley-Terry)</option>
                     </select>
                     <button
                       type="button"
@@ -678,6 +700,15 @@ export default function MyMovies() {
                       ) : (
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                       )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRecomputeRankings}
+                      disabled={isRecomputing}
+                      title="Refit every movie's rank from your full comparison history (Bradley-Terry), instead of the running per-swipe ELO estimate"
+                      className="px-3 py-2 rounded-lg text-sm font-medium bg-secondary text-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                    >
+                      {isRecomputing ? 'Recalculating…' : 'Recalculate accurate ranking'}
                     </button>
                   </div>
                   <button
