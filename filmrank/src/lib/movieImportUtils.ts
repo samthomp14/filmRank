@@ -190,18 +190,25 @@ export async function importMoviesFromFile(
     updateProgress({ status: 'loading', message: 'Checking your existing library...' })
     const { data: userExistingMovies, error: userMoviesError } = await supabase
       .from('user_movies')
-      .select('movie_id, elo_score, match_count')
+      .select('movie_id, elo_score, match_count, removed_at')
       .eq('user_id', userId)
 
     if (userMoviesError) throw userMoviesError
 
-    const userMovieIds = new Set(userExistingMovies?.map(um => um.movie_id) || [])
+    const activeExistingMovies = (userExistingMovies || []).filter(um => !um.removed_at)
+    const userMovieIds = new Set(activeExistingMovies.map(um => um.movie_id))
+    // Movies previously removed from the library — reappearing in this
+    // import should restore them (keeping their elo/comparison history)
+    // rather than fail on the (user_id, movie_id) PK by trying to re-insert.
+    const removedMovieIds = new Set(
+      (userExistingMovies || []).filter(um => um.removed_at).map(um => um.movie_id)
+    )
 
     // Elo distribution to seed imported movies into. Only movies that have
     // actually been compared (match_count > 0) count, so a previous
     // uncalibrated import batch doesn't skew the prior for this one. Falls
     // back to a fixed cold-start distribution for new/mostly-empty libraries.
-    const calibratedScores = (userExistingMovies || [])
+    const calibratedScores = activeExistingMovies
       .filter(um => (um.match_count || 0) > 0 && um.elo_score !== null)
       .map(um => um.elo_score as number)
     const eloStats: EloStats = calibratedScores.length >= MIN_CALIBRATED_MOVIES_FOR_STATS
@@ -219,6 +226,7 @@ export async function importMoviesFromFile(
     // we can look up its seeded rating once we know the inserted movie's id.
     const moviesToInsertMeta: { title: string; year?: string; uri?: string }[] = []
     const userMoviesToInsert: { movie_id: string; elo_score?: number }[] = []
+    const movieIdsToRestore: string[] = []
 
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex]
@@ -291,6 +299,14 @@ export async function importMoviesFromFile(
             return { title, year, skipped: true }
           }
 
+          // Previously removed from the library — restore it rather than
+          // re-insert, so its prior elo/comparison history stays intact.
+          if (movieId && removedMovieIds.has(movieId)) {
+            movieIdsToRestore.push(movieId)
+            added++
+            return { title, year, movieId, added: true }
+          }
+
           // Add to user_movies batch
           if (movieId) {
             const rating = lookupRating(uri, title, year)
@@ -360,8 +376,19 @@ export async function importMoviesFromFile(
       const { error: userMoviesInsertError } = await supabase
         .from('user_movies')
         .insert(userMoviesToInsert)
-      
+
       if (userMoviesInsertError) throw userMoviesInsertError
+    }
+
+    if (movieIdsToRestore.length > 0) {
+      updateProgress({ status: 'loading', message: 'Restoring previously removed movies...' })
+      const { error: restoreError } = await supabase
+        .from('user_movies')
+        .update({ removed_at: null })
+        .eq('user_id', userId)
+        .in('movie_id', movieIdsToRestore)
+
+      if (restoreError) throw restoreError
     }
 
     return {

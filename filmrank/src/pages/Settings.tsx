@@ -183,6 +183,7 @@ export default function Settings() {
         .from('user_movies')
         .select(`elo_score, movies:movies!user_movies_movie_id_fkey (title, year)`)
         .eq('user_id', userId)
+        .is('removed_at', null)
       if (error) throw error
 
       type MovieJoinRow = { elo_score: number; movies: { title: string; year: number | null } | { title: string; year: number | null }[] | null }

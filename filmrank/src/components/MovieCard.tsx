@@ -1,4 +1,5 @@
 import React from 'react'
+import { Info } from 'lucide-react'
 
 interface CompareMovie {
   movie_id: string;
@@ -14,12 +15,13 @@ interface MovieCardProps {
   onClick: () => void;
   selected: boolean;
   className?: string;
+  onInfoClick?: () => void;
 }
 
 const FALLBACK_IMAGE =
   'https://via.placeholder.com/300x445.png?text=No+Image';
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected, className }) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected, className, onInfoClick }) => {
   return (
     <div
       onClick={onClick}
@@ -33,6 +35,19 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected, classNa
         className="w-full h-full object-cover bg-muted"
         onError={e => (e.currentTarget.src = FALLBACK_IMAGE)}
       />
+      {onInfoClick && (
+        <button
+          onClick={e => {
+            e.stopPropagation()
+            onInfoClick()
+          }}
+          className="absolute top-2 right-2 z-10 rounded-full bg-black/50 p-1.5 text-white/80 transition-colors duration-150 hover:bg-black/70 hover:text-white"
+          title="View movie details"
+          aria-label="View movie details"
+        >
+          <Info className="h-4 w-4" strokeWidth={2} />
+        </button>
+      )}
       <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent px-4 py-3 flex items-end">
         <h2 className="text-lg font-bold text-white drop-shadow-md truncate w-full" title={movie.title}>
           {movie.title}
@@ -45,4 +60,4 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, selected, classNa
   )
 }
 
-export default MovieCard 
+export default MovieCard

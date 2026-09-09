@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { formatRuntime, formatYear, formatIMDBRating, computeEloStats, eloToStars } from '../lib/movieUtils'
 import StarRating from '../components/StarRating'
+import { Eye } from 'lucide-react'
 import type { Tables } from '../types/supabase';
 
 type Movie = Tables<'movies'>;
@@ -99,6 +100,10 @@ function MovieInfo() {
   const [genres, setGenres] = useState<CreditGenre[]>([])
   const [personalStars, setPersonalStars] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
+  const [inLibrary, setInLibrary] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [showRemoveModal, setShowRemoveModal] = useState(false)
+  const [removing, setRemoving] = useState(false)
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -147,14 +152,17 @@ function MovieInfo() {
       setGenres(genreList)
 
       if (user) {
+        setUserId(user.id)
         const { data: userMovies, error: userMoviesError } = await supabase
           .from('user_movies')
           .select('movie_id, elo_score')
           .eq('user_id', user.id)
+          .is('removed_at', null)
         if (userMoviesError) {
           console.error('Failed to fetch user ratings:', userMoviesError)
         } else if (userMovies) {
           const mine = userMovies.find((m) => m.movie_id === movieId)
+          setInLibrary(!!mine)
           if (mine && mine.elo_score !== null) {
             const stats = computeEloStats(userMovies.map((m) => m.elo_score).filter((e): e is number => e !== null))
             setPersonalStars(eloToStars(mine.elo_score, stats))
@@ -178,6 +186,26 @@ function MovieInfo() {
     }
   }
 
+  const handleRemove = async () => {
+    if (!userId || !movieId) return
+    setRemoving(true)
+    try {
+      const { error } = await supabase
+        .from('user_movies')
+        .update({ removed_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .eq('movie_id', movieId)
+      if (error) throw error
+      setInLibrary(false)
+      setPersonalStars(null)
+      setShowRemoveModal(false)
+    } catch (err) {
+      console.error('Failed to remove movie from library:', err)
+    } finally {
+      setRemoving(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -197,11 +225,20 @@ function MovieInfo() {
   const imdbId = movie.imdb_id || getOMDBField(movie.metadata, 'imdbID')
   const quickFacts = [movie.year && formatYear(movie.year), movie.runtime && formatRuntime(movie.runtime), movie.rating].filter(Boolean)
 
+  const compareState = location.state as { from?: string; pair?: unknown } | null
+  const cameFromCompare = compareState?.from === 'compare' && !!compareState?.pair
+
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <button
           onClick={() => {
+            if (cameFromCompare) {
+              // Resume the exact pair being compared rather than fetching a
+              // fresh random one.
+              navigate('/compare', { state: { pair: compareState!.pair } })
+              return
+            }
             // location.key is 'default' when there's no history to go back to
             // (e.g. a direct link/refresh), so fall back to a sensible page.
             if (location.key !== 'default') navigate(-1)
@@ -212,7 +249,7 @@ function MovieInfo() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          {cameFromCompare ? 'Back to Comparison' : 'Back'}
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-14">
@@ -249,6 +286,16 @@ function MovieInfo() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
+                  </button>
+                )}
+                {inLibrary && (
+                  <button
+                    onClick={() => setShowRemoveModal(true)}
+                    className="mt-1 text-muted-foreground transition-colors duration-200 hover:text-destructive"
+                    title="Remove from Library"
+                    aria-label="Remove from library"
+                  >
+                    <Eye className="h-5 w-5" strokeWidth={2} />
                   </button>
                 )}
               </div>
@@ -335,6 +382,32 @@ function MovieInfo() {
           </div>
         </div>
       </div>
+
+      {showRemoveModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-medium text-foreground mb-4">Remove from Library</h3>
+            <p className="text-muted-foreground mb-6">
+              Remove "{movie.title}" from your library? You can add it back later without losing your rating or comparison history.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowRemoveModal(false)}
+                className="px-4 py-2 text-sm font-medium text-foreground bg-secondary rounded-lg hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemove}
+                disabled={removing}
+                className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive rounded-lg hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50"
+              >
+                {removing ? 'Removing...' : 'Remove'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

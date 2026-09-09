@@ -319,6 +319,7 @@ export type Database = {
           elo_score: number | null
           match_count: number | null
           movie_id: string
+          removed_at: string | null
           user_id: string
         }
         Insert: {
@@ -328,6 +329,7 @@ export type Database = {
           elo_score?: number | null
           match_count?: number | null
           movie_id: string
+          removed_at?: string | null
           user_id?: string
         }
         Update: {
@@ -337,6 +339,7 @@ export type Database = {
           elo_score?: number | null
           match_count?: number | null
           movie_id?: string
+          removed_at?: string | null
           user_id?: string
         }
         Relationships: [

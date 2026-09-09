@@ -62,6 +62,7 @@ export default function Profile() {
         .from('user_movies')
         .select(`elo_score, movies:movies!user_movies_movie_id_fkey (id, title, year)`)
         .eq('user_id', user.id)
+        .is('removed_at', null)
       if (moviesError) throw moviesError
 
       const ranked: RankedMovie[] = (movieRows || [])

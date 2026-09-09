@@ -1,5 +1,6 @@
 // src/pages/Compare.tsx
 import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import MovieCard from '../components/MovieCard.tsx'
 import type { Tables } from '../types/supabase';
@@ -12,6 +13,8 @@ interface CompareMovie extends Tables<'movies'> {
 }
 
 function Compare() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [movies, setMovies] = useState<CompareMovie[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [comparisonsToday, setComparisonsToday] = useState(0)
@@ -75,6 +78,10 @@ function Compare() {
     fetchMovies()
   }
 
+  const handleInfoClick = (movie: CompareMovie) => {
+    navigate(`/movie/${movie.movie_id}`, { state: { from: 'compare', pair: movies } })
+  }
+
   // Handle keyboard events
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!movies || movies.length < 2) return
@@ -96,8 +103,19 @@ function Compare() {
   }
 
   useEffect(() => {
-    fetchMovies()
+    const resumedPair = (location.state as { pair?: CompareMovie[] } | null)?.pair
+    if (resumedPair && resumedPair.length === 2) {
+      // Returning from a movie's detail page mid-comparison — resume the
+      // same pair instead of fetching a fresh random one.
+      setMovies(resumedPair)
+      setSelectedMovie(null)
+      setLoading(false)
+      navigate('.', { replace: true, state: null })
+    } else {
+      fetchMovies()
+    }
     fetchComparisonsToday()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -164,6 +182,7 @@ function Compare() {
             <MovieCard
               movie={movies[0]}
               onClick={() => handleVote(movies[0], movies[1])}
+              onInfoClick={() => handleInfoClick(movies[0])}
               selected={selectedMovie === movies[0].movie_id}
               className="flex-1 max-w-xs"
             />
@@ -177,6 +196,7 @@ function Compare() {
             <MovieCard
               movie={movies[1]}
               onClick={() => handleVote(movies[1], movies[0])}
+              onInfoClick={() => handleInfoClick(movies[1])}
               selected={selectedMovie === movies[1].movie_id}
               className="flex-1 max-w-xs"
             />

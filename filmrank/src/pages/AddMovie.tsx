@@ -25,7 +25,8 @@ export default function AddMovie() {
       setUserId(user.id);
       const { data, error } = await supabase
         .from('user_movies')
-        .select('movie_id');
+        .select('movie_id')
+        .is('removed_at', null);
       if (error) {
         setUserLibraryIds([]);
       } else {
@@ -42,6 +43,29 @@ export default function AddMovie() {
     if (!user) throw new Error('Not logged in');
     // Check if already in library (should be disabled in UI, but double check)
     if (userLibraryIds.includes(movie.id)) return;
+
+    // The movie may have a soft-removed row from a previous "remove from
+    // library" — restore it (keeping its elo/comparison history) instead of
+    // inserting a fresh row, which would violate the (user_id, movie_id) PK.
+    const { data: existing, error: existingError } = await supabase
+      .from('user_movies')
+      .select('movie_id')
+      .eq('user_id', user.id)
+      .eq('movie_id', movie.id)
+      .maybeSingle();
+    if (existingError) throw existingError;
+
+    if (existing) {
+      const { error } = await supabase
+        .from('user_movies')
+        .update({ removed_at: null })
+        .eq('user_id', user.id)
+        .eq('movie_id', movie.id);
+      if (error) throw error;
+      setUserLibraryIds(ids => [...ids, movie.id]);
+      return;
+    }
+
     const { error } = await supabase
       .from('user_movies')
       .insert({

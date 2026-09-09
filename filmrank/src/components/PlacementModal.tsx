@@ -65,6 +65,7 @@ export default function PlacementModal({ newMovie, userId, onComplete }: Placeme
         .select(`movie_id, elo_score, match_count, movies:movies!user_movies_movie_id_fkey (title, imdb_id, url)`)
         .eq('user_id', userId)
         .neq('movie_id', newMovie.id)
+        .is('removed_at', null)
         .order('elo_score', { ascending: true })
 
       if (!isMounted) return

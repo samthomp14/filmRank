@@ -130,7 +130,8 @@ export default function MyMovies() {
         .select(`elo_score, bt_score, movies:movies!user_movies_movie_id_fkey (
           id, title, year, runtime, rating, genre, director, language, country, imdb_rating, url
         )`)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .is('removed_at', null);
       if (moviesError) throw moviesError;
       const movies: MovieWithElo[] = (data || []).map((m: any) => ({
         ...m.movies,
@@ -285,7 +286,7 @@ export default function MyMovies() {
         
       const { error } = await supabase
         .from('user_movies')
-        .delete()
+        .update({ removed_at: new Date().toISOString() })
         .eq('user_id', user.id)
         .eq('movie_id', movie.id)
 
@@ -1002,7 +1003,7 @@ export default function MyMovies() {
           <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-medium text-foreground mb-4">Remove from Library</h3>
             <p className="text-muted-foreground mb-6">
-              Remove "{movieToDelete.title}" from your library? Your rating and comparisons for it will be lost.
+              Remove "{movieToDelete.title}" from your library? You can add it back later without losing your rating or comparison history.
             </p>
             <div className="flex justify-end space-x-4">
               <button

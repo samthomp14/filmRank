@@ -82,11 +82,13 @@ export default function Dashboard() {
         .from('user_movies')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .is('removed_at', null)
 
       const { data: topMoviesRows, error: topMoviesError } = await supabase
         .from('user_movies')
         .select(`elo_score, created_at, movies:movies!user_movies_movie_id_fkey (id, title, year, url)`)
         .eq('user_id', user.id)
+        .is('removed_at', null)
         .order('elo_score', { ascending: false })
         .limit(3)
       if (topMoviesError) console.error('Failed to fetch top movies:', topMoviesError)
@@ -95,6 +97,7 @@ export default function Dashboard() {
         .from('user_movies')
         .select(`elo_score, created_at, movies:movies!user_movies_movie_id_fkey (id, title, year, url)`)
         .eq('user_id', user.id)
+        .is('removed_at', null)
         .order('created_at', { ascending: false })
         .limit(6)
       if (recentMoviesError) console.error('Failed to fetch recent movies:', recentMoviesError)
