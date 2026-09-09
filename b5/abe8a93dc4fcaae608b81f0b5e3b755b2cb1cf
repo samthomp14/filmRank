@@ -1,0 +1,45 @@
+filmrank/src/pages/MyMovies.tsx
+  s_977d6b1fb95b43::t_b9fa562e60e938 16
+  s_977d6b1fb95b43::t_83c2893a03026f 119-146,151,155-170
+  s_977d6b1fb95b43::t_c1a6a58e784c26 690,704-711
+  s_977d6b1fb95b43::t_9e1317aa583359 171,712
+filmrank/src/pages/Settings.tsx
+  s_977d6b1fb95b43::t_e78ddf6ff72087 140-174
+  s_977d6b1fb95b43::t_904fe7877e9513 612-648
+  s_977d6b1fb95b43::t_e269053a5b0efe 48-50
+  s_977d6b1fb95b43::t_dec64e3e3c96d4 83-85
+  s_977d6b1fb95b43::t_58119a968de65d 10
+  s_977d6b1fb95b43::t_1da4e7bd002f42 175-177
+  s_977d6b1fb95b43::t_166fa25cc395c1 649-650
+filmrank/supabase/migrations/20260908180001_add_bradley_terry_ranking.sql
+  s_977d6b1fb95b43::t_06d4e1457f3737 103-112,116-117,121-125,127,130
+  s_977d6b1fb95b43::t_53337973bb4c13 1-102,113-115,118-120,126,128-129,131-145
+filmrank/supabase/migrations/20260908190000_auto_apply_bt_rankings.sql
+  s_977d6b1fb95b43::t_d2dd9da93d4bdf 36-42
+  s_977d6b1fb95b43::t_08ad1ebdb49d35 1-35,43-204
+filmrank/src/types/supabase.ts
+  s_977d6b1fb95b43::t_e2e0143f2cfd37 453-458
+  s_977d6b1fb95b43::t_fa389961ac13f3 460
+  s_977d6b1fb95b43::t_025beea51b997f 316-317,325-326,334-335
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "b5abe8a93dc4fcaae608b81f0b5e3b755b2cb1cf",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_977d6b1fb95b43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbce3210-adf4-4821-9691-7dec1b4d4917",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
