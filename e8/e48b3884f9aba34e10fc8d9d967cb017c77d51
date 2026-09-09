@@ -1,0 +1,29 @@
+filmrank/src/pages/MyMovies.tsx
+  s_977d6b1fb95b43::t_3500d054df81d8 690
+  s_977d6b1fb95b43::t_ade7b0fb02aa2e 711
+filmrank/src/pages/Settings.tsx
+  s_977d6b1fb95b43::t_afdede73114003 620
+  s_977d6b1fb95b43::t_1f687e56d0b7b9 150
+  s_977d6b1fb95b43::t_c3d2811741a8f9 618
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "e8e48b3884f9aba34e10fc8d9d967cb017c77d51",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_977d6b1fb95b43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbce3210-adf4-4821-9691-7dec1b4d4917",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
