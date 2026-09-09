@@ -687,7 +687,7 @@ export default function MyMovies() {
                       <option value="imdb_rating">IMDB Rating</option>
                       <option value="runtime">Runtime</option>
                       <option value="elo_score">ELO Score</option>
-                      <option value="bt_score">Accurate Rank (Bradley-Terry)</option>
+                      <option value="bt_score">Recalibrated Rank (Bradley-Terry)</option>
                     </select>
                     <button
                       type="button"
@@ -708,7 +708,7 @@ export default function MyMovies() {
                       title="Refit every movie's rank from your full comparison history (Bradley-Terry), instead of the running per-swipe ELO estimate"
                       className="px-3 py-2 rounded-lg text-sm font-medium bg-secondary text-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
                     >
-                      {isRecomputing ? 'Recalculating…' : 'Recalculate accurate ranking'}
+                      {isRecomputing ? 'Recalculating…' : 'Recalibrate ranking'}
                     </button>
                   </div>
                   <button

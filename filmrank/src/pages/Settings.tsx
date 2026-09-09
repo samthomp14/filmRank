@@ -147,7 +147,7 @@ export default function Settings() {
     if (!userId || autoApplyBtStatus.status === 'loading') return
     const next = !autoApplyBt
     setAutoApplyBt(next)
-    setAutoApplyBtStatus({ status: 'loading', message: next ? 'Applying accurate ranking...' : 'Saving...' })
+    setAutoApplyBtStatus({ status: 'loading', message: next ? 'Recalibrating your ranking...' : 'Saving...' })
     try {
       const { data: userRow } = await supabase
         .from('users')
@@ -615,9 +615,9 @@ export default function Settings() {
                 <div className="flex items-start gap-3">
                   <ArrowPathIcon className={rowIconClass} />
                   <div>
-                    <p className="text-sm font-medium text-foreground">Accurate Ranking</p>
+                    <p className="text-sm font-medium text-foreground">Recalibrate Ranking</p>
                     <p className="text-xs text-muted-foreground max-w-sm">
-                      Refits your whole library from every comparison you've ever made (not just the running per-swipe ELO estimate), and applies it as your real ranking — checked and reapplied every night.
+                      Refits your whole library from every comparison you've ever made, instead of just the running per-swipe ELO estimate, and applies the result — recalculated and reapplied every night.
                     </p>
                   </div>
                 </div>
