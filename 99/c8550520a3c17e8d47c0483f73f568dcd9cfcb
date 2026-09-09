@@ -1,0 +1,24 @@
+filmrank/supabase/migrations/20260908180000_weight_opponent_by_elo_proximity.sql
+  s_977d6b1fb95b43::t_318a654b193984 1-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "99c8550520a3c17e8d47c0483f73f568dcd9cfcb",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_977d6b1fb95b43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbce3210-adf4-4821-9691-7dec1b4d4917",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
