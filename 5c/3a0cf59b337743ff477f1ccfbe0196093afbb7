@@ -1,0 +1,40 @@
+filmrank/src/pages/MovieInfo.tsx
+  s_66d05e24596a0e::t_9dc927cd985858 372-373
+  s_66d05e24596a0e::t_27fdeea6c990d8 6
+filmrank/api/tmdb.mjs
+  s_66d05e24596a0e::t_130802fce6851e 4-17,19-62
+  s_66d05e24596a0e::t_0c72d6291a394f 18
+  s_66d05e24596a0e::t_fa757aa6821973 110,112-113,121-125,128-131,134
+filmrank/src/components/WhereToWatch.tsx
+  s_66d05e24596a0e::t_ebbad2356dce26 62-64,69-77,84
+  s_66d05e24596a0e::t_3f7a9386d26730 1-25,27-61,65-68,78-83,85-105,107-194
+  s_66d05e24596a0e::t_cc5b9589e046fc 106
+  s_66d05e24596a0e::t_9688d0ce1fc2b7 26
+filmrank/src/pages/Settings.tsx
+  s_66d05e24596a0e::t_3e3f65109f6466 53-55
+  s_66d05e24596a0e::t_4886e58c6279ca 91-92
+  s_66d05e24596a0e::t_2ac4048302f838 640-671
+  s_66d05e24596a0e::t_b28bab680be0fd 8
+  s_66d05e24596a0e::t_972112f743e126 19
+  s_66d05e24596a0e::t_7199d2725ce6c0 147-162
+  s_66d05e24596a0e::t_82d508a98e9606 637-639
+filmrank/src/lib/watchProvidersUtils.ts
+  s_66d05e24596a0e::t_d6799913640c90 5-10,17-19
+  s_66d05e24596a0e::t_05316e726579ae 1-4,11-16,20-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "5c3a0cf59b337743ff477f1ccfbe0196093afbb7",
+  "prompts": {},
+  "sessions": {
+    "s_66d05e24596a0e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5a06bf7a-9291-4812-a9ec-7cfa2f669791",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
