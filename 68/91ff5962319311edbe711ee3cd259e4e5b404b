@@ -1,0 +1,66 @@
+filmrank/src/types/supabase.ts
+  s_731c9303eca927::t_f3562d55307cd6 322,332,342
+filmrank/src/lib/movieImportUtils.ts
+  s_731c9303eca927::t_fd4039cf90861d 193,198-205,211
+  s_731c9303eca927::t_cc748f54d0f660 379,383-391
+  s_731c9303eca927::t_b74de66deb06ae 229
+  s_731c9303eca927::t_4befb3e4578d34 392-393
+  s_731c9303eca927::t_1e5249ad571ff5 302-309
+filmrank/src/pages/AddMovie.tsx
+  s_731c9303eca927::t_fcf103660c19dc 28-29,46-68
+filmrank/src/components/PlacementModal.tsx
+  s_731c9303eca927::t_3a7f05b32a9e6f 68
+filmrank/src/pages/Compare.tsx
+  s_731c9303eca927::t_60f815dd0ed24f 81-84
+  s_731c9303eca927::t_46bc3adb7fa223 106-116,118
+  s_731c9303eca927::t_593839821b1ca0 199
+  s_731c9303eca927::t_71d0b4bb44fc2f 185
+  s_731c9303eca927::t_3fd69380526575 3,16-17
+filmrank/src/pages/MovieInfo.tsx
+  s_731c9303eca927::t_82305801a8f58f 291-300
+  s_731c9303eca927::t_b887a484475db5 155,160,165
+  s_731c9303eca927::t_97101ede4d0824 252
+  s_731c9303eca927::t_7f18648d5725b6 228-230,236-241
+  s_731c9303eca927::t_c5198cef2e00d6 6
+  s_731c9303eca927::t_e5741e1f2ae47e 103-106
+  s_731c9303eca927::t_6f6e74e371bfe0 189-208
+  s_731c9303eca927::t_a40c542464f433 385-410
+filmrank/src/components/MovieCard.tsx
+  s_731c9303eca927::t_1286611834f653 2,18,24,38-50,63
+filmrank/src/pages/Dashboard.tsx
+  s_731c9303eca927::t_656ba78fd82712 85,91,100
+filmrank/supabase/migrations/20260909030000_soft_delete_user_movies.sql
+  s_731c9303eca927::t_fac3ec54868243 1-14,38-84
+  s_731c9303eca927::t_0cddeca6eec072 15-37
+filmrank/src/pages/Settings.tsx
+  s_731c9303eca927::t_264081a0a9b7e3 186
+filmrank/src/pages/MyMovies.tsx
+  s_731c9303eca927::t_ed60ec6c7ca73d 1006
+  s_731c9303eca927::t_7069c15b4fe455 133-134
+  s_731c9303eca927::t_e2e4e7ffed5b16 289
+filmrank/src/pages/Onboarding.tsx
+  s_731c9303eca927::t_6c3beeb4cb6b92 242-243,259-281
+filmrank/src/pages/Profile.tsx
+  s_731c9303eca927::t_822648d9b7cf1c 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "6891ff5962319311edbe711ee3cd259e4e5b404b",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_731c9303eca927": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1406d6e2-bd27-4582-a61e-a7ded192b89d",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
