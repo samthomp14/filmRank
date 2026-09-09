@@ -9,6 +9,8 @@ import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
   TrashIcon,
+  GlobeAltIcon,
+  LinkIcon,
 } from '@heroicons/react/24/outline'
 import type { Area } from 'react-easy-crop'
 import { supabase } from '../lib/supabaseClient'
@@ -16,6 +18,14 @@ import { importMoviesFromFile, formatImportResult, type ImportStatus } from '../
 import { cropToWebpBlob, getAvatarPublicUrl, removeAvatar, uploadAvatar, validateAvatarFile } from '../lib/avatarUtils'
 import { GENRE_OPTIONS } from '../lib/genresUtils'
 import { computeEloStats, eloToStars } from '../lib/movieUtils'
+import {
+  HANDLE_MAX_LENGTH,
+  isHandleAvailable,
+  normalizeHandle,
+  publicProfilePath,
+  publicProfileUrl,
+  validateHandle,
+} from '../lib/publicProfileUtils'
 import AvatarCropModal from '../components/AvatarCropModal'
 
 const sectionLabelClass = 'mb-3 px-1 font-marquee text-[11px] font-semibold uppercase tracking-[.2em] text-muted-foreground'
@@ -48,6 +58,13 @@ export default function Settings() {
   const [autoApplyBt, setAutoApplyBt] = useState(false)
   const [autoApplyBtStatus, setAutoApplyBtStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
 
+  const [savedHandle, setSavedHandle] = useState<string | null>(null)
+  const [handleInput, setHandleInput] = useState('')
+  const [handleStatus, setHandleStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
+  const [publicProfile, setPublicProfile] = useState(false)
+  const [publicProfileStatus, setPublicProfileStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
+  const [linkCopied, setLinkCopied] = useState(false)
+
   const [importStatus, setImportStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
   const [exportStatus, setExportStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
   const [resetStatus, setResetStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
@@ -69,7 +86,7 @@ export default function Settings() {
 
       const { data: userRow } = await supabase
         .from('users')
-        .select('name, avatar_filename, preferences')
+        .select('name, avatar_filename, preferences, handle, public_profile')
         .eq('id', user.id)
         .single()
 
@@ -83,6 +100,10 @@ export default function Settings() {
 
       const preferences = userRow?.preferences as { auto_apply_bt_ranking?: boolean } | null
       setAutoApplyBt(Boolean(preferences?.auto_apply_bt_ranking))
+
+      setSavedHandle(userRow?.handle ?? null)
+      setHandleInput(userRow?.handle ?? '')
+      setPublicProfile(Boolean(userRow?.public_profile))
     }
     loadAccount()
   }, [])
@@ -172,6 +193,90 @@ export default function Settings() {
     } catch (err) {
       setAutoApplyBt(!next)
       setAutoApplyBtStatus({ status: 'error', message: err instanceof Error ? err.message : 'Failed to update setting' })
+    }
+  }
+
+  const handleSaveHandle = async () => {
+    if (!userId || handleStatus.status === 'loading') return
+
+    const candidate = normalizeHandle(handleInput)
+    setHandleInput(candidate)
+
+    const validationError = validateHandle(candidate)
+    if (validationError) {
+      setHandleStatus({ status: 'error', message: validationError })
+      return
+    }
+
+    setHandleStatus({ status: 'loading', message: 'Checking...' })
+    try {
+      // Checked up front for a readable message; the unique constraint is
+      // still the thing that actually decides, so the race between the two is
+      // caught below rather than assumed away.
+      if (!(await isHandleAvailable(candidate))) {
+        setHandleStatus({ status: 'error', message: `@${candidate} is already taken.` })
+        return
+      }
+
+      const { error } = await supabase.from('users').update({ handle: candidate }).eq('id', userId)
+      if (error) {
+        if (error.code === '23505') {
+          setHandleStatus({ status: 'error', message: `@${candidate} is already taken.` })
+          return
+        }
+        throw error
+      }
+
+      setSavedHandle(candidate)
+      setHandleStatus({ status: 'success', message: `Your handle is @${candidate}.` })
+    } catch (err) {
+      setHandleStatus({ status: 'error', message: err instanceof Error ? err.message : 'Failed to save handle' })
+    }
+  }
+
+  const handleTogglePublicProfile = async () => {
+    if (!userId || publicProfileStatus.status === 'loading') return
+
+    // The DB enforces this too (users_public_profile_requires_handle); saying
+    // so here turns a constraint violation into an instruction.
+    if (!savedHandle) {
+      setPublicProfileStatus({ status: 'error', message: 'Choose a handle first — it becomes your profile URL.' })
+      return
+    }
+
+    const next = !publicProfile
+    setPublicProfile(next)
+    setPublicProfileStatus({ status: 'loading', message: 'Saving...' })
+    try {
+      const { error } = await supabase.from('users').update({ public_profile: next }).eq('id', userId)
+      if (error) throw error
+
+      setPublicProfileStatus({
+        status: 'success',
+        message: next
+          ? 'Your ranking is now visible to anyone with the link.'
+          : 'Your profile is private again. The link no longer resolves.',
+      })
+    } catch (err) {
+      setPublicProfile(!next)
+      setPublicProfileStatus({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Failed to update setting',
+      })
+    }
+  }
+
+  const handleCopyProfileLink = async () => {
+    if (!savedHandle) return
+    try {
+      await navigator.clipboard.writeText(publicProfileUrl(savedHandle))
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch (err) {
+      setPublicProfileStatus({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Failed to copy link',
+      })
     }
   }
 
@@ -649,6 +754,113 @@ export default function Settings() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Sharing */}
+        <div>
+          <h2 className={sectionLabelClass}>Sharing</h2>
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <GlobeAltIcon className={rowIconClass} />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Public Profile</p>
+                  <p className="text-xs text-muted-foreground max-w-sm">
+                    Publishes a read-only page of your ranking at your handle. Anyone with the link can see it —
+                    no account needed. Your email address is never shown.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={publicProfile}
+                aria-label="Public profile"
+                onClick={handleTogglePublicProfile}
+                disabled={publicProfileStatus.status === 'loading'}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 ${
+                  publicProfile ? 'bg-primary' : 'bg-muted'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
+                    publicProfile ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div>
+              <label htmlFor="handle" className="mb-1 block text-sm font-medium text-foreground">
+                Handle
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex min-w-0 flex-1 items-center rounded-lg border border-border bg-background focus-within:ring-2 focus-within:ring-primary">
+                  <span className="shrink-0 pl-3 text-sm text-muted-foreground">{window.location.host}/u/</span>
+                  <input
+                    type="text"
+                    id="handle"
+                    value={handleInput}
+                    onChange={(e) => {
+                      setHandleInput(normalizeHandle(e.target.value))
+                      setHandleStatus({ status: 'idle', message: '' })
+                    }}
+                    maxLength={HANDLE_MAX_LENGTH}
+                    placeholder="yourname"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="min-w-0 flex-1 bg-transparent py-2 pl-0 pr-3 text-foreground focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveHandle}
+                  disabled={handleStatus.status === 'loading' || handleInput === (savedHandle ?? '')}
+                  className={primaryButtonClass}
+                >
+                  {savedHandle ? 'Change' : 'Claim'}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Lowercase letters, numbers and underscores. Changing it breaks any link you've already shared.
+              </p>
+              {handleStatus.status !== 'idle' && (
+                <p className={`mt-2 text-sm ${
+                  handleStatus.status === 'success' ? 'text-success' :
+                  handleStatus.status === 'error' ? 'text-destructive' :
+                  'text-primary'
+                }`}>
+                  {handleStatus.message}
+                </p>
+              )}
+            </div>
+
+            {savedHandle && publicProfile && (
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2">
+                <LinkIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                  {window.location.host}{publicProfilePath(savedHandle)}
+                </span>
+                <button type="button" onClick={handleCopyProfileLink} className={pillButtonClass}>
+                  {linkCopied ? 'Copied' : 'Copy'}
+                </button>
+                <Link to={publicProfilePath(savedHandle)} className={pillButtonClass}>
+                  View
+                </Link>
+              </div>
+            )}
+
+            {publicProfileStatus.status !== 'idle' && (
+              <div className={`text-sm ${
+                publicProfileStatus.status === 'success' ? 'text-success' :
+                publicProfileStatus.status === 'error' ? 'text-destructive' :
+                'text-primary'
+              }`}>
+                {publicProfileStatus.message}
+              </div>
+            )}
           </div>
         </div>
 

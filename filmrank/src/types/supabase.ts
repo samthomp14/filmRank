@@ -362,24 +362,30 @@ export type Database = {
       users: {
         Row: {
           avatar_filename: string | null
+          handle: string | null
           id: string
           name: string | null
           onboarding_complete: boolean
           preferences: Json
+          public_profile: boolean
         }
         Insert: {
           avatar_filename?: string | null
+          handle?: string | null
           id: string
           name?: string | null
           onboarding_complete?: boolean
           preferences?: Json
+          public_profile?: boolean
         }
         Update: {
           avatar_filename?: string | null
+          handle?: string | null
           id?: string
           name?: string | null
           onboarding_complete?: boolean
           preferences?: Json
+          public_profile?: boolean
         }
         Relationships: []
       }
@@ -459,6 +465,34 @@ export type Database = {
       }
       apply_bt_rankings_for_opted_in_users: { Args: never; Returns: undefined }
       apply_bt_rankings_now: { Args: never; Returns: undefined }
+      get_public_profile: {
+        Args: { p_handle: string }
+        Returns: {
+          avatar_filename: string | null
+          comparison_count: number
+          display_name: string
+          elo_mean: number
+          elo_stddev: number
+          first_ranked_at: string | null
+          handle: string
+          movie_count: number
+        }[]
+      }
+      get_public_profile_movies: {
+        Args: { p_handle: string; p_limit?: number }
+        Returns: {
+          elo_score: number
+          movie_id: string
+          rank_position: number
+          title: string
+          url: string | null
+          year: number | null
+        }[]
+      }
+      handle_available: {
+        Args: { p_handle: string }
+        Returns: boolean
+      }
       log_omdb_request: { Args: never; Returns: undefined }
       recompute_bt_rankings: { Args: never; Returns: undefined }
       search_movies: {

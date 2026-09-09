@@ -16,6 +16,7 @@ import PersonInfo from "./pages/PersonInfo";
 import GenreInfo from "./pages/GenreInfo";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
+import PublicProfile from "./pages/PublicProfile";
 import Onboarding from "./pages/Onboarding";
 
 function App() {
@@ -91,6 +92,10 @@ function App() {
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
         <Route element={<Layout />}>
+          {/* Public, no-auth: the only route a signed-out visitor can land on
+              besides the landing page. Read-only, and only resolves for users
+              who have opted their profile into being public. */}
+          <Route path="/u/:handle" element={<PublicProfile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/onboarding" element={

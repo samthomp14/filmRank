@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Cog6ToothIcon } from '@heroicons/react/24/outline'
+import { Cog6ToothIcon, LinkIcon } from '@heroicons/react/24/outline'
 import { supabase } from '../lib/supabaseClient'
 import { computeEloStats, eloToStars } from '../lib/movieUtils'
 import { getAvatarPublicUrl } from '../lib/avatarUtils'
+import { publicProfilePath, publicProfileUrl } from '../lib/publicProfileUtils'
 import AnimatedLeaderboard from '../components/AnimatedLeaderboard'
 import RatingDistribution from '../components/RatingDistribution'
 import type { RankedRow } from '../lib/demoTypes'
@@ -13,6 +14,8 @@ interface UserProfile {
   name: string | null
   created_at: string
   avatar_filename: string | null
+  handle: string | null
+  public_profile: boolean
 }
 
 interface RankedMovie {
@@ -33,6 +36,7 @@ export default function Profile() {
   const [isEditingName, setIsEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [savingName, setSavingName] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   useEffect(() => {
     fetchProfile()
@@ -46,7 +50,7 @@ export default function Profile() {
 
       const { data: userRow } = await supabase
         .from('users')
-        .select('name, avatar_filename')
+        .select('name, avatar_filename, handle, public_profile')
         .eq('id', user.id)
         .single()
 
@@ -55,6 +59,8 @@ export default function Profile() {
         name: userRow?.name ?? null,
         created_at: new Date(user.created_at).toLocaleDateString(),
         avatar_filename: userRow?.avatar_filename ?? null,
+        handle: userRow?.handle ?? null,
+        public_profile: Boolean(userRow?.public_profile),
       })
       setNameInput(userRow?.name ?? '')
 
@@ -98,6 +104,17 @@ export default function Profile() {
         .map((m, idx) => ({ position: idx + 1, id: m.id, title: m.title, year: m.year, move: 0 })),
     [rankedMovies]
   )
+
+  const handleCopyPublicLink = async () => {
+    if (!profile?.handle) return
+    try {
+      await navigator.clipboard.writeText(publicProfileUrl(profile.handle))
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to copy link')
+    }
+  }
 
   const handleNameSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -208,6 +225,29 @@ export default function Profile() {
             )}
             <p className="mt-1 text-sm text-muted-foreground">{profile?.email}</p>
             <p className="text-xs text-muted-foreground">Member since {profile?.created_at}</p>
+            {/* The public profile is the app's only shareable surface, so surface
+                it here rather than leaving it buried in Settings. */}
+            {profile?.public_profile && profile.handle ? (
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <Link
+                  to={publicProfilePath(profile.handle)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  @{profile.handle}
+                </Link>
+                <button
+                  onClick={handleCopyPublicLink}
+                  className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <LinkIcon className="h-3.5 w-3.5" />
+                  {linkCopied ? 'Copied' : 'Copy public link'}
+                </button>
+              </div>
+            ) : (
+              <Link to="/settings" className="mt-2 inline-block text-xs font-medium text-primary hover:underline">
+                Share your ranking &rarr;
+              </Link>
+            )}
             {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
           </div>
         </div>
