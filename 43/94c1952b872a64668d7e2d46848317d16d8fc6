@@ -1,0 +1,25 @@
+filmrank/supabase/migrations/20260909020000_fix_elo_kernel_numeric_underflow.sql
+  s_977d6b1fb95b43::t_03c01875d83214 1-2,4,16,26-39,41-62,66-72
+  s_977d6b1fb95b43::t_05b228a2ea7abc 3,5-15,17-25,40,63-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "4394c1952b872a64668d7e2d46848317d16d8fc6",
+  "prompts": {},
+  "humans": {
+    "h_4e1d4ad18f97c2": {
+      "author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  },
+  "sessions": {
+    "s_977d6b1fb95b43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbce3210-adf4-4821-9691-7dec1b4d4917",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Samuel Thompson <sam@atlog.ai>"
+    }
+  }
+}
