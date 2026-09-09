@@ -5,6 +5,7 @@ import {
   EnvelopeIcon,
   LockClosedIcon,
   TagIcon,
+  GlobeAltIcon,
   ArrowUpTrayIcon,
   ArrowDownTrayIcon,
   ArrowPathIcon,
@@ -15,6 +16,7 @@ import { supabase } from '../lib/supabaseClient'
 import { importMoviesFromFile, formatImportResult, type ImportStatus } from '../lib/movieImportUtils'
 import { cropToWebpBlob, getAvatarPublicUrl, removeAvatar, uploadAvatar, validateAvatarFile } from '../lib/avatarUtils'
 import { GENRE_OPTIONS } from '../lib/genresUtils'
+import { DEFAULT_WATCH_REGION, WATCH_REGIONS, readWatchRegion, regionLabel, saveWatchRegion } from '../lib/watchProvidersUtils'
 import { computeEloStats, eloToStars } from '../lib/movieUtils'
 import AvatarCropModal from '../components/AvatarCropModal'
 
@@ -47,6 +49,9 @@ export default function Settings() {
 
   const [autoApplyBt, setAutoApplyBt] = useState(false)
   const [autoApplyBtStatus, setAutoApplyBtStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
+
+  const [watchRegion, setWatchRegion] = useState(DEFAULT_WATCH_REGION)
+  const [watchRegionStatus, setWatchRegionStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
 
   const [importStatus, setImportStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
   const [exportStatus, setExportStatus] = useState<ImportStatus>({ status: 'idle', message: '' })
@@ -83,6 +88,8 @@ export default function Settings() {
 
       const preferences = userRow?.preferences as { auto_apply_bt_ranking?: boolean } | null
       setAutoApplyBt(Boolean(preferences?.auto_apply_bt_ranking))
+
+      setWatchRegion(readWatchRegion(userRow?.preferences))
     }
     loadAccount()
   }, [])
@@ -134,6 +141,22 @@ export default function Settings() {
       setGenresStatus({ status: 'success', message: 'Genre preferences saved' })
     } catch (err) {
       setGenresStatus({ status: 'error', message: err instanceof Error ? err.message : 'Failed to save preferences' })
+    }
+  }
+
+  // Saves on change rather than behind a button: it's a single value and the
+  // movie page's inline switcher writes it the same way.
+  const handleWatchRegionChange = async (next: string) => {
+    if (!userId) return
+    const previous = watchRegion
+    setWatchRegion(next)
+    setWatchRegionStatus({ status: 'loading', message: 'Saving...' })
+    try {
+      await saveWatchRegion(userId, next)
+      setWatchRegionStatus({ status: 'success', message: `Showing availability for ${regionLabel(next)}` })
+    } catch (err) {
+      setWatchRegion(previous)
+      setWatchRegionStatus({ status: 'error', message: err instanceof Error ? err.message : 'Failed to save region' })
     }
   }
 
@@ -608,6 +631,41 @@ export default function Settings() {
                 }`}>
                   {genresStatus.message}
                 </span>
+              )}
+            </div>
+
+            <div className="pt-4 mt-1 border-t border-border">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <GlobeAltIcon className={rowIconClass} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Streaming Region</p>
+                    <p className="text-xs text-muted-foreground max-w-sm">
+                      Where to check availability when a film's page shows what's streaming.
+                    </p>
+                  </div>
+                </div>
+                <select
+                  value={watchRegion}
+                  onChange={(e) => handleWatchRegionChange(e.target.value)}
+                  aria-label="Streaming region"
+                  className="shrink-0 rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                >
+                  {WATCH_REGIONS.map((code) => (
+                    <option key={code} value={code}>
+                      {regionLabel(code)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {watchRegionStatus.status !== 'idle' && (
+                <div className={`mt-2 text-sm ${
+                  watchRegionStatus.status === 'success' ? 'text-success' :
+                  watchRegionStatus.status === 'error' ? 'text-destructive' :
+                  'text-primary'
+                }`}>
+                  {watchRegionStatus.message}
+                </div>
               )}
             </div>
 

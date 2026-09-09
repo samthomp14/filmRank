@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { formatRuntime, formatYear, formatIMDBRating, computeEloStats, eloToStars } from '../lib/movieUtils'
 import StarRating from '../components/StarRating'
+import WhereToWatch from '../components/WhereToWatch'
 import { Eye } from 'lucide-react'
 import type { Tables } from '../types/supabase';
 
@@ -367,6 +368,8 @@ function MovieInfo() {
                 <DetailRow label="Awards">{getOMDBField(movie.metadata, 'Awards')}</DetailRow>
               )}
             </div>
+
+            <WhereToWatch tmdbId={movie.tmdb_id} />
 
             {/* Cast */}
             {(credits.actor?.length || getOMDBField(movie.metadata, 'Actors')) && (
